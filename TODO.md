@@ -2,7 +2,7 @@
 
 Phased checklist for the NeoForge mod and dedicated server. Check items off as you complete them.
 
-_Roadmap reviewed **2026-04-22** (island HUD + config documentation). Updated **2026-04-23**: Phase 2 priority + claim design (starter vs dock)._
+_Roadmap reviewed **2026-04-22** (island HUD + config documentation). Updated **2026-04-23**: Phase 2 priority + claim design (starter vs dock). Updated **2026-04-25**: island HUD pipeline (server tick sync, client render stage + culling)._
 
 When researching features, use **mods, datapacks, modpacks, and GitHub** as examples (see [README.md](README.md) — “Learning from existing work”); pin anything you depend on and respect licenses.
 
@@ -43,7 +43,7 @@ When researching features, use **mods, datapacks, modpacks, and GitHub** as exam
 - [x] **Persistence** — `FloatingIslandSavedData` (`projectisland_floating_islands.dat`) on the overworld `ServerLevel` when it uses the floating chunk generator.
 - [x] Island **states**: `AVAILABLE`, `CLAIMED` (owner UUID + time fields on `IslandRecord`), `CONTESTED` reserved.
 - [x] Serialization **version** field on saved file (`Version` int); expand when migrating rows.
-- [x] **Nearby island HUD** — server sync of island state for a radius around the player in the floating-islands overworld; client floating labels + common/client config (`islandHud*` keys, 2026-04-22). Read-only until Phase 4 claim actions exist.
+- [x] **Nearby island HUD** — server sync of island state for a radius around the player in the floating-islands overworld (`IslandHudServerSync` on **`ServerTickEvent.Post`**, `ProjectIslandDimensions.isFloatingIslandsGameplay`); client **`IslandHudRenderer`** + `IslandHudWorldBillboard` on **`AFTER_TRANSLUCENT_BLOCKS`**; common/client config (`islandHud*` keys). Read-only until Phase 4 claim actions exist.
 - [x] **Island HUD v2 (2026-04-22):** procedural display names (`FloatingIslandDisplayName` + word lists, deterministic per region), billboard **panel** (translucent dark fill + tinted border + state **item icon** + title / status / id lines) via `IslandHudWorldBillboard` + extended `IslandHudBeacon` payload.
 - [ ] **Island HUD polish (optional):** datapack or JSON-driven name word lists; custom atlas icon instead of vanilla item stacks; panel size / colors in config.
 
