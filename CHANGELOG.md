@@ -15,6 +15,7 @@ _Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24*
 - **Spawn safety:** `FloatingIslandsSpawnEvents` now also runs on **player login** and when **changing dimension to overworld** (nearest-island spiral search unchanged). **`FloatingIslandsSpawnPregen`** optionally loads a Chebyshev chunk neighborhood around overworld spawn (`spawnPregenChunkRadius`, default `0` = off; `spawnPregenChunksPerTick`).
 - **Dimension checks:** server gameplay uses **`ProjectIslandDimensions.isFloatingIslandsGameplay(ServerLevel)`** (chunk generator type). **`ProjectIslandDimensions.FLOATING_ISLANDS`** is **`Level.OVERWORLD`**.
 - **Client island HUD:** renderer gates on **`minecraft:overworld`** (client `ChunkCache` has no `getGenerator()` in 1.21.1); the server only syncs HUD payloads when the overworld generator matches.
+- **Island HUD reliability (2026-04-24):** server sync runs on **`ServerTickEvent.Post`** (per-player interval) instead of **`PlayerTickEvent.Post`**; **`isFloatingIslandsGameplay`** also unwraps a shallow **delegate `ChunkGenerator`** when present. Client relaxes **`hasChunk`** culling when the beacon column is still within a few chunks of the player. **Rendering** stays on **`AFTER_TRANSLUCENT_BLOCKS`** (world-space pose); **`AFTER_LEVEL` + frustum cull** was dropping all labels because the stage’s frustum is not valid for world AABBs.
 
 ### Added
 

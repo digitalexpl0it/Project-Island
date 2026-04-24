@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -27,9 +26,9 @@ public final class IslandHudRenderer {
 
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
-        // AFTER_LEVEL: runs after the world pass (including fabulous/translucent targets). Translucent stage can skip
-        // custom geometry in some graphics modes; world-space HUD labels are safer here.
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) {
+        // Must run during the world pass so the pose stack and camera match world space. AFTER_LEVEL fires after the
+        // level renderer finishes; its frustum is not reliable for world-space AABBs and was culling every beacon.
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             return;
         }
         if (!ClientConfig.ISLAND_HUD_SHOW.getAsBoolean()) {
@@ -47,16 +46,10 @@ public final class IslandHudRenderer {
         boolean seeThrough = ClientConfig.ISLAND_HUD_SEE_THROUGH_TEXT.getAsBoolean();
 
         var pose = event.getPoseStack();
-        var frustum = event.getFrustum();
         MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
-        double cullSpan = Mth.clamp(56.0d * (scale / 0.02d), 48.0d, 160.0d);
 
         for (IslandHudBeacon b : IslandHudClientCache.beacons()) {
             if (!shouldDrawHudForBeacon(clientLevel, mc, b)) {
-                continue;
-            }
-            Vec3 at = new Vec3(b.x(), b.y(), b.z());
-            if (!frustum.isVisible(AABB.ofSize(at, cullSpan, cullSpan * 1.6d, cullSpan))) {
                 continue;
             }
             int titleC = brightenForNight(mc, event, b.x(), b.y(), b.z(), b.titleColorArgb());
