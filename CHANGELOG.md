@@ -16,6 +16,7 @@ _Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24*
 - **Dimension checks:** server gameplay uses **`ProjectIslandDimensions.isFloatingIslandsGameplay(ServerLevel)`** — overworld plus **`FloatingIslandsChunkGenerator`** (`instanceof`) or a **shallow unwrap** of a delegate `ChunkGenerator` field when present. **`ProjectIslandDimensions.FLOATING_ISLANDS`** is **`Level.OVERWORLD`**.
 - **Client island HUD:** renderer gates on **`minecraft:overworld`** (client `ChunkCache` has no `getGenerator()` in 1.21.1); the server only syncs HUD payloads when the overworld generator matches.
 - **Island HUD reliability (2026-04-24):** server sync runs on **`ServerTickEvent.Post`** (per-player interval) instead of **`PlayerTickEvent.Post`**; **`isFloatingIslandsGameplay`** also unwraps a shallow **delegate `ChunkGenerator`** when present. Client relaxes **`hasChunk`** culling when the beacon column is still within a few chunks of the player. **Rendering** stays on **`AFTER_TRANSLUCENT_BLOCKS`** (world-space pose); **`AFTER_LEVEL` + frustum cull** was dropping all labels because the stage’s frustum is not valid for world AABBs.
+- **Biome / noise_settings:** removed an attempted bundled **`minecraft:worldgen/noise_settings/overworld`** override: **`noise.size_horizontal`** must be an **integer `1`–`4`** (vanilla overworld is **`1`**); fractional values **fail registry load** (`Value … outside of range [1:4]`). Smaller biome patches are **not** achievable by lowering this field alone.
 
 ### Added
 

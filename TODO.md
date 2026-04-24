@@ -2,7 +2,7 @@
 
 Phased checklist for the NeoForge mod and dedicated server. Check items off as you complete them.
 
-_Roadmap reviewed **2026-04-22** (island HUD + config documentation). Updated **2026-04-23**: Phase 2 priority + claim design (starter vs dock). Updated **2026-04-25**: island HUD pipeline (server tick sync, client render stage + culling)._
+_Roadmap reviewed **2026-04-22** (island HUD + config documentation). Updated **2026-04-23**: Phase 2 priority + claim design (starter vs dock). Updated **2026-04-25**: island HUD pipeline; **`noise_settings`** `size_horizontal` override reverted (must be int `1`–`4`; vanilla overworld already `1`)._
 
 When researching features, use **mods, datapacks, modpacks, and GitHub** as examples (see [README.md](README.md) — “Learning from existing work”); pin anything you depend on and respect licenses.
 
@@ -31,7 +31,7 @@ When researching features, use **mods, datapacks, modpacks, and GitHub** as exam
 
 - [x] Void-style world: no sea-level continent; islands suspended over void — **`minecraft:overworld`** uses `FloatingIslandsChunkGenerator` via built-in datapack (`data/minecraft/dimension/overworld.json`).
 - [x] Procedural **floating islands** with spacing and size variance (tunable) — ellipsoid islands on a region grid (`FloatingIslandsChunkGenerator`).
-- [x] **Biome-aware** surfaces: grass, sand, snow from biome **temperature**; trees/ores from vanilla **feature** step where it triggers; datapack **`minecraft:multi_noise`** preset **`minecraft:overworld`** for biome placement.
+- [x] **Biome-aware** surfaces: grass, sand, snow from biome **temperature**; trees/ores from vanilla **feature** step where it triggers; datapack **`minecraft:multi_noise`** preset **`minecraft:overworld`** for biome placement (vanilla **`noise.size_horizontal`** is already **`1`**—smaller patches need custom `multi_noise` / worldgen data, tracked as optional follow-up).
 - [x] No mandatory **portal**: players join **overworld** directly with floating-island terrain (Nether/End unchanged).
 - [x] (Optional) **Spawn pregen:** common config `spawnPregenChunkRadius` (0 = off) + `spawnPregenChunksPerTick` — `FloatingIslandsSpawnPregen` loads a Chebyshev chunk neighborhood around shared spawn after level load.
 - [x] **Void spawn mitigation:** `FloatingIslandsSpawnEvents` on **dimension change to overworld** and **player login** — nearest procedural island surface from XZ (`FloatingIslandsChunkGenerator.islandSurfaceBlockY`).

@@ -93,7 +93,7 @@ flowchart LR
 
 ## World (Phase 2)
 
-The mod registers **`projectisland:floating_islands`** as a **chunk generator type** and ships a built-in **datapack override** for **`minecraft:overworld`**:
+The mod registers **`projectisland:floating_islands`** as a **chunk generator type** and ships a built-in **datapack override** for the overworld dimension under `data/minecraft/` (same pattern as shipping JSON in the mod JAR—**no separate download**):
 
 | Piece | What it is |
 |-------|------------|
@@ -104,7 +104,7 @@ Details:
 
 - **Dimension type** stays `minecraft:overworld` (sky, day cycle, monster ranges) so the sky feels familiar while terrain is custom.
 - **Generator** is Java (`FloatingIslandsChunkGenerator`): islands sit on a **sparse** coarse grid (8×8 chunks per cell, ~17% spawn). Each mass uses an **asymmetric** profile (short **vrTop** dome + longer **vrBottom** tail with **extra depth under the rim**), **smooth** horizontal scaling (no block-step noise), a **wider flat-ish plateau** on top (`horiz^0.72` inside the cap), and a **low-frequency** vertical hill so surfaces read as gentle terrain rather than Swiss cheese. **Vanilla structures** (mineshafts, ruined portals, etc.) still run, then a **trim pass** removes structure blocks in **void columns** or **floating above** the island top so pieces tend to **cling to land** where they intersect it; **biome decoration** (trees, flowers, ores) still runs. (Shader lighting in reference art is separate from this terrain pass.)
-- **Biomes:** overworld JSON uses **`minecraft:multi_noise`** with preset **`minecraft:overworld`** so biome placement matches vanilla overworld noise (temperature/humidity/etc.); the custom generator still decides **where solid islands exist**, then samples **`getNoiseBiome`** per column for tops and decoration context.
+- **Biomes:** overworld dimension JSON uses **`minecraft:multi_noise`** preset **`minecraft:overworld`** (vanilla overworld climate + biome layout). The custom generator decides **where solid islands exist**, then **`getNoiseBiome`** / decoration match vanilla for each column. **Note:** `noise_settings` field **`size_horizontal`** is an **integer in `1`–`4`** in 1.21.1; vanilla overworld uses **`1`** (the minimum), so you **cannot** shrink biome patches further by lowering that field—tighter patches need a **custom** `multi_noise` parameter list or other worldgen JSON, not a fractional `size_horizontal`.
 - **Tuning** (`config/projectisland-common.toml` on client or server): `floatingIslandsRareStructureKeepChance` — each **monster room** or **trial chamber** that appears in a chunk is **kept** with this probability after trim (default `0.12`; use `1.0` to disable thinning). `floatingIslandsExtraSurfaceTreesPerChunk` — extra vanilla **oak / fancy oak / birch** trees on **grass** tops per chunk after decoration (default `5`; `0` disables). **Spawn pregen (optional):** `spawnPregenChunkRadius` (Chebyshev chunk radius around overworld spawn, **`0` = off**) and `spawnPregenChunksPerTick`. **Island HUD (server):** `islandHudSyncEnabled`, `islandHudSyncIntervalTicks`, `islandHudRegionScanRadius`, `islandHudHeightAbovePeakBlocks` — sync is driven from **`ServerTickEvent.Post`** (per-player interval). **`ProjectIslandDimensions.isFloatingIslandsGameplay`** gates sync (direct `FloatingIslandsChunkGenerator` or shallow **delegate** on `ChunkGenerator`). **Island HUD (client only):** `config/projectisland-client.toml` — `islandHudShow`, `islandHudTextScale`, `islandHudSeeThroughText`, `islandHudNightColorBoost`.
 
 Try it in a dev world (you are already in overworld):
@@ -162,4 +162,4 @@ Mod metadata currently uses **All Rights Reserved** ([`gradle.properties`](gradl
 
 ---
 
-_Documentation last revised **25 April 2026** (island HUD: `ServerTickEvent` sync, `AFTER_TRANSLUCENT_BLOCKS` render, culling notes)._
+_Documentation last revised **25 April 2026** (island HUD notes; biome / `noise_settings` caveat)._
