@@ -1,0 +1,13 @@
+Bundled resource pack: Unshaded Blocks
+=====================================
+
+Source: https://modrinth.com/resourcepack/unshaded-blocks
+Project ID on Modrinth: DSNQqM2M
+Bundled file version: 2.1 (game version 1.21.1), file id Td5C3Q7l
+
+License: CC0-1.0 (Creative Commons Zero v1.0 Universal)
+See https://creativecommons.org/publicdomain/zero/1.0/
+
+The pack is included as an unpacked folder under src/main/resources/resourcepacks/bundled_unshaded_blocks/
+(built-in packs use PathPackResources, which requires a directory, not a .zip).
+It is registered at runtime as a built-in client resource pack by Project Island.

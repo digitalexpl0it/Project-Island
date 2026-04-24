@@ -1,0 +1,10 @@
+{
+    "pack": {
+        "pack_format": 34,
+    "supported_formats": [
+      16,
+      34
+    ],
+        "description": "Disables legacy block shading on most blocks. (v2.1)"
+    }
+}

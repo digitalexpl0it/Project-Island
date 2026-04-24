@@ -1,0 +1,35 @@
+---
+description: Project Island — NeoForge floating-islands mod, airship progression, server goals
+alwaysApply: true
+---
+
+# Project Island
+
+This repository is a **NeoForge** Minecraft **mod + dedicated server** effort: a **void world of procedural floating islands** (biome-aware), **no portal** as the primary entry to gameplay, and **server-authoritative** island and progression state.
+
+## Product intent
+
+- **Core loop:** players develop their island into a **mobile airship** (sails → propellers → jet-style thrust, with sub-tiers for thrust) to **pressure, raid, and capture** other islands—not only static bridges.
+- Islands are **tagged** (e.g. available → claimed); **capture / steal** is in scope—detail win conditions and travel mix in [TODO.md](TODO.md).
+- **Tech / advancement tree** gates better propulsion and other branches (defense, docking, power); **unlock flags and thrust caps must be enforced on the server**, never trusted from the client alone.
+- **Ownership, capture, and unlocks** live in **saved data**; respect performance limits for moving assemblies.
+
+## Research and reuse
+
+When implementing or designing systems, **use public examples**: other **mods**, **datapacks**, **modpacks**, and **GitHub** repos (MDKs, ship mods, progression packs). Always verify **license compatibility** and **pin** dependency versions; document inspiration and hard dependencies in [README.md](README.md).
+
+## Integrations
+
+- Prefer **Valkyrien Skies** (and ecosystem) for **rigid moving island assemblies**; **Create** for **cogwheels** / kinetic contraptions where versions align. Do not block core worldgen and claims on optional mods—see [TODO.md](TODO.md) phase order.
+
+## Where to look
+
+- [README.md](README.md) — pillars, propulsion table, pinned toolchain, `./gradlew` commands, external-examples policy.
+- [TODO.md](TODO.md) — phased roadmap (including Phase 6 propulsion / tech tree).
+- [CHANGELOG.md](CHANGELOG.md) — notable changes.
+
+## Implementation habits
+
+- Prefer **pinned** Minecraft + NeoForge (and third-party mod) versions in Gradle.
+- When behavior changes, update **README** / **TODO** / **CHANGELOG** as appropriate.
+- Keep changes **focused**; avoid drive-by refactors unrelated to the task.

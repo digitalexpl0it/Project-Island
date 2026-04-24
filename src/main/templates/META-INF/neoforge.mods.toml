@@ -1,0 +1,29 @@
+# This file is expanded from templates at build time; see build.gradle (generateModMetadata).
+
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="${mod_license}"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+description='''
+Void sky of procedural floating islands, claims, capture PvP, and progression toward
+mobile island airships (sails, propellers, jets). Server-authoritative rules.
+See the repository README for design pillars and roadmap.
+'''
+
+[[dependencies.${mod_id}]]
+modId="neoforge"
+type="required"
+versionRange="[${neo_version},)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="minecraft"
+type="required"
+versionRange="${minecraft_version_range}"
+ordering="NONE"
+side="BOTH"

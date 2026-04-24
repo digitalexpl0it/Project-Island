@@ -1,0 +1,50 @@
+package net.projectisland;
+
+import org.slf4j.Logger;
+
+import com.mojang.logging.LogUtils;
+
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.projectisland.island.IslandCommands;
+import net.projectisland.island.IslandHudServerSync;
+import net.projectisland.network.ProjectIslandNetworking;
+import net.projectisland.worldgen.FloatingIslandsSpawnPregen;
+import net.projectisland.worldgen.ProjectIslandWorldgen;
+
+@Mod(ProjectIsland.MOD_ID)
+public final class ProjectIsland {
+    public static final String MOD_ID = "projectisland";
+    public static final Logger LOGGER = LogUtils.getLogger();
+
+    public ProjectIsland(IEventBus modEventBus, ModContainer modContainer) {
+        modEventBus.addListener(this::onCommonSetup);
+        ProjectIslandWorldgen.register(modEventBus);
+        ProjectIslandNetworking.register(modEventBus);
+        NeoForge.EVENT_BUS.register(this);
+        FloatingIslandsSpawnEvents.register();
+        FloatingIslandsSpawnPregen.register();
+        IslandCommands.register();
+        IslandHudServerSync.register();
+        modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
+    }
+
+    private void onCommonSetup(FMLCommonSetupEvent event) {
+        LOGGER.info("Project Island common setup");
+        if (Config.DEBUG_LOGGING.getAsBoolean()) {
+            LOGGER.debug("Project Island debug logging is enabled");
+        }
+    }
+
+    @SubscribeEvent
+    public void onServerStarting(ServerStartingEvent event) {
+        LOGGER.info("Project Island dedicated server starting");
+    }
+}

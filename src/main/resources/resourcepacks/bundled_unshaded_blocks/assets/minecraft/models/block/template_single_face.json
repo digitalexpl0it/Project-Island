@@ -1,0 +1,26 @@
+{
+    "textures": {
+        "particle": "#texture"
+    },
+    "elements": [
+        {
+            "from": [
+                0,
+                0,
+                0
+            ],
+            "to": [
+                16,
+                16,
+                0
+            ],
+            "shade": false,
+            "faces": {
+                "north": {
+                    "texture": "#texture",
+                    "cullface": "north"
+                }
+            }
+        }
+    ]
+}
