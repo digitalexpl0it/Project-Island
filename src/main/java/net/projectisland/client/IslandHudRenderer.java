@@ -27,7 +27,9 @@ public final class IslandHudRenderer {
 
     @SubscribeEvent
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
+        // AFTER_LEVEL: runs after the world pass (including fabulous/translucent targets). Translucent stage can skip
+        // custom geometry in some graphics modes; world-space HUD labels are safer here.
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) {
             return;
         }
         if (!ClientConfig.ISLAND_HUD_SHOW.getAsBoolean()) {
@@ -75,10 +77,15 @@ public final class IslandHudRenderer {
         }
         int chunkX = Mth.floor(b.x()) >> 4;
         int chunkZ = Mth.floor(b.z()) >> 4;
-        if (!level.hasChunk(chunkX, chunkZ)) {
-            return false;
-        }
         int renderChunks = Mth.clamp(mc.options.getEffectiveRenderDistance(), 2, 32);
+        if (!level.hasChunk(chunkX, chunkZ)) {
+            int px = mc.player.blockPosition().getX() >> 4;
+            int pz = mc.player.blockPosition().getZ() >> 4;
+            int cheb = Math.max(Math.abs(chunkX - px), Math.abs(chunkZ - pz));
+            if (cheb > renderChunks + 3) {
+                return false;
+            }
+        }
         double maxBlocks = renderChunks * 16.0 * HUD_DISTANCE_FRACTION_OF_RENDER_RADIUS;
         Vec3 cam = mc.gameRenderer.getMainCamera().getPosition();
         double dx = b.x() - cam.x;

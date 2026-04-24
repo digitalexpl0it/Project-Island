@@ -11,7 +11,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -25,30 +24,31 @@ public final class IslandHudServerSync {
     private IslandHudServerSync() {}
 
     public static void register() {
-        NeoForge.EVENT_BUS.addListener(IslandHudServerSync::onPlayerPostTick);
+        NeoForge.EVENT_BUS.addListener(IslandHudServerSync::onServerTickPost);
     }
 
-    private static void onPlayerPostTick(PlayerTickEvent.Post event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) {
-            return;
-        }
-        if (player.level().isClientSide()) {
-            return;
-        }
-        ServerLevel level = player.serverLevel();
-        if (!ProjectIslandDimensions.isFloatingIslandsGameplay(level)) {
-            return;
-        }
+    /**
+     * Drive HUD sync from the server tick so it does not depend on {@code PlayerTickEvent} delivery quirks.
+     * Still throttled per player with {@link Config#ISLAND_HUD_SYNC_INTERVAL_TICKS}.
+     */
+    private static void onServerTickPost(ServerTickEvent.Post event) {
+        MinecraftServer server = event.getServer();
         int interval = Math.max(1, Config.ISLAND_HUD_SYNC_INTERVAL_TICKS.getAsInt());
-        if (player.tickCount % interval != 0) {
-            return;
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            if (player.tickCount % interval != 0) {
+                continue;
+            }
+            ServerLevel level = player.serverLevel();
+            if (!ProjectIslandDimensions.isFloatingIslandsGameplay(level)) {
+                continue;
+            }
+            if (!Config.ISLAND_HUD_SYNC_ENABLED.getAsBoolean()) {
+                PacketDistributor.sendToPlayer(player, new IslandHudSyncPayload(List.of()));
+                continue;
+            }
+            List<IslandHudBeacon> beacons = buildBeacons(player, level);
+            PacketDistributor.sendToPlayer(player, new IslandHudSyncPayload(beacons));
         }
-        if (!Config.ISLAND_HUD_SYNC_ENABLED.getAsBoolean()) {
-            PacketDistributor.sendToPlayer(player, new IslandHudSyncPayload(List.of()));
-            return;
-        }
-        List<IslandHudBeacon> beacons = buildBeacons(player, level);
-        PacketDistributor.sendToPlayer(player, new IslandHudSyncPayload(beacons));
     }
 
     private static List<IslandHudBeacon> buildBeacons(ServerPlayer player, ServerLevel level) {
