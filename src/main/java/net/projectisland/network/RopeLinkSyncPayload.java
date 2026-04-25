@@ -20,8 +20,9 @@ public record RopeLinkSyncPayload(List<RopeLinkSegment> segments) implements Cus
             (buf, s) -> {
                 buf.writeLong(s.fromPacked());
                 buf.writeLong(s.toPacked());
+                buf.writeFloat(s.healthFraction());
             },
-            buf -> new RopeLinkSegment(buf.readLong(), buf.readLong()));
+            buf -> new RopeLinkSegment(buf.readLong(), buf.readLong(), buf.readFloat()));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, RopeLinkSyncPayload> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.collection(ArrayList::new, SEGMENT_CODEC, 512),
@@ -37,6 +38,6 @@ public record RopeLinkSyncPayload(List<RopeLinkSegment> segments) implements Cus
         context.enqueueWork(() -> RopeLinkClientCache.replace(payload.segments()));
     }
 
-    /** Packed {@link net.minecraft.core.BlockPos#asLong()} endpoints. */
-    public record RopeLinkSegment(long fromPacked, long toPacked) {}
+    /** Packed {@link net.minecraft.core.BlockPos#asLong()} endpoints and health ratio {@code 0..1} for client HUD. */
+    public record RopeLinkSegment(long fromPacked, long toPacked, float healthFraction) {}
 }

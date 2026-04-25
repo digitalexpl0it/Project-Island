@@ -133,7 +133,8 @@ public final class HarpoonGunItem extends Item {
         }
 
         pd.remove(TAG_PENDING);
-        data.putRopeLink(new RopeLink(linkId, sp.getUUID(), aKey, key, aPos, pos, maxLinkLen));
+        float ropeMaxHp = (float) Config.ROPE_LINK_MAX_HEALTH.getAsDouble();
+        data.putRopeLink(new RopeLink(linkId, sp.getUUID(), aKey, key, aPos, pos, maxLinkLen, ropeMaxHp, ropeMaxHp));
         stack.hurtAndBreak(1, sp, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
         actionBar(sp, "projectisland.harpoon.linked");
         return InteractionResultHolder.success(stack);

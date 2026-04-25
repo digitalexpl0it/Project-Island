@@ -3,7 +3,6 @@ package net.projectisland.content;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -18,6 +17,7 @@ import net.projectisland.ProjectIsland;
 import net.projectisland.island.FloatingIslandSavedData;
 import net.projectisland.island.IslandWorld;
 import net.projectisland.island.RopeLink;
+import org.jetbrains.annotations.Nullable;
 
 public final class RopeAnchorBlockEntity extends BlockEntity {
     private static final String TAG_ORIG = "Orig";
@@ -77,7 +77,11 @@ public final class RopeAnchorBlockEntity extends BlockEntity {
      * anchor's link flag, and schedules restoring both positions to their stored original blocks (deferred one tick so
      * vanilla break logic does not overwrite the restore in the same tick).
      */
-    public void handleServerBreak(ServerLevel level, Player breaker) {
+    /**
+     * Removes saved link data and restores anchor blocks. {@code breaker} is optional (e.g. strain snap has no
+     * player).
+     */
+    public void handleServerBreak(ServerLevel level, @Nullable Player breaker) {
         FloatingIslandSavedData data;
         try {
             data = IslandWorld.get(level);
@@ -169,6 +173,26 @@ public final class RopeAnchorBlockEntity extends BlockEntity {
         if (tag.contains(TAG_ENDPOINT)) {
             endpointKind = tag.getInt(TAG_ENDPOINT);
         }
+    }
+
+    /**
+     * Removes {@code link} from saved data and restores both anchor blocks (same as breaking one anchor by hand).
+     */
+    public static void severLinkFromSavedData(ServerLevel level, RopeLink link) {
+        BlockEntity be = level.getBlockEntity(link.fromAnchorPos());
+        if (be instanceof RopeAnchorBlockEntity ra && link.id().equals(ra.getLinkId())) {
+            ra.handleServerBreak(level, null);
+            return;
+        }
+        be = level.getBlockEntity(link.toAnchorPos());
+        if (be instanceof RopeAnchorBlockEntity rb && link.id().equals(rb.getLinkId())) {
+            rb.handleServerBreak(level, null);
+            return;
+        }
+        IslandWorld.get(level).removeRopeLink(link.id());
+        ProjectIsland.LOGGER.warn(
+                "Rope link {} could not sever at anchors (chunks or blocks missing) — removed from saved data only",
+                link.id());
     }
 }
 

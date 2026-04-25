@@ -164,10 +164,35 @@ public final class Config {
                     "Stored on each RopeLink for future tension / gameplay checks.")
             .defineInRange("ropeLinkMaxLengthBlocks", 96, 16, 1024);
 
+    public static final ModConfigSpec.DoubleValue ROPE_LINK_MAX_HEALTH = BUILDER
+            .comment(
+                    "Maximum (and initial) hit points per rope link. Strain lowers health; at 0 the link snaps and anchors restore.")
+            .defineInRange("ropeLinkMaxHealth", 100.0d, 1.0d, 1_000_000.0d);
+
+    public static final ModConfigSpec.IntValue ROPE_LINK_STRESS_TICK_INTERVAL = BUILDER
+            .comment("Server ticks between strain evaluations (span vs max length) and optional damage. 20 ≈ once per second.")
+            .defineInRange("ropeLinkStressTickInterval", 20, 1, 1200);
+
+    public static final ModConfigSpec.DoubleValue ROPE_LINK_STRAIN_RATIO_THRESHOLD = BUILDER
+            .comment(
+                    "When chord length / maxLinkLength exceeds this ratio, the rope takes strain damage each stress tick (e.g. 0.88 = 88% of allowed span).")
+            .defineInRange("ropeLinkStrainRatioThreshold", 0.88d, 0.5d, 0.999d);
+
+    public static final ModConfigSpec.DoubleValue ROPE_LINK_STRAIN_DAMAGE_PER_TICK = BUILDER
+            .comment(
+                    "Hit points removed per stress tick while over the strain threshold. Scales up as span approaches max length.")
+            .defineInRange("ropeLinkStrainDamagePerTick", 1.5d, 0.0d, 10_000.0d);
+
     public static final ModConfigSpec.BooleanValue SECONDARY_CLAIM_REQUIRES_ROPE_LINK = BUILDER
             .comment(
-                    "When true, OP /projectisland island claim requires a harpoon RopeLink owned by the claimer between the target island and an island they already own (starter or prior claim).")
+                    "When true, secondary claims require a harpoon RopeLink owned by the claimer between the target island and an island they already own (starter or prior claim).")
             .define("secondaryClaimRequiresRopeLink", true);
+
+    public static final ModConfigSpec.IntValue SECONDARY_CLAIM_COMMAND_PERMISSION_LEVEL = BUILDER
+            .comment(
+                    "Minimum permission level for `/projectisland island claim` (0 = any player; 2 = OP on vanilla).",
+                    "Rope-anchor shift-use is not gated by this — only the Brigadier command.")
+            .defineInRange("secondaryClaimCommandPermissionLevel", 0, 0, 4);
 
     static final ModConfigSpec SPEC = BUILDER.build();
 

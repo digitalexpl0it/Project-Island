@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 _Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24**._ _README/TODO sync: **2026-04-25**._
 
+### Added
+
+- **Rope health & strain (Phase 4):** each **`RopeLink`** stores **health / maxHealth** (NBT + new harpoon links use **`ropeLinkMaxHealth`**). **`RopeLinkStress`** applies damage when span / max length exceeds **`ropeLinkStrainRatioThreshold`**; at **0** health anchors **`severLinkFromSavedData`**. **`RopeLinkSyncPayload`** includes **health fraction**; client **`RopeLinkHealthBarRenderer`** draws billboard bars at **both** anchor ends when **`ropeLinkHealthBarsShow`** is on. Common: **`ropeLinkMaxHealth`**, **`ropeLinkStressTickInterval`**, **`ropeLinkStrainRatioThreshold`**, **`ropeLinkStrainDamagePerTick`** (set damage to **0** to disable strain).
+
+- **Secondary claim (Phase 4):** **`IslandSecondaryClaim`** centralizes rules; **`/projectisland island claim`** uses common config **`secondaryClaimCommandPermissionLevel`** (default **0**; use **2** for OP-only). **Sneak + use** (empty hand) on **your** linked **rope anchor** on an **AVAILABLE** island attempts the same claim (action-bar feedback). Lang keys under **`projectisland.claim.*`**.
+
 ### Changed
 
 - **Void rescue flavor text:** random **action-bar** lines (same style as harpoon feedback) when you are moved by void rescue, starter void snap, nearest-island relocate, or unsafe floating respawn.

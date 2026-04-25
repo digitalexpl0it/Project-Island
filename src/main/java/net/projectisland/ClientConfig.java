@@ -27,6 +27,11 @@ public final class ClientConfig {
             .comment("Draw synced rope segments between linked anchors in the floating-islands overworld (server still sends data when disabled).")
             .define("ropeLinksShow", true);
 
+    public static final ModConfigSpec.BooleanValue ROPE_LINK_HEALTH_BARS_SHOW = BUILDER
+            .comment(
+                    "Draw small billboard health bars at each rope anchor when rope rendering is enabled (uses synced health fraction).")
+            .define("ropeLinkHealthBarsShow", true);
+
     static final ModConfigSpec SPEC = BUILDER.build();
 
     private ClientConfig() {}

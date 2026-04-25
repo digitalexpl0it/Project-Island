@@ -47,6 +47,9 @@ public final class IslandHudRenderer {
 
         if (ClientConfig.ROPE_LINKS_SHOW.getAsBoolean()) {
             RopeLinkSegmentRenderer.render(mc, pose, buffers);
+            if (ClientConfig.ROPE_LINK_HEALTH_BARS_SHOW.getAsBoolean()) {
+                RopeLinkHealthBarRenderer.render(mc, pose, buffers);
+            }
         }
 
         if (!ClientConfig.ISLAND_HUD_SHOW.getAsBoolean()) {

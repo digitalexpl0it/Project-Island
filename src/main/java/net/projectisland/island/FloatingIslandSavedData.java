@@ -13,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.projectisland.Config;
 import net.projectisland.ProjectIsland;
 
 /**
@@ -79,7 +80,10 @@ public final class FloatingIslandSavedData extends SavedData {
                     var fromPos = BlockPos.of(t.getLong("FromPos"));
                     var toPos = BlockPos.of(t.getLong("ToPos"));
                     double maxLen = t.contains("MaxLen") ? t.getDouble("MaxLen") : 96.0d;
-                    ropeLinks.put(id, new RopeLink(id, owner, fromKey.get(), toKey.get(), fromPos, toPos, maxLen));
+                    float maxHp = t.contains("MaxHealth") ? t.getFloat("MaxHealth") : (float) Config.ROPE_LINK_MAX_HEALTH.getAsDouble();
+                    float hp = t.contains("Health") ? t.getFloat("Health") : maxHp;
+                    hp = Math.min(Math.max(0f, hp), maxHp);
+                    ropeLinks.put(id, new RopeLink(id, owner, fromKey.get(), toKey.get(), fromPos, toPos, maxLen, hp, maxHp));
                 } catch (IllegalArgumentException ignored) {
                     // skip malformed uuid
                 }
@@ -177,7 +181,37 @@ public final class FloatingIslandSavedData extends SavedData {
     }
 
     public synchronized void removeRopeLink(UUID id) {
-        if (ropeLinks.remove(id) != null) {
+        RopeLink removed = ropeLinks.remove(id);
+        if (removed != null) {
+            setDirty();
+            if (Config.SECONDARY_CLAIM_REQUIRES_ROPE_LINK.getAsBoolean()) {
+                revalidateRopeBackedClaimsForOwner(removed.owner());
+            }
+        }
+    }
+
+    /**
+     * Secondary islands (not this player's starter home) must keep a direct owned {@linkplain RopeLink} to another
+     * island they {@linkplain #islandClaimedBy claim}; otherwise they return to {@link IslandState#AVAILABLE}.
+     */
+    public synchronized void revalidateRopeBackedClaimsForOwner(UUID owner) {
+        Optional<FloatingIslandKey> starter = getStarterHome(owner);
+        boolean changed = false;
+        for (Map.Entry<FloatingIslandKey, IslandRecord> e : new ArrayList<>(islands.entrySet())) {
+            IslandRecord rec = e.getValue();
+            if (rec.state() != IslandState.CLAIMED || !owner.equals(rec.owner())) {
+                continue;
+            }
+            FloatingIslandKey key = e.getKey();
+            if (starter.filter(key::equals).isPresent()) {
+                continue;
+            }
+            if (!hasRopeLinkFromClaimedIsland(owner, key)) {
+                rec.clearClaim();
+                changed = true;
+            }
+        }
+        if (changed) {
             setDirty();
         }
     }
@@ -230,6 +264,8 @@ public final class FloatingIslandSavedData extends SavedData {
             t.putLong("FromPos", link.fromAnchorPos().asLong());
             t.putLong("ToPos", link.toAnchorPos().asLong());
             t.putDouble("MaxLen", link.maxLengthBlocks());
+            t.putFloat("Health", link.health());
+            t.putFloat("MaxHealth", link.maxHealth());
             rl.put(e.getKey().toString(), t);
         }
         root.put(TAG_ROPE_LINKS, rl);

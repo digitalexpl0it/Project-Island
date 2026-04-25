@@ -10,7 +10,6 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.projectisland.Config;
 import net.projectisland.ProjectIsland;
-import net.projectisland.ProjectIslandDimensions;
 
 public final class IslandCommands {
     private IslandCommands() {}
@@ -22,10 +21,22 @@ public final class IslandCommands {
     private static void onRegisterCommands(RegisterCommandsEvent event) {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
         dispatcher.register(Commands.literal("projectisland")
-                .requires(s -> s.hasPermission(2))
                 .then(Commands.literal("island")
-                        .then(Commands.literal("here").executes(ctx -> islandHere(ctx.getSource())))
-                        .then(Commands.literal("claim").executes(ctx -> islandClaim(ctx.getSource())))));
+                        .then(Commands.literal("here")
+                                .requires(IslandCommands::isServerPlayerSource)
+                                .executes(ctx -> islandHere(ctx.getSource())))
+                        .then(Commands.literal("claim")
+                                .requires(IslandCommands::isServerPlayerSourceWithClaimPermission)
+                                .executes(ctx -> islandClaim(ctx.getSource())))));
+    }
+
+    private static boolean isServerPlayerSource(CommandSourceStack s) {
+        return s.getEntity() instanceof ServerPlayer;
+    }
+
+    private static boolean isServerPlayerSourceWithClaimPermission(CommandSourceStack s) {
+        return s.getEntity() instanceof ServerPlayer
+                && s.hasPermission(Config.SECONDARY_CLAIM_COMMAND_PERMISSION_LEVEL.getAsInt());
     }
 
     private static int islandHere(CommandSourceStack source) {
@@ -53,10 +64,8 @@ public final class IslandCommands {
     }
 
     /**
-     * Interim Phase 4: claim the island region under the player's feet when {@link IslandState#AVAILABLE}. When
-     * {@link net.projectisland.Config#SECONDARY_CLAIM_REQUIRES_ROPE_LINK} is true, the player must own a
-     * {@link net.projectisland.island.RopeLink} between this island and one they already claim. OP-only until a
-     * non-command claim interaction exists.
+     * Claim the island region under the player's feet when {@link IslandState#AVAILABLE}. Permission:
+     * {@link Config#SECONDARY_CLAIM_COMMAND_PERMISSION_LEVEL}. Rope rules: {@link IslandSecondaryClaim}.
      */
     private static int islandClaim(CommandSourceStack source) {
         if (!(source.getEntity() instanceof ServerPlayer player)) {
@@ -64,35 +73,18 @@ public final class IslandCommands {
             return 0;
         }
         var level = player.serverLevel();
-        if (!ProjectIslandDimensions.isFloatingIslandsGameplay(level)) {
-            source.sendFailure(Component.literal("Not in the floating-islands overworld."));
-            return 0;
-        }
-        FloatingIslandSavedData data = IslandWorld.get(level);
-        var keyOpt = IslandWorld.keyAt(level, player.blockPosition());
-        if (keyOpt.isEmpty()) {
-            source.sendFailure(Component.literal("No island region owns this column."));
-            return 0;
-        }
-        FloatingIslandKey key = keyOpt.get();
-        IslandState state = data.peek(key).map(IslandRecord::state).orElse(IslandState.AVAILABLE);
-        if (state != IslandState.AVAILABLE) {
-            source.sendFailure(Component.literal("Island is not AVAILABLE (state=" + state + ")."));
-            return 0;
-        }
-        if (Config.SECONDARY_CLAIM_REQUIRES_ROPE_LINK.getAsBoolean()
-                && !data.hasRopeLinkFromClaimedIsland(player.getUUID(), key)) {
-            source.sendFailure(Component.translatable("projectisland.claim.no_rope_link"));
-            return 0;
-        }
-        if (data.trySecondaryClaim(key, player.getUUID(), level.getGameTime())) {
-            source.sendSuccess(
-                    () -> Component.literal("Claimed island " + key.toStorageKey() + " for " + player.getGameProfile().getName()),
-                    true);
-            ProjectIsland.LOGGER.info("projectisland island claim: {} by {}", key, player.getGameProfile().getName());
+        IslandSecondaryClaim.Outcome outcome = IslandSecondaryClaim.tryAtFeet(player, level);
+        if (outcome == IslandSecondaryClaim.Outcome.SUCCESS) {
+            source.sendSuccess(() -> IslandSecondaryClaim.message(outcome), true);
+            IslandWorld.keyAt(level, player.blockPosition())
+                    .ifPresent(
+                            key -> ProjectIsland.LOGGER.info(
+                                    "projectisland island claim: {} by {}",
+                                    key,
+                                    player.getGameProfile().getName()));
             return 1;
         }
-        source.sendFailure(Component.literal("Claim failed (race or state changed)."));
+        source.sendFailure(IslandSecondaryClaim.message(outcome));
         return 0;
     }
 }

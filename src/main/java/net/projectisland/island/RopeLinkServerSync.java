@@ -24,6 +24,7 @@ public final class RopeLinkServerSync {
 
     private static void onServerTickPost(ServerTickEvent.Post event) {
         MinecraftServer server = event.getServer();
+        RopeLinkStress.tick(server);
         int interval = Math.max(1, Config.ROPE_LINK_SYNC_INTERVAL_TICKS.getAsInt());
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             if (player.tickCount % interval != 0) {
@@ -51,7 +52,8 @@ public final class RopeLinkServerSync {
         List<RopeLinkSegment> out = new ArrayList<>();
         for (RopeLink link : data.copyRopeLinks()) {
             if (segmentNearPlayer(link.fromAnchorPos(), link.toAnchorPos(), px, py, pz, radius)) {
-                out.add(new RopeLinkSegment(link.fromAnchorPos().asLong(), link.toAnchorPos().asLong()));
+                out.add(new RopeLinkSegment(
+                        link.fromAnchorPos().asLong(), link.toAnchorPos().asLong(), link.healthFraction()));
             }
         }
         return out;

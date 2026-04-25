@@ -2,6 +2,8 @@ package net.projectisland.content;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.BlockGetter;
@@ -9,9 +11,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.projectisland.island.IslandSecondaryClaim;
+import net.projectisland.island.IslandWorld;
 
 public final class RopeAnchorBlock extends Block implements EntityBlock {
     private static final VoxelShape BASE = Block.box(0, 0, 0, 16, 10, 16);
@@ -66,6 +71,31 @@ public final class RopeAnchorBlock extends Block implements EntityBlock {
     public VoxelShape getOcclusionShape(BlockState state, BlockGetter level, BlockPos pos) {
         // Prevent neighbor face-culling “void boxes” around the anchor.
         return Shapes.empty();
+    }
+
+    /**
+     * Sneak + use empty hand: try to {@linkplain IslandSecondaryClaim claim} the island region this anchor sits on
+     * (same rules as the command, plus this anchor must be your linked harpoon endpoint).
+     */
+    @Override
+    protected InteractionResult useWithoutItem(
+            BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (level.isClientSide() || !player.isShiftKeyDown()) {
+            return InteractionResult.PASS;
+        }
+        if (!(level instanceof ServerLevel sl) || !(player instanceof ServerPlayer sp)) {
+            return InteractionResult.PASS;
+        }
+        return IslandWorld.keyAt(sl, pos)
+                .map(
+                        key -> {
+                            IslandSecondaryClaim.Outcome o = IslandSecondaryClaim.tryAtIsland(sp, sl, key, pos);
+                            sp.displayClientMessage(IslandSecondaryClaim.message(o), true);
+                            return o == IslandSecondaryClaim.Outcome.SUCCESS
+                                    ? InteractionResult.SUCCESS
+                                    : InteractionResult.FAIL;
+                        })
+                .orElse(InteractionResult.PASS);
     }
 }
 
