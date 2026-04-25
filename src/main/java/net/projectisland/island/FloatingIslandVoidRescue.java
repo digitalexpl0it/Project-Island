@@ -132,6 +132,7 @@ public final class FloatingIslandVoidRescue {
                         int wz = bz + LOCAL_Z[s];
                         int top = FloatingIslandsChunkGenerator.islandSurfaceBlockY(generator, wx, wz, minY, maxY);
                         if (top != Integer.MIN_VALUE) {
+                            IslandChunkLoader.ensureChunksAroundWorldBlock(level, wx, wz);
                             player.teleportTo(level, wx + 0.5d, top + 1.0d, wz + 0.5d, player.getYRot(), player.getXRot());
                             return;
                         }
@@ -174,6 +175,7 @@ public final class FloatingIslandVoidRescue {
                         int wz = bz + LOCAL_Z[s];
                         int top = FloatingIslandsChunkGenerator.islandSurfaceBlockY(generator, wx, wz, minY, maxY);
                         if (top != Integer.MIN_VALUE) {
+                            IslandChunkLoader.ensureChunksAroundWorldBlock(level, wx, wz);
                             return Optional.of(new Vec3(wx + 0.5d, top + 1.0d, wz + 0.5d));
                         }
                     }

@@ -44,6 +44,7 @@ public final class FloatingIslandRespawnHandler {
             return;
         }
         Vec3 feet = replacement.get();
+        IslandChunkLoader.ensureChunksAroundWorldBlock(target, Mth.floor(feet.x), Mth.floor(feet.z));
         event.setDimensionTransition(
                 new DimensionTransition(target, feet, Vec3.ZERO, dt.yRot(), dt.xRot(), dt.postDimensionTransition()));
     }

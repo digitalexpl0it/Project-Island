@@ -96,6 +96,27 @@ public final class FloatingIslandSavedData extends SavedData {
         return Optional.of(key);
     }
 
+    /**
+     * Atomically claim {@code key} for {@code owner} if missing or {@link IslandState#AVAILABLE}. Does not touch
+     * {@linkplain #starterHomes starter homes} — for secondary claims (e.g. OP command until dock/link gameplay exists).
+     */
+    public synchronized boolean trySecondaryClaim(FloatingIslandKey key, UUID owner, long gameTime) {
+        IslandRecord rec = islands.get(key);
+        if (rec != null && rec.state() != IslandState.AVAILABLE) {
+            return false;
+        }
+        if (rec == null) {
+            rec = new IslandRecord();
+            islands.put(key, rec);
+        }
+        if (rec.state() != IslandState.AVAILABLE) {
+            return false;
+        }
+        rec.setClaimed(owner, gameTime);
+        setDirty();
+        return true;
+    }
+
     public IslandRecord getOrCreate(FloatingIslandKey key) {
         IslandRecord existing = islands.get(key);
         if (existing != null) {

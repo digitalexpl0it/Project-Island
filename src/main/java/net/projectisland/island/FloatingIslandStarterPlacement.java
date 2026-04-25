@@ -144,7 +144,11 @@ public final class FloatingIslandStarterPlacement {
     public static void teleportToIslandCenter(ServerPlayer player, ServerLevel level, FloatingIslandKey key) {
         optionalFeetAtIslandCenter(level, key)
                 .ifPresentOrElse(
-                        vec -> player.teleportTo(level, vec.x, vec.y, vec.z, player.getYRot(), player.getXRot()),
+                        vec -> {
+                            IslandChunkLoader.ensureChunksAroundWorldBlock(
+                                    level, Mth.floor(vec.x), Mth.floor(vec.z));
+                            player.teleportTo(level, vec.x, vec.y, vec.z, player.getYRot(), player.getXRot());
+                        },
                         () -> ProjectIsland.LOGGER.warn(
                                 "FloatingIslandStarterPlacement: layout had no surface at center for starter island {}",
                                 key));
