@@ -14,5 +14,12 @@
   "projectisland.harpoon.same_island": "Pick a block on a different island.",
   "projectisland.harpoon.too_far": "Too far from the first anchor (max %s blocks; this shot is %s blocks).",
   "projectisland.harpoon.second_place_failed": "Couldn't place the second anchor here.",
-  "projectisland.harpoon.linked": "Rope linked between islands."
+  "projectisland.harpoon.linked": "Rope linked between islands.",
+  "projectisland.claim.no_rope_link": "Claim a rope link from one of your islands to this one first (harpoon gun).",
+  "projectisland.rescue.sudden_death": "You have been rescued from sudden death!",
+  "projectisland.rescue.got_you": "Don't worry — I got you! That was close.",
+  "projectisland.rescue.life_saved": "Your life was saved. Mind the gap next time.",
+  "projectisland.rescue.plucked": "Plucked you out of the void. You're welcome.",
+  "projectisland.rescue.gravity": "Gravity had plans. Project Island disagreed.",
+  "projectisland.rescue.airship_insurance": "Void fall coverage: paid in full. Welcome back."
 }

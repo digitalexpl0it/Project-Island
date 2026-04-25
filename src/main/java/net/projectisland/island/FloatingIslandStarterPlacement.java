@@ -122,7 +122,13 @@ public final class FloatingIslandStarterPlacement {
         if (FloatingIslandVoidRescue.isSupportedOnIslandSurface(player, level)) {
             return;
         }
-        teleportToIslandCenter(player, level, key);
+        // Do not yank explorers in dungeons / builds: only snap to starter when actually in the void-floor band.
+        if (!FloatingIslandVoidRescue.isDeepVoidDangerZone(player, level)) {
+            return;
+        }
+        if (teleportToIslandCenter(player, level, key)) {
+            FloatingIslandVoidRescue.showVoidRescueActionBar(player);
+        }
     }
 
     /** Feet position (center XZ, one above surface) for {@code key}, or empty if layout has no solid column there. */
@@ -141,16 +147,20 @@ public final class FloatingIslandStarterPlacement {
         return Optional.of(new Vec3(wx + 0.5d, top + 1.0d, wz + 0.5d));
     }
 
-    public static void teleportToIslandCenter(ServerPlayer player, ServerLevel level, FloatingIslandKey key) {
-        optionalFeetAtIslandCenter(level, key)
-                .ifPresentOrElse(
-                        vec -> {
-                            IslandChunkLoader.ensureChunksAroundWorldBlock(
-                                    level, Mth.floor(vec.x), Mth.floor(vec.z));
-                            player.teleportTo(level, vec.x, vec.y, vec.z, player.getYRot(), player.getXRot());
-                        },
-                        () -> ProjectIsland.LOGGER.warn(
-                                "FloatingIslandStarterPlacement: layout had no surface at center for starter island {}",
-                                key));
+    /**
+     * @return {@code true} if a surface was found and the player was teleported.
+     */
+    public static boolean teleportToIslandCenter(ServerPlayer player, ServerLevel level, FloatingIslandKey key) {
+        Optional<Vec3> vecOpt = optionalFeetAtIslandCenter(level, key);
+        if (vecOpt.isEmpty()) {
+            ProjectIsland.LOGGER.warn(
+                    "FloatingIslandStarterPlacement: layout had no surface at center for starter island {}",
+                    key);
+            return false;
+        }
+        Vec3 vec = vecOpt.get();
+        IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(vec.x), Mth.floor(vec.z));
+        player.teleportTo(level, vec.x, vec.y, vec.z, player.getYRot(), player.getXRot());
+        return true;
     }
 }

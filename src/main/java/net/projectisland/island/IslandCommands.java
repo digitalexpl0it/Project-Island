@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.projectisland.Config;
 import net.projectisland.ProjectIsland;
 import net.projectisland.ProjectIslandDimensions;
 
@@ -52,8 +53,10 @@ public final class IslandCommands {
     }
 
     /**
-     * Interim Phase 4: claim the island region under the player's feet when {@link IslandState#AVAILABLE}. Full
-     * dock/link rules come later; this is OP-only for testing and admin.
+     * Interim Phase 4: claim the island region under the player's feet when {@link IslandState#AVAILABLE}. When
+     * {@link net.projectisland.Config#SECONDARY_CLAIM_REQUIRES_ROPE_LINK} is true, the player must own a
+     * {@link net.projectisland.island.RopeLink} between this island and one they already claim. OP-only until a
+     * non-command claim interaction exists.
      */
     private static int islandClaim(CommandSourceStack source) {
         if (!(source.getEntity() instanceof ServerPlayer player)) {
@@ -75,6 +78,11 @@ public final class IslandCommands {
         IslandState state = data.peek(key).map(IslandRecord::state).orElse(IslandState.AVAILABLE);
         if (state != IslandState.AVAILABLE) {
             source.sendFailure(Component.literal("Island is not AVAILABLE (state=" + state + ")."));
+            return 0;
+        }
+        if (Config.SECONDARY_CLAIM_REQUIRES_ROPE_LINK.getAsBoolean()
+                && !data.hasRopeLinkFromClaimedIsland(player.getUUID(), key)) {
+            source.sendFailure(Component.translatable("projectisland.claim.no_rope_link"));
             return 0;
         }
         if (data.trySecondaryClaim(key, player.getUUID(), level.getGameTime())) {

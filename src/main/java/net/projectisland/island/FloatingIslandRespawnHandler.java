@@ -11,7 +11,6 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerRespawnPositionEvent;
 import net.projectisland.ProjectIslandDimensions;
-import net.projectisland.worldgen.FloatingIslandsChunkGenerator;
 
 /**
  * If vanilla respawn (world spawn, obstructed bed, etc.) would place the player in the void over the floating-islands
@@ -47,9 +46,10 @@ public final class FloatingIslandRespawnHandler {
         IslandChunkLoader.ensureChunksAroundWorldBlock(target, Mth.floor(feet.x), Mth.floor(feet.z));
         event.setDimensionTransition(
                 new DimensionTransition(target, feet, Vec3.ZERO, dt.yRot(), dt.xRot(), dt.postDimensionTransition()));
+        FloatingIslandVoidRescue.showVoidRescueActionBar(player);
     }
 
-    /** True if no procedural island column in a small neighborhood supports the respawn feet height. */
+    /** True if no column in a small neighborhood supports the respawn feet (procedural top + tall allowance, or solid footing). */
     static boolean isUnsafeFloatingSpawn(ServerLevel level, Vec3 pos) {
         if (!ProjectIslandDimensions.isFloatingIslandsGameplay(level)) {
             return false;
@@ -62,8 +62,7 @@ public final class FloatingIslandRespawnHandler {
         double ey = pos.y;
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
-                int top = FloatingIslandsChunkGenerator.islandSurfaceBlockY(gen, bx + dx, bz + dz, minY, maxY);
-                if (top != Integer.MIN_VALUE && ey >= top - 0.5d && ey <= top + 8.0d) {
+                if (FloatingIslandSurfaceSupport.columnSupportsFeet(level, gen, bx + dx, bz + dz, ey, minY, maxY)) {
                     return false;
                 }
             }

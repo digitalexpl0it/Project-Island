@@ -3,21 +3,22 @@ package net.projectisland.island;
 import java.util.Optional;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.phys.Vec3;
 import net.projectisland.Config;
 import net.projectisland.ProjectIsland;
 import net.projectisland.ProjectIslandDimensions;
-import net.projectisland.worldgen.FloatingIslandsChunkGenerator;
 
 /**
  * Void rescue for the floating-islands overworld: {@linkplain #tickVoidRescue(ServerPlayer, ServerLevel) per-tick}
- * path fires **once per fall** when the player reaches **near min build height** while not supported on island surface.
- * {@linkplain #relocatePlayerFromVoid(ServerPlayer, ServerLevel)} is also used on join / dimension change (immediate).
+ * path fires **once per fall** when the player reaches the **void-floor band** (see {@link Config#VOID_RESCUE_TRIGGER_BLOCKS_ABOVE_MIN_Y})
+ * while not supported. Join / dimension change still uses {@linkplain #relocatePlayerFromVoid(ServerPlayer, ServerLevel)} when unsupported at any height.
  */
 public final class FloatingIslandVoidRescue {
     private FloatingIslandVoidRescue() {}
@@ -29,10 +30,25 @@ public final class FloatingIslandVoidRescue {
     private static final int[] LOCAL_X = {8, 2, 14, 8, 8};
     private static final int[] LOCAL_Z = {8, 8, 8, 2, 14};
 
+    private static final String[] RESCUE_ACTIONBAR_KEYS = {
+        "projectisland.rescue.sudden_death",
+        "projectisland.rescue.got_you",
+        "projectisland.rescue.life_saved",
+        "projectisland.rescue.plucked",
+        "projectisland.rescue.gravity",
+        "projectisland.rescue.airship_insurance",
+    };
+
+    /** Hotbar-style action bar, same channel as {@link net.projectisland.content.HarpoonGunItem} feedback. */
+    public static void showVoidRescueActionBar(ServerPlayer player) {
+        String key = RESCUE_ACTIONBAR_KEYS[player.getRandom().nextInt(RESCUE_ACTIONBAR_KEYS.length)];
+        player.displayClientMessage(Component.translatable(key), true);
+    }
+
     /**
-     * Once per void fall: when the player is **not** supported on island surface and has dropped to
-     * {@code minBuildHeight + voidRescueTriggerBlocksAboveMinY} or below, teleport to starter (if any) then nearest island.
-     * Mid-air high above the void floor does nothing (rim-safe; no mid-fall yank).
+     * Once per void fall: when **unsupported** and feet are in the **deep void band** (near {@link Level#getMinBuildHeight()}),
+     * try **bed / respawn anchor**, then starter island center, then nearest procedural surface. Does not run while you
+     * are merely underground or on structures well above the world floor.
      */
     public static void tickVoidRescue(ServerPlayer player, ServerLevel level) {
         if (!Config.VOID_RESCUE_EACH_TICK.getAsBoolean()) {
@@ -46,17 +62,28 @@ public final class FloatingIslandVoidRescue {
             data.remove(TAG_VOID_FALLING);
             return;
         }
-        data.putBoolean(TAG_VOID_FALLING, true);
-        int minY = level.getMinBuildHeight();
-        int triggerY = minY + Config.VOID_RESCUE_TRIGGER_BLOCKS_ABOVE_MIN_Y.getAsInt();
-        if (player.getY() > triggerY) {
+        if (!isDeepVoidDangerZone(player, level)) {
+            data.remove(TAG_VOID_FALLING);
             return;
+        }
+        data.putBoolean(TAG_VOID_FALLING, true);
+        Optional<Vec3> bed = FloatingIslandSurfaceSupport.findRespawnStandUp(level, player);
+        if (bed.isPresent()) {
+            Vec3 p = bed.get();
+            IslandChunkLoader.ensureChunksAroundWorldBlock(level, (int) Mth.floor(p.x), (int) Mth.floor(p.z));
+            player.teleportTo(level, p.x, p.y, p.z, player.getYRot(), player.getXRot());
+            if (isSupportedOnIslandSurface(player, level)) {
+                data.remove(TAG_VOID_FALLING);
+                showVoidRescueActionBar(player);
+                return;
+            }
         }
         Optional<FloatingIslandKey> home = IslandWorld.get(level).getStarterHome(player.getUUID());
         if (home.isPresent()) {
-            FloatingIslandStarterPlacement.teleportToIslandCenter(player, level, home.get());
-            if (isSupportedOnIslandSurface(player, level)) {
+            if (FloatingIslandStarterPlacement.teleportToIslandCenter(player, level, home.get())
+                    && isSupportedOnIslandSurface(player, level)) {
                 data.remove(TAG_VOID_FALLING);
+                showVoidRescueActionBar(player);
                 return;
             }
         }
@@ -75,30 +102,34 @@ public final class FloatingIslandVoidRescue {
 
     /**
      * {@code true} if any column under the player's horizontal footprint (with margin) has procedural island surface
-     * within the usual “standing on top” vertical band. Non-floating-islands levels always return {@code true}.
+     * (including tall structures above that surface) or solid footing from the loaded world.
      */
     public static boolean isSupportedOnIslandSurface(ServerPlayer player, ServerLevel level) {
         if (!ProjectIslandDimensions.isFloatingIslandsGameplay(level)) {
+            return true;
+        }
+        if (player.isSpectator()) {
+            return true;
+        }
+        // Stairs / thin floors often fail the bbox collision probe for one tick; ground contact matches player reality.
+        if (!player.getAbilities().flying && player.onGround()) {
             return true;
         }
         ChunkGenerator generator = level.getChunkSource().getGenerator();
         int minY = level.getMinBuildHeight();
         int maxY = level.getMaxBuildHeight();
         double ey = player.getY();
-        var bb = player.getBoundingBox();
-        int x0 = Mth.floor(bb.minX) - 1;
-        int x1 = Mth.floor(bb.maxX - 1.0E-7) + 1;
-        int z0 = Mth.floor(bb.minZ) - 1;
-        int z1 = Mth.floor(bb.maxZ - 1.0E-7) + 1;
-        for (int wx = x0; wx <= x1; wx++) {
-            for (int wz = z0; wz <= z1; wz++) {
-                int top = FloatingIslandsChunkGenerator.islandSurfaceBlockY(generator, wx, wz, minY, maxY);
-                if (top != Integer.MIN_VALUE && ey >= top - 0.5d && ey <= top + 8.0d) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return FloatingIslandSurfaceSupport.bboxSupported(level, generator, player.getBoundingBox(), ey, minY, maxY);
+    }
+
+    /**
+     * True when feet Y is at or below {@code minBuildHeight + voidRescueTriggerBlocksAboveMinY} — the “vice” near the
+     * world bottom where void rescue should run.
+     */
+    public static boolean isDeepVoidDangerZone(ServerPlayer player, ServerLevel level) {
+        int minY = level.getMinBuildHeight();
+        int band = Math.max(0, Config.VOID_RESCUE_TRIGGER_BLOCKS_ABOVE_MIN_Y.getAsInt());
+        return player.getY() <= (double) minY + band;
     }
 
     public static void relocatePlayerFromVoid(ServerPlayer player, ServerLevel level) {
@@ -130,10 +161,12 @@ public final class FloatingIslandVoidRescue {
                     for (int s = 0; s < LOCAL_X.length; s++) {
                         int wx = bx + LOCAL_X[s];
                         int wz = bz + LOCAL_Z[s];
-                        int top = FloatingIslandsChunkGenerator.islandSurfaceBlockY(generator, wx, wz, minY, maxY);
+                        int top = net.projectisland.worldgen.FloatingIslandsChunkGenerator.islandSurfaceBlockY(
+                                generator, wx, wz, minY, maxY);
                         if (top != Integer.MIN_VALUE) {
                             IslandChunkLoader.ensureChunksAroundWorldBlock(level, wx, wz);
                             player.teleportTo(level, wx + 0.5d, top + 1.0d, wz + 0.5d, player.getYRot(), player.getXRot());
+                            showVoidRescueActionBar(player);
                             return;
                         }
                     }
@@ -173,7 +206,8 @@ public final class FloatingIslandVoidRescue {
                     for (int s = 0; s < LOCAL_X.length; s++) {
                         int wx = bx + LOCAL_X[s];
                         int wz = bz + LOCAL_Z[s];
-                        int top = FloatingIslandsChunkGenerator.islandSurfaceBlockY(generator, wx, wz, minY, maxY);
+                        int top = net.projectisland.worldgen.FloatingIslandsChunkGenerator.islandSurfaceBlockY(
+                                generator, wx, wz, minY, maxY);
                         if (top != Integer.MIN_VALUE) {
                             IslandChunkLoader.ensureChunksAroundWorldBlock(level, wx, wz);
                             return Optional.of(new Vec3(wx + 0.5d, top + 1.0d, wz + 0.5d));

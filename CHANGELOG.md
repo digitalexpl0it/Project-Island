@@ -11,6 +11,10 @@ _Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24*
 
 ### Changed
 
+- **Void rescue flavor text:** random **action-bar** lines (same style as harpoon feedback) when you are moved by void rescue, starter void snap, nearest-island relocate, or unsafe floating respawn.
+
+- **Void rescue (less “dungeon stairs”):** per-tick rescue and **starter snap on login** only run in the **void-floor band** (`minBuildHeight` + `voidRescueTriggerBlocksAboveMinY`; default **12** blocks above min, was 48). **`onGround()`** counts as supported (unless flying) so thin stairs / partial blocks rarely read as open void. **`solidFootingNearColumn`** tolerates slightly more vertical slop under the feet.
+
 - **Rope visuals:** segments attach at the **top of the anchor loop** (`rope_anchor.json`), hang with **parabolic vertical slack** (tessellated), and render as a **square tube** (four chain-textured faces) using **vanilla** `minecraft:textures/block/chain.png`; UVs follow arc length. **Explicit outward normals** per face plus **full-bright** lighting avoid one tube side reading as a black “missing texture” strip from bad cross-product normals / diffuse. **Tighter UVs** and a **slimmer tube** reduce oversized dark link patches.
 
 - **License metadata:** `gradle.properties` `mod_license` is now **`MIT`** to match the existing root [`LICENSE`](LICENSE) file (was **All Rights Reserved**). README license section updated accordingly.
@@ -22,6 +26,9 @@ _Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24*
 - **TODO / README (Phase 4 intent):** Starter island flow spelled out — **region** (not chunk) spiral for **`AVAILABLE`**, **atomic** claim + per-UUID idempotency, **center / HUD** spawn vs **`FloatingIslandsSpawnEvents`** rim rescue; **layout math** before chunks generate; search **cap** + fallback; void rescue kept. README **Current focus** updated to match.
 
 ### Added
+
+- **Secondary claim gate:** when **`secondaryClaimRequiresRopeLink`** is true (default), **`/projectisland island claim`** fails unless the player **owns** a **`RopeLink`** between the target region and an island they already **CLAIM** (starter counts). Common config key in **`projectisland-common.toml`**.
+- **Void / respawn footing:** shared **`FloatingIslandSurfaceSupport`** — procedural “top” allows **structures far above** the ellipsoid skin; **solid collision** under the feet catches dungeon roofs and similar. **Void rescue** tries **bed / respawn anchor** stand-up (same dimension) **before** starter-home teleport so sleeping on another island is respected when you fall into the void.
 
 - **Harpoon / rope link tuning (common config):** **`ropeLinkRaycastRangeBlocks`** (each shot’s reach) and **`ropeLinkMaxLengthBlocks`** (max anchor–anchor span and value stored on **`RopeLink`**) — **`HarpoonGunItem`** reads both from **`Config`** (`projectisland-common.toml`).
 

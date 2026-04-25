@@ -126,6 +126,30 @@ public final class FloatingIslandSavedData extends SavedData {
      * Atomically claim {@code key} for {@code owner} if missing or {@link IslandState#AVAILABLE}. Does not touch
      * {@linkplain #starterHomes starter homes} — for secondary claims (e.g. OP command until dock/link gameplay exists).
      */
+    private synchronized boolean islandClaimedBy(FloatingIslandKey key, UUID owner) {
+        return peek(key).map(r -> r.state() == IslandState.CLAIMED && owner.equals(r.owner())).orElse(false);
+    }
+
+    /**
+     * True if {@code claimer} owns a {@link RopeLink} whose endpoints are {@code targetToClaim} and another island
+     * they already have {@link IslandState#CLAIMED}.
+     */
+    public synchronized boolean hasRopeLinkFromClaimedIsland(UUID claimer, FloatingIslandKey targetToClaim) {
+        for (RopeLink link : copyRopeLinks()) {
+            if (!claimer.equals(link.owner())) {
+                continue;
+            }
+            if (!link.fromKey().equals(targetToClaim) && !link.toKey().equals(targetToClaim)) {
+                continue;
+            }
+            FloatingIslandKey other = link.fromKey().equals(targetToClaim) ? link.toKey() : link.fromKey();
+            if (islandClaimedBy(other, claimer)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public synchronized boolean trySecondaryClaim(FloatingIslandKey key, UUID owner, long gameTime) {
         IslandRecord rec = islands.get(key);
         if (rec != null && rec.state() != IslandState.AVAILABLE) {

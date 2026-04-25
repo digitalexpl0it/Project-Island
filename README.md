@@ -46,6 +46,10 @@ The mod registers it as a **built-in client resource pack** (`AddPackFindersEven
 
 For **glowing ores / neon** style, you usually want a **shader** (e.g. Complementary, BSL) in addition to or instead of only a texture pack.
 
+### Optional client mods (not bundled; pin per modpack)
+
+- **[Advancements Reloaded](https://github.com/42atomys/mc-advancements-reloaded)** ([Modrinth](https://modrinth.com/mod/advancements-reloaded)) — NeoForge, **MIT**. Use it as a **progress tracker**: better **vanilla advancements** UI (layout, search, tab ordering) so players can see what they **have completed** and what they **still need** to unlock **new gear** or **upgrade existing** gear (ropes/chains, engines, propellers, etc.). **Important split:** those systems’ **rules and mechanics** (rope tension, thrust caps, recipes) live in **Project Island** and the **server**; datapack **`data/.../advancement`** + criteria reflect progression, while Advancements Reloaded only changes **how** that tree is browsed—it does not grant power by itself. Prefer **pinning** their release for your MC version; **fork** only if you need UI behavior they will not take upstream (forks add merge cost). Check their **Known issues** if another mod replaces the same screen.
+
 ## Learning from existing work
 
 When designing worldgen, ships, progression, or UX, **actively reuse ideas and patterns** from public sources (always respect **licenses** and **attribution**):

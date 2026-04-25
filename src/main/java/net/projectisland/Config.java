@@ -131,9 +131,10 @@ public final class Config {
 
     public static final ModConfigSpec.IntValue VOID_RESCUE_TRIGGER_BLOCKS_ABOVE_MIN_Y = BUILDER
             .comment(
-                    "With voidRescueEachTick: when feet Y is at or below (minBuildHeight + this value), run starter / nearest-island rescue if the player is still not supported on procedural surface.",
-                    "Larger values rescue higher (sooner); too small may let void damage tick first.")
-            .defineInRange("voidRescueTriggerBlocksAboveMinY", 48, 0, 512);
+                    "With voidRescueEachTick: when feet Y is at or below (minBuildHeight + this value), run rescue if still not supported.",
+                    "This is the **void-floor band** only — keep it small so dungeons / stairs far above the world minimum are not mistaken for the void. Vanilla overworld min is -64; 12 ⇒ rescue at Y≤-52 unless you raise this.",
+                    "Join / dimension relocate still runs when unsupported at any height (see FloatingIslandVoidRescue).")
+            .defineInRange("voidRescueTriggerBlocksAboveMinY", 12, 0, 512);
 
     public static final ModConfigSpec.BooleanValue ROPE_LINK_SYNC_ENABLED = BUILDER
             .comment(
@@ -162,6 +163,11 @@ public final class Config {
                     "Maximum Euclidean distance (blocks) between two anchors for a new rope link (server-validated).",
                     "Stored on each RopeLink for future tension / gameplay checks.")
             .defineInRange("ropeLinkMaxLengthBlocks", 96, 16, 1024);
+
+    public static final ModConfigSpec.BooleanValue SECONDARY_CLAIM_REQUIRES_ROPE_LINK = BUILDER
+            .comment(
+                    "When true, OP /projectisland island claim requires a harpoon RopeLink owned by the claimer between the target island and an island they already own (starter or prior claim).")
+            .define("secondaryClaimRequiresRopeLink", true);
 
     static final ModConfigSpec SPEC = BUILDER.build();
 
