@@ -33,6 +33,12 @@ public final class ClientConfig {
             .comment("Alpha for the **tinted border** around the island HUD panel (0–1).")
             .defineInRange("islandHudPanelBorderOpacity", 0.92d, 0.0d, 1.0d);
 
+    public static final ModConfigSpec.DoubleValue ISLAND_HUD_PANEL_SCALE = BUILDER
+            .comment(
+                    "Scales **padding, icon slot, and border** for the island HUD billboard (1 = legacy size).",
+                    "Text size still follows **islandHudTextScale**; title ellipsis width scales with this value.")
+            .defineInRange("islandHudPanelScale", 1.0d, 0.35d, 2.5d);
+
     public static final ModConfigSpec.BooleanValue ROPE_LINKS_SHOW = BUILDER
             .comment("Draw synced rope segments between linked anchors in the floating-islands overworld (server still sends data when disabled).")
             .define("ropeLinksShow", true);

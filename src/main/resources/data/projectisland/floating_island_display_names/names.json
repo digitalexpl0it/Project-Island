@@ -1,0 +1,12 @@
+{
+  "adjectives": [
+    "Misty", "Coral", "Jade", "Amber", "Azure", "Dusky", "Ivory", "Onyx", "Opal", "Rust",
+    "Sable", "Solar", "Verdant", "Cobalt", "Crimson", "Gilded", "Marble", "Obsidian", "Pearl", "Quartz",
+    "Saffron", "Silver", "Velvet", "Winding", "Brine", "Drift", "High", "Low", "Far", "Near"
+  ],
+  "nouns": [
+    "Atoll", "Barrow", "Bluff", "Cay", "Crest", "Crag", "Delta", "Drift", "Firth", "Haven",
+    "Isle", "Knoll", "Lagoon", "Ledge", "Mesa", "Moor", "Nook", "Reach", "Reef", "Ridge",
+    "Shoal", "Skerry", "Spire", "Stack", "Strand", "Table", "Tor", "Vale", "Veer", "Ward"
+  ]
+}

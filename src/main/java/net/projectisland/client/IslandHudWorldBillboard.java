@@ -28,10 +28,21 @@ import net.projectisland.network.IslandHudSyncPayload.IslandHudBeacon;
 /**
  * Billboards a small panel (translucent fill + border + island icon + text) in world space, matching
  * {@link net.minecraft.client.renderer.debug.DebugRenderer#renderFloatingText} orientation.
+ *
+ * <p><strong>Icons:</strong> {@linkplain net.projectisland.island.IslandState#CLAIMED Claimed} uses {@code floating-island.png}.
+ * {@linkplain net.projectisland.island.IslandState#AVAILABLE Available} alternates {@code floating-island_ex.png} and
+ * {@code floating-island.png}. {@linkplain net.projectisland.island.IslandState#CONTESTED Contested} uses a vanilla torch.
+ * Replace the two PNGs via a <strong>resource pack</strong> at the same paths under
+ * {@code assets/projectisland/textures/gui/island_hud/} (see {@code examples/island_hud_icons_resource_pack/} in the repo).
+ * Datapacks cannot push textures to every client; operators distribute a matching resource pack or ship overrides in a
+ * forked mod JAR.
  */
 public final class IslandHudWorldBillboard {
+    /** Claimed icon; also the “plain” frame for available islands. */
     private static final ResourceLocation TEX_ISLAND =
             ResourceLocation.fromNamespaceAndPath(ProjectIsland.MOD_ID, "textures/gui/island_hud/floating-island.png");
+
+    /** Alternate frame for available islands (slow swap). */
     private static final ResourceLocation TEX_ISLAND_EX =
             ResourceLocation.fromNamespaceAndPath(ProjectIsland.MOD_ID, "textures/gui/island_hud/floating-island_ex.png");
 
@@ -41,13 +52,13 @@ public final class IslandHudWorldBillboard {
      */
     private static final int AVAILABLE_ICON_HOLD_TICKS = 25;
 
-    /** Source PNGs are 64×64; full UV 0–1 is used. Slot size in local billboard units before {@code textScale}. */
-    private static final float ICON = 18f;
+    /** Base slot size in local billboard units before {@code textScale} and {@link ClientConfig#ISLAND_HUD_PANEL_SCALE}. */
+    private static final float ICON_BASE = 18f;
 
     private static final float BILLBOARD_Y_BIAS = 0.07f;
-    private static final float PANEL_PAD = 4f;
-    private static final float TEXT_GAP = 3f;
-    private static final float BORDER = 1.25f;
+    private static final float PANEL_PAD_BASE = 4f;
+    private static final float TEXT_GAP_BASE = 3f;
+    private static final float BORDER_BASE = 1.25f;
     /** RGB for panel fill when combined with {@link ClientConfig#ISLAND_HUD_PANEL_FILL_OPACITY}. */
     private static final int PANEL_FILL_RGB = 0x00101018;
 
@@ -73,18 +84,25 @@ public final class IslandHudWorldBillboard {
             return;
         }
 
-        String title = ellipsize(font, b.title(), 200);
+        float ps = Mth.clamp((float) ClientConfig.ISLAND_HUD_PANEL_SCALE.getAsDouble(), 0.35f, 2.5f);
+        float icon = ICON_BASE * ps;
+        float pad = PANEL_PAD_BASE * ps;
+        float textGap = TEXT_GAP_BASE * ps;
+        float border = BORDER_BASE * ps;
+        int titleMaxPx = Mth.ceil(200 * ps);
+
+        String title = ellipsize(font, b.title(), titleMaxPx);
         String status = b.status();
         String idKey = b.idKey();
 
         int tw = Mth.ceil(Math.max(Math.max(font.width(title), font.width(status)), font.width(idKey)));
         int lineCount = 2 + (idKey.isEmpty() ? 0 : 1);
-        float textBlockH = font.lineHeight * lineCount + TEXT_GAP * (lineCount - 1);
-        float innerW = PANEL_PAD + ICON + TEXT_GAP + tw + PANEL_PAD;
-        float innerH = PANEL_PAD + Math.max(ICON, textBlockH) + PANEL_PAD;
+        float textBlockH = font.lineHeight * lineCount + textGap * (lineCount - 1);
+        float innerW = pad + icon + textGap + tw + pad;
+        float innerH = pad + Math.max(icon, textBlockH) + pad;
         float halfW = innerW * 0.5f;
         float halfH = innerH * 0.5f;
-        float tx = -halfW + PANEL_PAD + ICON + TEXT_GAP;
+        float tx = -halfW + pad + icon + textGap;
 
         int fillA = alphaByte(ClientConfig.ISLAND_HUD_PANEL_FILL_OPACITY.getAsDouble());
         int panelFillArgb = (fillA << 24) | (PANEL_FILL_RGB & 0x00FFFFFF);
@@ -100,42 +118,42 @@ public final class IslandHudWorldBillboard {
         Pose poseEntry = pose.last();
         Matrix4f mat = poseEntry.pose();
         VertexConsumer quads = buffers.getBuffer(RenderType.debugQuads());
-        // Separate Z in local billboard units (before uniform scale) so layers don't z-fight when the camera moves.
         final float zBorder = 0f;
         final float zFillIconCol = 1.0f;
         final float zFillTextCol = 1.25f;
         final float zIcon = 2.0f;
         final float zText = 2.6f;
 
-        fillQuad(quads, mat, -halfW - BORDER, -halfH - BORDER, halfW + BORDER, halfH + BORDER, zBorder, borderArgb);
+        fillQuad(quads, mat, -halfW - border, -halfH - border, halfW + border, halfH + border, zBorder, borderArgb);
         float innerTop = -halfH + 1f;
         float innerBottom = halfH - 1f;
-        float iconColRight = tx - 2f;
+        float iconColRight = tx - 2f * ps;
         fillQuad(quads, mat, -halfW + 1f, innerTop, iconColRight, innerBottom, zFillIconCol, panelFillArgb);
         fillQuad(quads, mat, iconColRight, innerTop, halfW - 1f, innerBottom, zFillTextCol, panelFillArgb);
 
-        float ix0 = -halfW + PANEL_PAD;
-        float iy0 = -halfH + PANEL_PAD;
-        float ix1 = ix0 + ICON;
-        float iy1 = iy0 + ICON;
+        float ix0 = -halfW + pad;
+        float iy0 = -halfH + pad;
+        float ix1 = ix0 + icon;
+        float iy1 = iy0 + icon;
 
         if (b.stateKind() == 2) {
             pose.pushPose();
             pose.translate(ix0, iy0, zIcon);
-            float iconScale = ICON / 16f;
+            float iconScale = icon / 16f;
             pose.scale(iconScale, iconScale, iconScale);
-            mc.getItemRenderer().renderStatic(
-                    new ItemStack(Items.REDSTONE_TORCH),
-                    ItemDisplayContext.GUI,
-                    LightTexture.FULL_BRIGHT,
-                    OverlayTexture.NO_OVERLAY,
-                    pose,
-                    buffers,
-                    level,
-                    0);
+            mc.getItemRenderer()
+                    .renderStatic(
+                            new ItemStack(Items.REDSTONE_TORCH),
+                            ItemDisplayContext.GUI,
+                            LightTexture.FULL_BRIGHT,
+                            OverlayTexture.NO_OVERLAY,
+                            pose,
+                            buffers,
+                            level,
+                            0);
             pose.popPose();
         } else {
-            ResourceLocation tex = islandHudTexture(b.stateKind(), level.getGameTime());
+            ResourceLocation tex = islandHudIconTexture(b.stateKind(), level.getGameTime());
             VertexConsumer texConsumer = buffers.getBuffer(RenderType.entityCutoutNoCullZOffset(tex));
             texturedIconQuad(texConsumer, poseEntry, ix0, iy0, ix1, iy1, zIcon);
         }
@@ -144,14 +162,14 @@ public final class IslandHudWorldBillboard {
         pose.pushPose();
         pose.translate(0f, 0f, zText);
         Matrix4f matText = pose.last().pose();
-        float ty = -halfH + PANEL_PAD;
+        float ty = -halfH + pad;
         font.drawInBatch(
                 title, tx, ty, titleArgb, false, matText, buffers, mode, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
-        ty += font.lineHeight + TEXT_GAP;
+        ty += font.lineHeight + textGap;
         font.drawInBatch(
                 status, tx, ty, statusArgb, false, matText, buffers, mode, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
         if (!idKey.isEmpty()) {
-            ty += font.lineHeight + TEXT_GAP;
+            ty += font.lineHeight + textGap;
             font.drawInBatch(
                     idKey, tx, ty, idArgb, false, matText, buffers, mode, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
         }
@@ -160,18 +178,18 @@ public final class IslandHudWorldBillboard {
         pose.popPose();
     }
 
-    private static ResourceLocation islandHudTexture(int stateKind, long gameTime) {
+    /** Claimed: {@link #TEX_ISLAND}. Available: alternates {@link #TEX_ISLAND_EX} then {@link #TEX_ISLAND}. */
+    private static ResourceLocation islandHudIconTexture(int stateKind, long gameTime) {
         if (stateKind == 1) {
             return TEX_ISLAND;
         }
         long phase = gameTime / AVAILABLE_ICON_HOLD_TICKS;
-        boolean showExclamation = (phase & 1L) == 0L;
-        return showExclamation ? TEX_ISLAND_EX : TEX_ISLAND;
+        boolean showEx = (phase & 1L) == 0L;
+        return showEx ? TEX_ISLAND_EX : TEX_ISLAND;
     }
 
-    /** Full texture quad (UV 0–1); normals use {@link PoseStack.Pose} so entity shading stays consistent while moving. */
-    private static void texturedIconQuad(
-            VertexConsumer c, Pose pose, float x0, float y0, float x1, float y1, float z) {
+    /** Full texture quad (UV 0–1). */
+    private static void texturedIconQuad(VertexConsumer c, Pose pose, float x0, float y0, float x1, float y1, float z) {
         float u0 = 0f;
         float u1 = 1f;
         float v0 = 0f;

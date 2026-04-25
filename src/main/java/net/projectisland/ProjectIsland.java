@@ -11,8 +11,10 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.projectisland.content.ProjectIslandContent;
+import net.projectisland.island.FloatingIslandDisplayNameReloader;
 import net.projectisland.island.FloatingIslandRespawnHandler;
 import net.projectisland.island.IslandCommands;
 import net.projectisland.island.IslandHudServerSync;
@@ -52,5 +54,10 @@ public final class ProjectIsland {
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("Project Island dedicated server starting");
+    }
+
+    @SubscribeEvent
+    public void onAddReloadListeners(AddReloadListenerEvent event) {
+        event.addListener(new FloatingIslandDisplayNameReloader());
     }
 }
