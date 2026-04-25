@@ -15,6 +15,50 @@ public final class Config {
                     "Lowering this reduces floating stone ruins in the void; raising it preserves more combat structures.")
             .defineInRange("floatingIslandsRareStructureKeepChance", 0.12d, 0.0d, 1.0d);
 
+    public static final ModConfigSpec.IntValue ISLAND_BIOME_WEIGHT_RIVER = BUILDER
+            .comment("Weight for minecraft:river when rolling per-island biome (0 = never). Land uses procedural biomes, not vanilla multi_noise sectors.")
+            .defineInRange("islandBiomeWeightRiver", 28, 0, 1000);
+
+    public static final ModConfigSpec.IntValue ISLAND_BIOME_WEIGHT_PLAINS = BUILDER
+            .comment("Weight for minecraft:plains (0 = exclude).")
+            .defineInRange("islandBiomeWeightPlains", 14, 0, 1000);
+
+    public static final ModConfigSpec.IntValue ISLAND_BIOME_WEIGHT_FOREST = BUILDER
+            .comment("Weight for minecraft:forest (0 = exclude).")
+            .defineInRange("islandBiomeWeightForest", 14, 0, 1000);
+
+    public static final ModConfigSpec.IntValue ISLAND_BIOME_WEIGHT_TAIGA = BUILDER
+            .comment("Weight for minecraft:taiga (0 = exclude).")
+            .defineInRange("islandBiomeWeightTaiga", 10, 0, 1000);
+
+    public static final ModConfigSpec.IntValue ISLAND_BIOME_WEIGHT_DESERT = BUILDER
+            .comment("Weight for minecraft:desert (0 = exclude).")
+            .defineInRange("islandBiomeWeightDesert", 8, 0, 1000);
+
+    public static final ModConfigSpec.IntValue ISLAND_BIOME_WEIGHT_SNOWY_PLAINS = BUILDER
+            .comment("Weight for minecraft:snowy_plains (0 = exclude).")
+            .defineInRange("islandBiomeWeightSnowyPlains", 8, 0, 1000);
+
+    public static final ModConfigSpec.IntValue ISLAND_BIOME_WEIGHT_JUNGLE = BUILDER
+            .comment("Weight for minecraft:jungle (0 = exclude).")
+            .defineInRange("islandBiomeWeightJungle", 6, 0, 1000);
+
+    public static final ModConfigSpec.IntValue ISLAND_BIOME_WEIGHT_MUSHROOM_FIELDS = BUILDER
+            .comment("Weight for minecraft:mushroom_fields (0 = exclude).")
+            .defineInRange("islandBiomeWeightMushroomFields", 2, 0, 1000);
+
+    public static final ModConfigSpec.IntValue ISLAND_BIOME_WEIGHT_BADLANDS = BUILDER
+            .comment("Weight for minecraft:badlands (0 = exclude).")
+            .defineInRange("islandBiomeWeightBadlands", 4, 0, 1000);
+
+    public static final ModConfigSpec.IntValue ISLAND_BIOME_WEIGHT_WINDSWEPT_FOREST = BUILDER
+            .comment("Weight for minecraft:windswept_forest (0 = exclude).")
+            .defineInRange("islandBiomeWeightWindsweptForest", 4, 0, 1000);
+
+    public static final ModConfigSpec.IntValue ISLAND_BIOME_WEIGHT_SWAMP = BUILDER
+            .comment("Weight for minecraft:swamp (0 = exclude).")
+            .defineInRange("islandBiomeWeightSwamp", 6, 0, 1000);
+
     public static final ModConfigSpec.IntValue FLOATING_ISLANDS_EXTRA_SURFACE_TREES_PER_CHUNK = BUILDER
             .comment(
                     "After normal biome decoration, try to place this many extra oak / fancy oak / birch trees on grass island tops per chunk (0 disables).")

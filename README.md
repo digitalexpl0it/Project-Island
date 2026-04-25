@@ -26,7 +26,7 @@ Other branches (defense, docking / merge, power, automation) should get **their 
 - [TODO.md](TODO.md) — phased checklist from bootstrap through ops.
 - [CHANGELOG.md](CHANGELOG.md) — notable changes ([Keep a Changelog](https://keepachangelog.com/en/1.1.0/) style).
 
-**Current focus:** **Phase 2 is done** (overworld floating islands + `multi_noise`). Next up: **Phase 4** claims (starter **nearest island + auto-claim**, then **dock / link** your floating base for additional islands)—see [TODO.md](TODO.md).
+**Current focus:** **Phase 2 is done** (overworld floating islands + procedural island biomes). Next up: **Phase 4** claims (starter **nearest island + auto-claim**, then **dock / link** your floating base for additional islands)—see [TODO.md](TODO.md).
 
 ## Target stack
 
@@ -97,15 +97,37 @@ The mod registers **`projectisland:floating_islands`** as a **chunk generator ty
 
 | Piece | What it is |
 |-------|------------|
-| `minecraft:overworld` | Same dimension id players always join; **terrain** is replaced by **void + scattered ellipsoid islands** (stone/dirt/grass or sand/snow tops from biome **temperature**). Nether and End are unchanged. |
+| `minecraft:overworld` | Same dimension id players always join; **terrain** is replaced by **void + scattered ellipsoid islands** (stone/dirt subsurface; tops **grass / sand / snow / mycelium** from overworld biome, including **mushroom fields**). Nether and End are unchanged. |
 | `projectisland:floating_islands` | **Chunk generator codec id** (not a separate dimension). |
 
 Details:
 
 - **Dimension type** stays `minecraft:overworld` (sky, day cycle, monster ranges) so the sky feels familiar while terrain is custom.
 - **Generator** is Java (`FloatingIslandsChunkGenerator`): islands sit on a **sparse** coarse grid (8×8 chunks per cell, ~17% spawn). Each mass uses an **asymmetric** profile (short **vrTop** dome + longer **vrBottom** tail with **extra depth under the rim**), **smooth** horizontal scaling (no block-step noise), a **wider flat-ish plateau** on top (`horiz^0.72` inside the cap), and a **low-frequency** vertical hill so surfaces read as gentle terrain rather than Swiss cheese. **Vanilla structures** (mineshafts, ruined portals, etc.) still run, then a **trim pass** removes structure blocks in **void columns** or **floating above** the island top so pieces tend to **cling to land** where they intersect it; **biome decoration** (trees, flowers, ores) still runs. (Shader lighting in reference art is separate from this terrain pass.)
-- **Biomes:** overworld dimension JSON uses **`minecraft:multi_noise`** preset **`minecraft:overworld`** (vanilla overworld climate + biome layout). The custom generator decides **where solid islands exist**, then **`getNoiseBiome`** / decoration match vanilla for each column. **Note:** `noise_settings` field **`size_horizontal`** is an **integer in `1`–`4`** in 1.21.1; vanilla overworld uses **`1`** (the minimum), so you **cannot** shrink biome patches further by lowering that field—tighter patches need a **custom** `multi_noise` parameter list or other worldgen JSON, not a fractional `size_horizontal`.
-- **Tuning** (`config/projectisland-common.toml` on client or server): `floatingIslandsRareStructureKeepChance` — each **monster room** or **trial chamber** that appears in a chunk is **kept** with this probability after trim (default `0.12`; use `1.0` to disable thinning). `floatingIslandsExtraSurfaceTreesPerChunk` — extra vanilla **oak / fancy oak / birch** trees on **grass** tops per chunk after decoration (default `5`; `0` disables). **Spawn pregen (optional):** `spawnPregenChunkRadius` (Chebyshev chunk radius around overworld spawn, **`0` = off**) and `spawnPregenChunksPerTick`. **Island HUD (server):** `islandHudSyncEnabled`, `islandHudSyncIntervalTicks`, `islandHudRegionScanRadius`, `islandHudHeightAbovePeakBlocks` — sync is driven from **`ServerTickEvent.Post`** (per-player interval). **`ProjectIslandDimensions.isFloatingIslandsGameplay`** gates sync (direct `FloatingIslandsChunkGenerator` or shallow **delegate** on `ChunkGenerator`). **Island HUD (client only):** `config/projectisland-client.toml` — `islandHudShow`, `islandHudTextScale`, `islandHudSeeThroughText`, `islandHudNightColorBoost`.
+- **Biomes:** overworld dimension JSON still uses **`minecraft:multi_noise`** preset **`minecraft:overworld`** (structures / compatibility). **Island land** does **not** use vanilla climate sectors for the chunk biome palette: each **`FloatingIslandKey`** (8×8-chunk region that owns an island) gets **one** overworld biome from **weighted random**, deterministic from **world seed + region X/Z** via `RandomState.getOrCreateRandomFactory`. Tune with **`islandBiomeWeight*`** in **`config/projectisland-common.toml`** — full key list and dedicated-server notes under **[Island biome weights (common config)](#island-biome-weights-common-config)**. **Void** sky columns use **plains** so F3 is not stuck on river/ocean. **Note:** `noise_settings` **`size_horizontal`** is an **integer `1`–`4`** in 1.21.1 (vanilla overworld is **`1`**).
+- **Tuning** (`config/projectisland-common.toml` on client or server): `floatingIslandsRareStructureKeepChance` — each **monster room** or **trial chamber** that appears in a chunk is **kept** with this probability after trim (default `0.12`; use `1.0` to disable thinning). **Per-island biome weights** — see **[Island biome weights (common config)](#island-biome-weights-common-config)**. `floatingIslandsExtraSurfaceTreesPerChunk` — extra vanilla **surface features** after decoration (default `5`; `0` disables): **oak / fancy oak / birch** on **grass**, **spruce / pine** on **snow**, **huge mushrooms** on **mycelium**, **acacia / oak** on **sand**. **Spawn pregen (optional):** `spawnPregenChunkRadius` (Chebyshev chunk radius around overworld spawn, **`0` = off**) and `spawnPregenChunksPerTick`. **Island HUD (server):** `islandHudSyncEnabled`, `islandHudSyncIntervalTicks`, `islandHudRegionScanRadius`, `islandHudHeightAbovePeakBlocks` — sync is driven from **`ServerTickEvent.Post`** (per-player interval). **`ProjectIslandDimensions.isFloatingIslandsGameplay`** gates sync (direct `FloatingIslandsChunkGenerator` or shallow **delegate** on `ChunkGenerator`). **Island HUD (client only):** `config/projectisland-client.toml` — `islandHudShow`, `islandHudTextScale`, `islandHudSeeThroughText`, `islandHudNightColorBoost`.
+
+### Island biome weights (common config)
+
+NeoForge registers these as **`ModConfig.Type.COMMON`** → **`config/projectisland-common.toml`** in the instance directory (single-player save folder **or** dedicated server root—**this is the file operators edit on a server**, alongside structure thinning and island HUD server options).
+
+After changing weights, **restart** the server or client session so worldgen reads values consistently. **Chunks already generated** keep their stored biome palette; **new** chunks (or a **new** world) pick up the new distribution.
+
+Each key is an integer weight **`0`–`1000`**. **`0`** removes that biome from the pool; weights are **relative** (the roll normalizes by the sum of all positive weights). Keep **at least one** weight **greater than `0`** (otherwise the implementation falls back to plains).
+
+| TOML key | Minecraft biome |
+|----------|------------------|
+| `islandBiomeWeightRiver` | `minecraft:river` |
+| `islandBiomeWeightPlains` | `minecraft:plains` |
+| `islandBiomeWeightForest` | `minecraft:forest` |
+| `islandBiomeWeightTaiga` | `minecraft:taiga` |
+| `islandBiomeWeightDesert` | `minecraft:desert` |
+| `islandBiomeWeightSnowyPlains` | `minecraft:snowy_plains` |
+| `islandBiomeWeightJungle` | `minecraft:jungle` |
+| `islandBiomeWeightMushroomFields` | `minecraft:mushroom_fields` |
+| `islandBiomeWeightBadlands` | `minecraft:badlands` |
+| `islandBiomeWeightWindsweptForest` | `minecraft:windswept_forest` |
+| `islandBiomeWeightSwamp` | `minecraft:swamp` |
 
 Try it in a dev world (you are already in overworld):
 
@@ -130,7 +152,7 @@ Pick one:
 
 Single-player worlds need **Allow Cheats** (or **Open to LAN** with cheats) instead.
 
-Fly around (`F3` debug lists `ChunkGenerator: projectisland:floating_islands` on the debug pie when relevant). Vanilla **feature decoration** (trees/ores) runs on solid surfaces after noise fills, plus optional **bonus trees** from config; biome variety follows **`multi_noise`** overworld placement.
+Fly around (`F3` debug lists `ChunkGenerator: projectisland:floating_islands` on the debug pie when relevant). Vanilla **feature decoration** (trees/ores) runs on solid surfaces after noise fills, plus optional **bonus trees** from config; **each island region** uses one rolled overworld biome (see **[Island biome weights (common config)](#island-biome-weights-common-config)**).
 
 ### Phase 3 — Island identity and persistence (initial)
 
@@ -162,4 +184,4 @@ Mod metadata currently uses **All Rights Reserved** ([`gradle.properties`](gradl
 
 ---
 
-_Documentation last revised **25 April 2026** (island HUD notes; biome / `noise_settings` caveat)._
+_Documentation last revised **22 April 2026** (island biome weight table; `projectisland-common.toml` on dedicated servers)._

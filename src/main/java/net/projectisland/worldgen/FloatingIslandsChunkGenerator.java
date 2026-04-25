@@ -2,7 +2,10 @@ package net.projectisland.worldgen;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
@@ -11,10 +14,12 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.TreeFeatures;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.ChunkPos;
@@ -27,6 +32,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -43,6 +49,7 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.projectisland.Config;
 import net.projectisland.ProjectIsland;
+import net.projectisland.island.FloatingIslandKey;
 
 /**
  * Void sky islands: asymmetric vertical profile (flat-ish dome top, deeper underside).
@@ -57,6 +64,14 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
     public static final MapCodec<FloatingIslandsChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             BiomeSource.CODEC.fieldOf("biome_source").forGetter(ChunkGenerator::getBiomeSource)
     ).apply(instance, FloatingIslandsChunkGenerator::new));
+
+    private static final ResourceLocation ISLAND_REGION_BIOME_RANDOM =
+            ResourceLocation.fromNamespaceAndPath(ProjectIsland.MOD_ID, "island_region_biome");
+
+    /** F3-friendly biome for void columns (no solid island); not rolled per region. */
+    private static final ResourceKey<Biome> VOID_COLUMN_BIOME = Biomes.PLAINS;
+
+    private final Map<ResourceKey<Biome>, Holder<Biome>> biomeHolderCache = new HashMap<>();
 
     public FloatingIslandsChunkGenerator(BiomeSource biomeSource) {
         super(biomeSource);
@@ -81,6 +96,60 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
 
     /** How far above the noise island top we allow structure blocks to remain (surface features). */
     private static final int STRUCTURE_CLEARANCE_ABOVE_TOP = 2;
+
+    /**
+     * Resolves a vanilla overworld {@link ResourceKey} to the live {@link Holder} from this level's
+     * {@link BiomeSource} (same registry the dimension was built with).
+     */
+    private Holder<Biome> holderForBiome(ResourceKey<Biome> key) {
+        return biomeHolderCache.computeIfAbsent(key, k -> {
+            for (Holder<Biome> h : getBiomeSource().possibleBiomes()) {
+                if (h.is(k)) {
+                    return h;
+                }
+            }
+            throw new IllegalStateException(
+                    "Biome " + k.location()
+                            + " is not in this dimension's biome_source; adjust island biome weights or overworld preset.");
+        });
+    }
+
+    /**
+     * One biome per {@link FloatingIslandKey}: deterministic from {@link RandomState} and region coords.
+     * Void columns use {@link #VOID_COLUMN_BIOME} so F3 does not show river/ocean for open sky.
+     */
+    private Holder<Biome> biomeForSurfaceColumn(
+            RandomState randomState, int blockX, int blockZ, int minY, int maxY, int columnTopY) {
+        if (columnTopY <= minY) {
+            return holderForBiome(VOID_COLUMN_BIOME);
+        }
+        Optional<FloatingIslandKey> owner = FloatingIslandLayout.islandOwningSurface(blockX, blockZ, minY, maxY);
+        if (owner.isEmpty()) {
+            return holderForBiome(VOID_COLUMN_BIOME);
+        }
+        FloatingIslandKey key = owner.get();
+        RandomSource rnd = randomState
+                .getOrCreateRandomFactory(ISLAND_REGION_BIOME_RANDOM)
+                .at(key.regionX(), key.regionZ(), 0);
+        ResourceKey<Biome> chosen = IslandRegionBiomePicker.roll(rnd);
+        return holderForBiome(chosen);
+    }
+
+    @Override
+    public CompletableFuture<ChunkAccess> createBiomes(
+            RandomState randomState, Blender blender, StructureManager structureManager, ChunkAccess chunk) {
+        int minY = chunk.getMinBuildHeight();
+        int maxY = chunk.getMaxBuildHeight();
+        chunk.fillBiomesFromNoise(
+                (qx, qy, qz, s) -> {
+                    int bx = QuartPos.toBlock(qx) + 2;
+                    int bz = QuartPos.toBlock(qz) + 2;
+                    int top = FloatingIslandLayout.columnTopY(bx, bz, minY, maxY);
+                    return this.biomeForSurfaceColumn(randomState, bx, bz, minY, maxY, top);
+                },
+                randomState.sampler());
+        return CompletableFuture.completedFuture(chunk);
+    }
 
     /**
      * Small vanilla structures that often read as “dungeons” in the void; frequency is thinned via
@@ -178,11 +247,8 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
         ChunkPos cpos = chunk.getPos();
         int minY = level.getMinBuildHeight();
         int maxY = level.getMaxBuildHeight();
-        var configured = level.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE);
-        List<Holder<ConfiguredFeature<?, ?>>> variants = List.of(
-                configured.getOrThrow(TreeFeatures.OAK),
-                configured.getOrThrow(TreeFeatures.FANCY_OAK),
-                configured.getOrThrow(TreeFeatures.BIRCH));
+        HolderGetter<ConfiguredFeature<?, ?>> configured =
+                level.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE);
         RandomSource rnd = RandomSource.create(cpos.toLong() ^ level.getSeed());
         for (int i = 0; i < n; i++) {
             int wx = cpos.getMinBlockX() + rnd.nextInt(16);
@@ -194,13 +260,41 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
             int lx = wx - cpos.getMinBlockX();
             int lz = wz - cpos.getMinBlockZ();
             BlockPos surfacePos = new BlockPos(lx, topY, lz);
-            if (!chunk.getBlockState(surfacePos).is(Blocks.GRASS_BLOCK)) {
+            BlockState surface = chunk.getBlockState(surfacePos);
+            List<Holder<ConfiguredFeature<?, ?>>> variants = sprinkleVariantsForSurface(configured, surface);
+            if (variants.isEmpty()) {
                 continue;
             }
             BlockPos placeAt = new BlockPos(wx, topY + 1, wz);
-            Holder<ConfiguredFeature<?, ?>> tree = variants.get(rnd.nextInt(variants.size()));
-            tree.value().place(level, this, rnd, placeAt);
+            Holder<ConfiguredFeature<?, ?>> feature = variants.get(rnd.nextInt(variants.size()));
+            feature.value().place(level, this, rnd, placeAt);
         }
+    }
+
+    private static List<Holder<ConfiguredFeature<?, ?>>> sprinkleVariantsForSurface(
+            HolderGetter<ConfiguredFeature<?, ?>> configured, BlockState surface) {
+        if (surface.is(Blocks.GRASS_BLOCK)) {
+            return List.of(
+                    configured.getOrThrow(TreeFeatures.OAK),
+                    configured.getOrThrow(TreeFeatures.FANCY_OAK),
+                    configured.getOrThrow(TreeFeatures.BIRCH));
+        }
+        if (surface.is(Blocks.SNOW_BLOCK)) {
+            return List.of(
+                    configured.getOrThrow(TreeFeatures.SPRUCE),
+                    configured.getOrThrow(TreeFeatures.PINE));
+        }
+        if (surface.is(Blocks.MYCELIUM)) {
+            return List.of(
+                    configured.getOrThrow(TreeFeatures.HUGE_BROWN_MUSHROOM),
+                    configured.getOrThrow(TreeFeatures.HUGE_RED_MUSHROOM));
+        }
+        if (surface.is(Blocks.SAND)) {
+            return List.of(
+                    configured.getOrThrow(TreeFeatures.ACACIA),
+                    configured.getOrThrow(TreeFeatures.OAK));
+        }
+        return List.of();
     }
 
     /**
@@ -273,10 +367,7 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
                     continue;
                 }
 
-                Holder<Biome> biome = chunk.getNoiseBiome(
-                        QuartPos.fromBlock(wx),
-                        QuartPos.fromBlock(Mth.clamp(topY - 1, minY, maxY - 1)),
-                        QuartPos.fromBlock(wz));
+                Holder<Biome> biome = biomeForSurfaceColumn(randomState, wx, wz, minY, maxY, topY);
                 BlockState surface = surfaceState(biome);
 
                 for (int y = bottomY; y <= topY; y++) {
@@ -366,11 +457,7 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
         }
 
         int bottomY = FloatingIslandLayout.columnBottomY(x, z, minY, maxY);
-        Holder<Biome> biome = getBiomeSource().getNoiseBiome(
-                QuartPos.fromBlock(x),
-                QuartPos.fromBlock(Mth.clamp(topY - 1, minY, maxY - 1)),
-                QuartPos.fromBlock(z),
-                random.sampler());
+        Holder<Biome> biome = biomeForSurfaceColumn(random, x, z, minY, maxY, topY);
         BlockState surface = surfaceState(biome);
 
         for (int y = bottomY; y <= topY; y++) {
@@ -400,6 +487,9 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
     }
 
     private static BlockState surfaceState(Holder<Biome> biome) {
+        if (biome.is(Biomes.MUSHROOM_FIELDS)) {
+            return Blocks.MYCELIUM.defaultBlockState();
+        }
         float temperature = biome.value().getBaseTemperature();
         if (temperature < 0.25f) {
             return Blocks.SNOW_BLOCK.defaultBlockState();
@@ -411,7 +501,7 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
     }
 
     private static BlockState underSurfaceState(BlockState surface) {
-        if (surface.is(Blocks.SNOW_BLOCK)) {
+        if (surface.is(Blocks.SNOW_BLOCK) || surface.is(Blocks.MYCELIUM)) {
             return Blocks.DIRT.defaultBlockState();
         }
         if (surface.is(Blocks.SAND)) {
