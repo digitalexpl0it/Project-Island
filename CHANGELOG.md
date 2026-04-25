@@ -12,6 +12,8 @@ _Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24*
 ### Added
 
 - **Rope health & strain (Phase 4):** each **`RopeLink`** stores **health / maxHealth** (NBT + new harpoon links use **`ropeLinkMaxHealth`**). **`RopeLinkStress`** applies damage when span / max length exceeds **`ropeLinkStrainRatioThreshold`**; at **0** health anchors **`severLinkFromSavedData`**. **`RopeLinkSyncPayload`** includes **health fraction**; client **`RopeLinkHealthBarRenderer`** draws billboard bars at **both** anchor ends when **`ropeLinkHealthBarsShow`** is on. Common: **`ropeLinkMaxHealth`**, **`ropeLinkStressTickInterval`**, **`ropeLinkStrainRatioThreshold`**, **`ropeLinkStrainDamagePerTick`** (set damage to **0** to disable strain).
+- **Secondary claim vs ropes:** when **`secondaryClaimRequiresRopeLink`** is true, **`removeRopeLink`** runs **`revalidateRopeBackedClaimsForOwner`** — any **non-starter** island you claimed that no longer has a **direct** owned rope to another island you still claim returns to **AVAILABLE** (breaking both anchors removes the link and reverts that island).
+- **Documentation:** [TODO.md](TODO.md) / [README.md](README.md) — rope **topology** intent: starter = main; **main → secondary → tertiary** only (tertiary is a **leaf**); abandon by removing ropes; advancement-based spoke caps still **TODO** in code.
 
 - **Secondary claim (Phase 4):** **`IslandSecondaryClaim`** centralizes rules; **`/projectisland island claim`** uses common config **`secondaryClaimCommandPermissionLevel`** (default **0**; use **2** for OP-only). **Sneak + use** (empty hand) on **your** linked **rope anchor** on an **AVAILABLE** island attempts the same claim (action-bar feedback). Lang keys under **`projectisland.claim.*`**.
 
