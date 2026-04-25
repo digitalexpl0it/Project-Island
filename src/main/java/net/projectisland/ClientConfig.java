@@ -23,6 +23,16 @@ public final class ClientConfig {
                     "Improves readability at night without changing daytime appearance much.")
             .defineInRange("islandHudNightColorBoost", 0.72d, 0.0d, 1.0d);
 
+    public static final ModConfigSpec.DoubleValue ISLAND_HUD_PANEL_FILL_OPACITY = BUILDER
+            .comment(
+                    "Alpha for the **dark fill** behind island HUD billboard text (0 = invisible, 1 = opaque).",
+                    "Default matches the previous hard-coded panel (~85% opacity); lower for a more see-through HUD.")
+            .defineInRange("islandHudPanelFillOpacity", 216.0d / 255.0d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.DoubleValue ISLAND_HUD_PANEL_BORDER_OPACITY = BUILDER
+            .comment("Alpha for the **tinted border** around the island HUD panel (0–1).")
+            .defineInRange("islandHudPanelBorderOpacity", 0.92d, 0.0d, 1.0d);
+
     public static final ModConfigSpec.BooleanValue ROPE_LINKS_SHOW = BUILDER
             .comment("Draw synced rope segments between linked anchors in the floating-islands overworld (server still sends data when disabled).")
             .define("ropeLinksShow", true);

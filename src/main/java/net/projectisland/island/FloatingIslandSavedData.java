@@ -134,11 +134,17 @@ public final class FloatingIslandSavedData extends SavedData {
         return peek(key).map(r -> r.state() == IslandState.CLAIMED && owner.equals(r.owner())).orElse(false);
     }
 
+    /** True if this region is {@link IslandState#CLAIMED} by {@code owner}. */
+    public synchronized boolean isClaimedByPlayer(FloatingIslandKey key, UUID owner) {
+        return islandClaimedBy(key, owner);
+    }
+
     /**
      * True if {@code claimer} owns a {@link RopeLink} whose endpoints are {@code targetToClaim} and another island
      * they already have {@link IslandState#CLAIMED}.
      */
     public synchronized boolean hasRopeLinkFromClaimedIsland(UUID claimer, FloatingIslandKey targetToClaim) {
+        Optional<FloatingIslandKey> starter = getStarterHome(claimer);
         for (RopeLink link : copyRopeLinks()) {
             if (!claimer.equals(link.owner())) {
                 continue;
@@ -148,6 +154,10 @@ public final class FloatingIslandSavedData extends SavedData {
             }
             FloatingIslandKey other = link.fromKey().equals(targetToClaim) ? link.toKey() : link.fromKey();
             if (islandClaimedBy(other, claimer)) {
+                return true;
+            }
+            // Rope to your starter-home region always counts, even if the island row is missing CLAIMED (data edge case).
+            if (starter.isPresent() && starter.get().equals(other)) {
                 return true;
             }
         }
@@ -169,6 +179,29 @@ public final class FloatingIslandSavedData extends SavedData {
         rec.setClaimed(owner, gameTime);
         setDirty();
         return true;
+    }
+
+    /**
+     * Call only after the new {@link RopeLink} is already in {@link #ropeLinks}. If one endpoint is this player's
+     * starter or a region they already claim, and the other is {@link IslandState#AVAILABLE}, claims the available
+     * region (same outcome as {@link #trySecondaryClaim} when used from the harpoon).
+     */
+    public synchronized boolean tryAutoClaimIslandAfterRopePlaced(UUID owner, FloatingIslandKey a, FloatingIslandKey b, long gameTime) {
+        if (!Config.AUTO_CLAIM_ON_ROPE_LINK.getAsBoolean()) {
+            return false;
+        }
+        Optional<FloatingIslandKey> starter = getStarterHome(owner);
+        boolean hubA = isClaimedByPlayer(a, owner) || starter.filter(a::equals).isPresent();
+        boolean hubB = isClaimedByPlayer(b, owner) || starter.filter(b::equals).isPresent();
+        boolean availA = peek(a).map(r -> r.state() == IslandState.AVAILABLE).orElse(true);
+        boolean availB = peek(b).map(r -> r.state() == IslandState.AVAILABLE).orElse(true);
+        if (hubA && availB) {
+            return trySecondaryClaim(b, owner, gameTime);
+        }
+        if (hubB && availA) {
+            return trySecondaryClaim(a, owner, gameTime);
+        }
+        return false;
     }
 
     public synchronized void putRopeLink(RopeLink link) {

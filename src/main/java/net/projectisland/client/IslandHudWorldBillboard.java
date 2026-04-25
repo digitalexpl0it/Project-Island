@@ -21,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.projectisland.ClientConfig;
 import net.projectisland.ProjectIsland;
 import net.projectisland.network.IslandHudSyncPayload.IslandHudBeacon;
 
@@ -47,7 +48,8 @@ public final class IslandHudWorldBillboard {
     private static final float PANEL_PAD = 4f;
     private static final float TEXT_GAP = 3f;
     private static final float BORDER = 1.25f;
-    private static final int BG = 0xD8101018;
+    /** RGB for panel fill when combined with {@link ClientConfig#ISLAND_HUD_PANEL_FILL_OPACITY}. */
+    private static final int PANEL_FILL_RGB = 0x00101018;
 
     private IslandHudWorldBillboard() {}
 
@@ -84,7 +86,9 @@ public final class IslandHudWorldBillboard {
         float halfH = innerH * 0.5f;
         float tx = -halfW + PANEL_PAD + ICON + TEXT_GAP;
 
-        int borderArgb = borderColor(titleArgb);
+        int fillA = alphaByte(ClientConfig.ISLAND_HUD_PANEL_FILL_OPACITY.getAsDouble());
+        int panelFillArgb = (fillA << 24) | (PANEL_FILL_RGB & 0x00FFFFFF);
+        int borderArgb = withAlpha(borderColor(titleArgb), ClientConfig.ISLAND_HUD_PANEL_BORDER_OPACITY.getAsDouble());
 
         Vec3 cam = camera.getPosition();
         pose.pushPose();
@@ -107,8 +111,8 @@ public final class IslandHudWorldBillboard {
         float innerTop = -halfH + 1f;
         float innerBottom = halfH - 1f;
         float iconColRight = tx - 2f;
-        fillQuad(quads, mat, -halfW + 1f, innerTop, iconColRight, innerBottom, zFillIconCol, BG);
-        fillQuad(quads, mat, iconColRight, innerTop, halfW - 1f, innerBottom, zFillTextCol, BG);
+        fillQuad(quads, mat, -halfW + 1f, innerTop, iconColRight, innerBottom, zFillIconCol, panelFillArgb);
+        fillQuad(quads, mat, iconColRight, innerTop, halfW - 1f, innerBottom, zFillTextCol, panelFillArgb);
 
         float ix0 = -halfW + PANEL_PAD;
         float iy0 = -halfH + PANEL_PAD;
@@ -207,6 +211,15 @@ public final class IslandHudWorldBillboard {
         g += (int) ((255 - g) * t);
         b += (int) ((255 - b) * t);
         return 0xFF000000 | (r << 16) | (g << 8) | b;
+    }
+
+    private static int withAlpha(int argb8888, double opacity01) {
+        int a = alphaByte(opacity01);
+        return (a << 24) | (argb8888 & 0x00FFFFFF);
+    }
+
+    private static int alphaByte(double opacity01) {
+        return Mth.clamp(Mth.floor(opacity01 * 255.0 + 0.5), 0, 255);
     }
 
     private static void fillQuad(VertexConsumer buffer, Matrix4f mat, float x0, float y0, float x1, float y1, float z, int argb) {

@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -27,6 +26,8 @@ import net.projectisland.island.FloatingIslandKey;
 import net.projectisland.island.FloatingIslandSavedData;
 import net.projectisland.island.IslandWorld;
 import net.projectisland.island.RopeLink;
+import net.projectisland.island.RopeTopology;
+import net.projectisland.network.ActionBarToastPayload;
 import net.projectisland.worldgen.FloatingIslandLayout;
 
 /**
@@ -43,7 +44,22 @@ public final class HarpoonGunItem extends Item {
     }
 
     private static void actionBar(ServerPlayer player, String translationKey, Object... args) {
-        player.displayClientMessage(Component.translatable(translationKey, args), true);
+        ActionBarToastPayload.sendWithArgs(player, translationKey, args);
+    }
+
+    /**
+     * Removes the first-shot rope anchor and clears pending harpoon state when the second shot cannot complete a link.
+     */
+    private static void clearPendingFirstAnchor(ServerLevel sl, ServerPlayer sp, CompoundTag pd) {
+        CompoundTag p = pd.getCompound(TAG_PENDING);
+        long packed = p.getLong(TAG_POS);
+        UUID pendingLinkId = p.getUUID("Link");
+        pd.remove(TAG_PENDING);
+        BlockPos aPos = BlockPos.of(packed);
+        var be = sl.getBlockEntity(aPos);
+        if (be instanceof RopeAnchorBlockEntity ra && pendingLinkId.equals(ra.getLinkId())) {
+            ra.handleServerBreak(sl, sp);
+        }
     }
 
     @Override
@@ -124,19 +140,33 @@ public final class HarpoonGunItem extends Item {
         }
         double dist = Math.sqrt(aPos.distSqr(pos));
         if (dist > maxLinkLen) {
-            actionBar(sp, "projectisland.harpoon.too_far", maxLinkLen, Math.round(dist));
+            clearPendingFirstAnchor(sl, sp, pd);
+            ActionBarToastPayload.sendForDuration(
+                    sp, "projectisland.harpoon.too_far", ActionBarToastPayload.LONG_READ_VISIBLE_TICKS, maxLinkLen, Math.round(dist));
+            return InteractionResultHolder.pass(stack);
+        }
+        Optional<String> topo = RopeTopology.validateNewRopeLink(data, sp.getUUID(), aKey, key);
+        if (topo.isPresent()) {
+            clearPendingFirstAnchor(sl, sp, pd);
+            ActionBarToastPayload.send(sp, topo.get(), ActionBarToastPayload.LONG_READ_VISIBLE_TICKS);
             return InteractionResultHolder.pass(stack);
         }
         if (!placeAnchor(sl, pos, state, linkId, 2)) {
-            actionBar(sp, "projectisland.harpoon.second_place_failed");
+            clearPendingFirstAnchor(sl, sp, pd);
+            ActionBarToastPayload.send(sp, "projectisland.harpoon.second_place_failed", ActionBarToastPayload.LONG_READ_VISIBLE_TICKS);
             return InteractionResultHolder.pass(stack);
         }
 
         pd.remove(TAG_PENDING);
         float ropeMaxHp = (float) Config.ROPE_LINK_MAX_HEALTH.getAsDouble();
         data.putRopeLink(new RopeLink(linkId, sp.getUUID(), aKey, key, aPos, pos, maxLinkLen, ropeMaxHp, ropeMaxHp));
+        boolean autoClaimed = data.tryAutoClaimIslandAfterRopePlaced(sp.getUUID(), aKey, key, sl.getGameTime());
         stack.hurtAndBreak(1, sp, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
-        actionBar(sp, "projectisland.harpoon.linked");
+        if (autoClaimed) {
+            actionBar(sp, "projectisland.harpoon.linked_and_claimed");
+        } else {
+            actionBar(sp, "projectisland.harpoon.linked");
+        }
         return InteractionResultHolder.success(stack);
     }
 

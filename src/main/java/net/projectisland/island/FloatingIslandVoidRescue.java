@@ -3,7 +3,6 @@ package net.projectisland.island;
 import java.util.Optional;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -14,6 +13,7 @@ import net.minecraft.world.phys.Vec3;
 import net.projectisland.Config;
 import net.projectisland.ProjectIsland;
 import net.projectisland.ProjectIslandDimensions;
+import net.projectisland.network.ActionBarToastPayload;
 
 /**
  * Void rescue for the floating-islands overworld: {@linkplain #tickVoidRescue(ServerPlayer, ServerLevel) per-tick}
@@ -42,7 +42,7 @@ public final class FloatingIslandVoidRescue {
     /** Hotbar-style action bar, same channel as {@link net.projectisland.content.HarpoonGunItem} feedback. */
     public static void showVoidRescueActionBar(ServerPlayer player) {
         String key = RESCUE_ACTIONBAR_KEYS[player.getRandom().nextInt(RESCUE_ACTIONBAR_KEYS.length)];
-        player.displayClientMessage(Component.translatable(key), true);
+        ActionBarToastPayload.send(player, key);
     }
 
     /**

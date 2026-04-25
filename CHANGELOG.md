@@ -11,13 +11,25 @@ _Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24*
 
 ### Added
 
+- **Client config — island HUD panel:** **`islandHudPanelFillOpacity`** and **`islandHudPanelBorderOpacity`** (0–1) control billboard **fill** and **border** alpha in `projectisland-client.toml` (defaults match prior visuals).
+
 - **Rope health & strain (Phase 4):** each **`RopeLink`** stores **health / maxHealth** (NBT + new harpoon links use **`ropeLinkMaxHealth`**). **`RopeLinkStress`** applies damage when span / max length exceeds **`ropeLinkStrainRatioThreshold`**; at **0** health anchors **`severLinkFromSavedData`**. **`RopeLinkSyncPayload`** includes **health fraction**; client **`RopeLinkHealthBarRenderer`** draws billboard bars at **both** anchor ends when **`ropeLinkHealthBarsShow`** is on. Common: **`ropeLinkMaxHealth`**, **`ropeLinkStressTickInterval`**, **`ropeLinkStrainRatioThreshold`**, **`ropeLinkStrainDamagePerTick`** (set damage to **0** to disable strain).
 - **Secondary claim vs ropes:** when **`secondaryClaimRequiresRopeLink`** is true, **`removeRopeLink`** runs **`revalidateRopeBackedClaimsForOwner`** — any **non-starter** island you claimed that no longer has a **direct** owned rope to another island you still claim returns to **AVAILABLE** (breaking both anchors removes the link and reverts that island).
 - **Documentation:** [TODO.md](TODO.md) / [README.md](README.md) — rope **topology** intent: starter = main; **main → secondary → tertiary** only (tertiary is a **leaf**); abandon by removing ropes; advancement-based spoke caps still **TODO** in code.
+- **Rope topology (server):** **`RopeTopology`** validates the second harpoon shot: stay **connected** to your starter island, **max depth** from starter (`ropeTopologyMaxDepthFromStarter`, default **2**), **direct spokes** off starter (`ropeMainDirectSpokeCap` **1–4**, default **1**), and **per claimed non-starter** non-starter neighbor count (`ropeSisterOutboundCap` **1–3**, default **1**). **`ropeTopologyEnabled`** toggles; **`FloatingIslandSavedData#isClaimedByPlayer`** supports checks. Lang: **`projectisland.harpoon.topology_blocked`**.
 
 - **Secondary claim (Phase 4):** **`IslandSecondaryClaim`** centralizes rules; **`/projectisland island claim`** uses common config **`secondaryClaimCommandPermissionLevel`** (default **0**; use **2** for OP-only). **Sneak + use** (empty hand) on **your** linked **rope anchor** on an **AVAILABLE** island attempts the same claim (action-bar feedback). Lang keys under **`projectisland.claim.*`**.
+- **`autoClaimIslandOnRopeLink`** (default **true**): after a successful harpoon link, an **AVAILABLE** endpoint is **auto-claimed** when the other endpoint is your **starter** or an island you already **claim** (same saved-data path as secondary claim; sneak-use remains for cases where auto-claim is off or both ends were already claimed).
 
 ### Changed
+
+- **Harpoon span defaults:** **`ropeLinkMaxLengthBlocks`** default **96 → 256** and **`ropeLinkRaycastRangeBlocks`** **64 → 256** so neighbor islands (often **100+** blocks anchor–anchor) relink without editing config; raycast is no longer shorter than max span. Existing `projectisland-common.toml` keeps saved values — delete those keys or set them manually to pick up the new defaults.
+
+- **Action bar toast:** dimmer panel (**~31%** opacity), default **~5.5s** on screen (**~9s** after rolled-back harpoon shots), player-facing topology strings (**no** `.toml` hints). **Harpoon:** if the second shot fails for **topology**, **distance**, or **second anchor placement**, the **first** anchor is removed automatically (pending state cleared).
+
+- **Rope tertiary links (default off):** new **`ropeAllowTertiaryIslandLinks`** (default **false**) caps topology at **one hop** from your starter unless enabled, so **sister → third island** ropes are blocked until operators turn it on or future advancement gates land. Harpoon uses clearer lang keys for **disconnected** vs **tertiary locked** vs generic caps. **`hasRopeLinkFromClaimedIsland`** also treats a rope to your **starter-home region key** as valid for secondary claims (avoids wrongly reverting a claimed sister when the starter row is inconsistent).
+
+- **Action-bar style feedback:** harpoon, sneak-claim on rope anchors, and void-rescue flavor text use **`ActionBarToastPayload`** → **`ActionBarToastOverlay`**: text **wraps** to ~**88%** of the scaled GUI width with a **semi-transparent dark** backdrop and drop shadow, instead of the vanilla action bar (which **truncates** long translations such as **`projectisland.harpoon.topology_blocked`**).
 
 - **Void rescue flavor text:** random **action-bar** lines (same style as harpoon feedback) when you are moved by void rescue, starter void snap, nearest-island relocate, or unsafe floating respawn.
 

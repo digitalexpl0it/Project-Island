@@ -86,14 +86,19 @@ public final class IslandSecondaryClaim {
     }
 
     public static Component message(Outcome outcome) {
+        return Component.translatable(translationKey(outcome));
+    }
+
+    /** Same keys as {@link #message(Outcome)}; used for wrapped action-bar toasts from the server. */
+    public static String translationKey(Outcome outcome) {
         return switch (outcome) {
-            case SUCCESS -> Component.translatable("projectisland.claim.success");
-            case NOT_FLOATING_WORLD -> Component.translatable("projectisland.claim.not_floating_world");
-            case NO_ISLAND_COLUMN -> Component.translatable("projectisland.claim.no_island_column");
-            case NOT_AVAILABLE -> Component.translatable("projectisland.claim.not_available");
-            case ROPE_REQUIRED -> Component.translatable("projectisland.claim.no_rope_link");
-            case NOT_LINKED_ANCHOR -> Component.translatable("projectisland.claim.not_linked_anchor");
-            case RACE_LOST -> Component.translatable("projectisland.claim.race_lost");
+            case SUCCESS -> "projectisland.claim.success";
+            case NOT_FLOATING_WORLD -> "projectisland.claim.not_floating_world";
+            case NO_ISLAND_COLUMN -> "projectisland.claim.no_island_column";
+            case NOT_AVAILABLE -> "projectisland.claim.not_available";
+            case ROPE_REQUIRED -> "projectisland.claim.no_rope_link";
+            case NOT_LINKED_ANCHOR -> "projectisland.claim.not_linked_anchor";
+            case RACE_LOST -> "projectisland.claim.race_lost";
         };
     }
 }

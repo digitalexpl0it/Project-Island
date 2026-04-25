@@ -17,6 +17,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.projectisland.island.IslandSecondaryClaim;
 import net.projectisland.island.IslandWorld;
+import net.projectisland.network.ActionBarToastPayload;
 
 public final class RopeAnchorBlock extends Block implements EntityBlock {
     private static final VoxelShape BASE = Block.box(0, 0, 0, 16, 10, 16);
@@ -90,7 +91,7 @@ public final class RopeAnchorBlock extends Block implements EntityBlock {
                 .map(
                         key -> {
                             IslandSecondaryClaim.Outcome o = IslandSecondaryClaim.tryAtIsland(sp, sl, key, pos);
-                            sp.displayClientMessage(IslandSecondaryClaim.message(o), true);
+                            ActionBarToastPayload.send(sp, IslandSecondaryClaim.translationKey(o));
                             return o == IslandSecondaryClaim.Outcome.SUCCESS
                                     ? InteractionResult.SUCCESS
                                     : InteractionResult.FAIL;

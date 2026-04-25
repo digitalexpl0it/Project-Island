@@ -3,6 +3,7 @@ package net.projectisland.network;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.projectisland.ProjectIsland;
+import net.projectisland.client.ActionBarToastOverlay;
 
 public final class ProjectIslandNetworking {
     private ProjectIslandNetworking() {}
@@ -17,5 +18,7 @@ public final class ProjectIslandNetworking {
                 IslandHudSyncPayload.TYPE, IslandHudSyncPayload.STREAM_CODEC, IslandHudSyncPayload::handleOnClient);
         registrar.playToClient(
                 RopeLinkSyncPayload.TYPE, RopeLinkSyncPayload.STREAM_CODEC, RopeLinkSyncPayload::handleOnClient);
+        registrar.playToClient(
+                ActionBarToastPayload.TYPE, ActionBarToastPayload.STREAM_CODEC, ActionBarToastOverlay::handlePayload);
     }
 }

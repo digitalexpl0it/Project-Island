@@ -155,14 +155,14 @@ public final class Config {
     public static final ModConfigSpec.IntValue ROPE_LINK_RAYCAST_RANGE_BLOCKS = BUILDER
             .comment(
                     "Harpoon gun raycast reach (blocks) for each shot when placing rope anchors.",
-                    "Should be at least ropeLinkMaxLengthBlocks if players need to aim the far anchor from the first island.")
-            .defineInRange("ropeLinkRaycastRangeBlocks", 64, 8, 512);
+                    "Should be **≥ ropeLinkMaxLengthBlocks** so you can aim at the far island from the near one; defaults match max span.")
+            .defineInRange("ropeLinkRaycastRangeBlocks", 256, 8, 512);
 
     public static final ModConfigSpec.IntValue ROPE_LINK_MAX_LENGTH_BLOCKS = BUILDER
             .comment(
                     "Maximum Euclidean distance (blocks) between two anchors for a new rope link (server-validated).",
-                    "Stored on each RopeLink for future tension / gameplay checks.")
-            .defineInRange("ropeLinkMaxLengthBlocks", 96, 16, 1024);
+                    "Default **256** fits typical floating-neighbor islands (~117+ blocks is common); raise up to **1024** for rare layouts. Stored on each RopeLink for strain / future rules.")
+            .defineInRange("ropeLinkMaxLengthBlocks", 256, 16, 1024);
 
     public static final ModConfigSpec.DoubleValue ROPE_LINK_MAX_HEALTH = BUILDER
             .comment(
@@ -183,10 +183,41 @@ public final class Config {
                     "Hit points removed per stress tick while over the strain threshold. Scales up as span approaches max length.")
             .defineInRange("ropeLinkStrainDamagePerTick", 1.5d, 0.0d, 10_000.0d);
 
+    public static final ModConfigSpec.BooleanValue ROPE_TOPOLOGY_ENABLED = BUILDER
+            .comment(
+                    "When true, completing a harpoon link must keep the network connected to your starter island and within depth / spoke caps below.",
+                    "Turn off only for unrestricted testing.")
+            .define("ropeTopologyEnabled", true);
+
+    public static final ModConfigSpec.IntValue ROPE_TOPOLOGY_MAX_DEPTH_FROM_STARTER = BUILDER
+            .comment(
+                    "Maximum BFS hop count from the starter region along **your** ropes (0 = starter only). Value **2** allows starter → secondary → tertiary when **ropeAllowTertiaryIslandLinks** is true; otherwise depth is capped at **1** regardless of this number.")
+            .defineInRange("ropeTopologyMaxDepthFromStarter", 2, 0, 8);
+
+    public static final ModConfigSpec.BooleanValue ROPE_ALLOW_TERTIARY_ISLAND_LINKS = BUILDER
+            .comment(
+                    "When **false** (default), topology never lets a rope put an island **two hops** from your starter (only the hub + one ring). Set **true** to apply the full **ropeTopologyMaxDepthFromStarter** depth (e.g. 2 = tertiary islands). Advancement-based unlocks can replace this toggle later.")
+            .define("ropeAllowTertiaryIslandLinks", false);
+
+    public static final ModConfigSpec.IntValue ROPE_MAIN_DIRECT_SPOKE_CAP = BUILDER
+            .comment(
+                    "Max **distinct** other regions linked **directly** to your starter by your ropes (default **1**; raise up to **4** as a stand-in until advancement gates exist).")
+            .defineInRange("ropeMainDirectSpokeCap", 1, 1, 4);
+
+    public static final ModConfigSpec.IntValue ROPE_SISTER_OUTBOUND_CAP = BUILDER
+            .comment(
+                    "Per **claimed** non-starter region you own: max distinct **non-starter** rope neighbors (links back to the starter excluded). Default **1**, max **3**.")
+            .defineInRange("ropeSisterOutboundCap", 1, 1, 3);
+
     public static final ModConfigSpec.BooleanValue SECONDARY_CLAIM_REQUIRES_ROPE_LINK = BUILDER
             .comment(
                     "When true, secondary claims require a harpoon RopeLink owned by the claimer between the target island and an island they already own (starter or prior claim).")
             .define("secondaryClaimRequiresRopeLink", true);
+
+    public static final ModConfigSpec.BooleanValue AUTO_CLAIM_ON_ROPE_LINK = BUILDER
+            .comment(
+                    "When true, completing a harpoon link immediately **claims** an **AVAILABLE** endpoint if the other endpoint is your **starter home** or an island you already **claim** (no shift-click needed). Turn off to require anchor sneak-use or `/projectisland island claim` only.")
+            .define("autoClaimIslandOnRopeLink", true);
 
     public static final ModConfigSpec.IntValue SECONDARY_CLAIM_COMMAND_PERMISSION_LEVEL = BUILDER
             .comment(
