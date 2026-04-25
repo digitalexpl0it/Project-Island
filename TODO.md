@@ -2,7 +2,7 @@
 
 Phased checklist for the NeoForge mod and dedicated server. Check items off as you complete them.
 
-_Roadmap reviewed **2026-04-22** (island HUD + config documentation). Updated **2026-04-23**: Phase 2 priority + claim design (starter vs dock). Updated **2026-04-25**: island HUD pipeline; **`noise_settings`** `size_horizontal` override reverted (must be int `1`–`4`; vanilla overworld already `1`). README **Island biome weights (common config)** table + dedicated-server `projectisland-common.toml` notes (**2026-04-22**)._
+_Roadmap reviewed **2026-04-22** (island HUD + config documentation). Updated **2026-04-23**: Phase 2 priority + claim design (starter vs dock). Updated **2026-04-25**: island HUD pipeline; **`noise_settings`** `size_horizontal` override reverted (must be int `1`–`4`; vanilla overworld already `1`). **2026-04-22** doc pass: README island biome weights table + dedicated-server `projectisland-common.toml` notes; Phase 4 starter placement spec (region spiral for `AVAILABLE`, **center / HUD-aligned** teleport, atomic claim, search cap + fallback)._
 
 When researching features, use **mods, datapacks, modpacks, and GitHub** as examples (see [README.md](README.md) — “Learning from existing work”); pin anything you depend on and respect licenses.
 
@@ -51,14 +51,14 @@ When researching features, use **mods, datapacks, modpacks, and GitHub** as exam
 
 **Design intent**
 
-- **Starter island (one per player, free):** on first join to the server (overworld floating islands), place the player on the **nearest** `AVAILABLE` island surface (same spirit as `FloatingIslandsSpawnEvents` today), then **auto-claim** that `FloatingIslandKey` for them once they are on it—no separate claim click for the free island.
+- **Starter island (one per player, free):** on **first join** to the floating-islands overworld, pick an **`AVAILABLE`** `FloatingIslandKey`, **auto-claim** it (**CLAIMED** + owner) **once per UUID** (idempotent on relog—do not re-roll or overwrite others). **Placement search:** spiral in **region coordinates** `(regionX, regionZ)` from a configurable anchor (e.g. **world spawn / origin**), skip `!FloatingIslandLayout.regionHasIsland`, use **`FloatingIslandSavedData.peek` / `getOrCreate`** and require **`AVAILABLE`**. If two players race the same key, **atomic** transition (`AVAILABLE` → `CLAIMED` only if still free) and **retry** the next region. **Teleport target:** stand on a solid top **near the island’s procedural center** — reuse **`FloatingIslandLayout.regionIsland`** horizontal **`centerX` / `centerZ`** and the same vertical basis as **`IslandHudServerSync`** (`peakSurfaceYAtIslandCenter` / `columnTopY`), so the starter spawn lines up under the **HUD beacon**, not the **rim** (today’s **`FloatingIslandsSpawnEvents`** uses a **chunk** Chebyshev spiral + first hit at sample offsets, which is only a **void-rescue** heuristic). **Chunks:** surface YXZ can be resolved from **layout math** before chunks exist (`islandSurfaceBlockY` / `columnTopY`); optionally **load / ticket** chunks before teleport if you want decoration guaranteed immediately. **Dense servers:** config **max region search steps** (or radius); if exhausted, **documented fallback** (warn, kick with message, staff hook—pick one). Keep **`FloatingIslandsSpawnEvents`** for **void rescue** (bad `/tp`, dimension travel, starter failure).
 - **Additional islands:** no free teleport-to-claim. Prefer **airship / floating-base gameplay:** the player must **move** their owned island assembly into valid proximity of a target `AVAILABLE` island and satisfy a **dock / link** interaction (or equivalent server-checked state) before the extra region flips to `CLAIMED`. Document edge cases (void gaps, max link distance, unlink on abandon). _Depends on Phase 6 propulsion or a minimal MVP “nudge” placeholder until ships exist._
 
-- [ ] **New player → nearest `AVAILABLE` + auto-claim starter:** extend spawn/join flow; persist `CLAIMED` + owner on the starter key only once per account rules; respect existing claims (`peek` / no overwrite).
+- [ ] **New player → region-spiral `AVAILABLE` + atomic auto-claim + center teleport:** extend join flow; per-UUID “already has starter” gate; claim only if `AVAILABLE` then teleport to **region center / HUD-aligned** surface; race → retry next region; retain **`FloatingIslandsSpawnEvents`** as fallback.
 - [ ] **Secondary claims — dock / link model:** design spec (distance, facing, blocks/entities, anti-exploit); server validation path; then implementation after Phase 2 + minimal movement MVP (or defer full rules until Phase 6).
 - [ ] **Claim** action (non-starter): interaction after dock/link satisfied; record owner and timestamp; `setDirty()` on saved data; HUD refresh already exists.
 - [ ] **Invite / team** access (if alliances share an island): allow list or team id on claim data.
-- [ ] **Config**: minimum distance between starting claims, max retries for placement, starter-island policy toggles, link distance, debug logging.
+- [ ] **Config:** minimum distance between starter assignments, **max region-spiral steps** (or Chebyshev radius on **regions**) for starter search + **fallback** behavior when cap hit; starter anchor (spawn vs origin); link distance; debug logging.
 - [ ] (Later) Client sync or UI for “your island” / borders — only after server rules are correct. _(Nearby island **state** labels already exist; dedicated “your island” / border UX still TBD.)_
 
 ## Phase 5 — Capture / PvP meta
@@ -79,14 +79,14 @@ When researching features, use **mods, datapacks, modpacks, and GitHub** as exam
 - [ ] **Unlock / advancement tree:** gate recipes, block placement, or thrust caps with **server-respected** flags (vanilla `Advancement` triggers, custom criteria, or modded research—pick one approach and document).
 - [ ] **Parallel tech tracks:** defense (turrets, shields, walls), **docking / merge** with allies, power, automation—each with staged unlocks aligned to PvP risk.
 - [ ] **Fuel economy:** non-infinite propulsion (e.g. coal or tiered fuels); balance vs raid windows.
-- [ ] Prototype against **Valkyrien Skies** (or chosen ship framework): what counts as one “island ship,” max block count, merge rules.
+- [ ] **Research — [Create Aeronautics](https://www.curseforge.com/minecraft/mc-mods/create-aeronautics)** ([Modrinth](https://modrinth.com/mod/create-aeronautics)): **NeoForge** **1.21.1**, depends on **[Create](https://modrinth.com/mod/create)** + **[Sable](https://modrinth.com/mod/sable)** (moving assemblies / “sub-levels”). **Source / issues:** [Creators-of-Aeronautics/Simulated-Project](https://github.com/Creators-of-Aeronautics/Simulated-Project) — read [LICENSE.md](https://github.com/Creators-of-Aeronautics/Simulated-Project/blob/main/LICENSE.md) before copying or redistributing; not the same repo as [Modders-of-Create/Create-Aeronautics](https://github.com/Modders-of-Create/Create-Aeronautics). Skim for **contraption + flight** patterns; decide fit vs **Valkyrien Skies** for **whole-island** translation and server load.
+- [ ] Prototype against **Valkyrien Skies** and/or **Sable + Create (+ Aeronautics)** (or another chosen stack): what counts as one “island ship,” max block count, merge rules, **Iris** / shader caveats if relevant.
 
 ## Phase 7 — Integrations (optional)
 
-- [ ] Evaluate **Valkyrien Skies** (+ helm add-ons) for **movable island / ship** assemblies; pin compatible versions.
-- [ ] Evaluate **Create** for **cogwheels**, contraptions on bases or ships; pin compatible versions.
-- [ ] Add compatibility matrix and known issues to `README.md`.
-- [ ] Defer heavy integration until Phases 2–5 and **Phase 6 design** are playable in a test server.
+- [ ] Once **Phase 6** narrows the stack, **pin** compatible mod versions and smoke-test (e.g. **Valkyrien Skies** + helm add-ons, **Create / Sable / Create Aeronautics**—research and prototype bullets live in **Phase 6**).
+- [ ] **README:** compatibility matrix + known issues for whatever you ship.
+- [ ] **Defer** heavy pack integration until Phases 2–5 and a **Phase 6** playable prototype exist.
 
 ## Phase 8 — Content
 

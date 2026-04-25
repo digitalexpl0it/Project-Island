@@ -26,7 +26,7 @@ Other branches (defense, docking / merge, power, automation) should get **their 
 - [TODO.md](TODO.md) — phased checklist from bootstrap through ops.
 - [CHANGELOG.md](CHANGELOG.md) — notable changes ([Keep a Changelog](https://keepachangelog.com/en/1.1.0/) style).
 
-**Current focus:** **Phase 2 is done** (overworld floating islands + procedural island biomes). Next up: **Phase 4** claims (starter **nearest island + auto-claim**, then **dock / link** your floating base for additional islands)—see [TODO.md](TODO.md).
+**Current focus:** **Phase 2 is done** (overworld floating islands + procedural island biomes). Next up: **Phase 4** claims — starter: **region-spiral** search for **`AVAILABLE`** keys, **atomic auto-claim** once per player UUID, teleport on **region center / HUD-aligned** surface (not the current chunk-spiral **void-rescue** rim); **dense spawn**: capped search + documented fallback; **dock / link** for extra islands — see [TODO.md](TODO.md) Phase 4.
 
 ## Target stack
 
@@ -184,4 +184,4 @@ Mod metadata currently uses **All Rights Reserved** ([`gradle.properties`](gradl
 
 ---
 
-_Documentation last revised **22 April 2026** (island biome weight table; `projectisland-common.toml` on dedicated servers)._
+_Documentation last revised **22 April 2026** (island biome weight table; `projectisland-common.toml` on dedicated servers; Phase 4 starter / spawn intent in **Current focus**)._

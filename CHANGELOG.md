@@ -12,6 +12,7 @@ _Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24*
 ### Documentation
 
 - **README / TODO:** Full table of **`islandBiomeWeight*`** keys → Minecraft biomes; NeoForge **`ModConfig.Type.COMMON`** file path **`config/projectisland-common.toml`** on clients and dedicated servers; restart / **new chunks** behavior. TODO Phase 2 biome item links to that README anchor.
+- **TODO / README (Phase 4 intent):** Starter island flow spelled out — **region** (not chunk) spiral for **`AVAILABLE`**, **atomic** claim + per-UUID idempotency, **center / HUD** spawn vs **`FloatingIslandsSpawnEvents`** rim rescue; **layout math** before chunks generate; search **cap** + fallback; void rescue kept. README **Current focus** updated to match.
 
 ### Changed
 
