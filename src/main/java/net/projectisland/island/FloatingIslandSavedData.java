@@ -1,8 +1,11 @@
 package net.projectisland.island;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -20,9 +23,12 @@ public final class FloatingIslandSavedData extends SavedData {
 
     private static final String TAG_VERSION = "Version";
     private static final String TAG_ISLANDS = "Islands";
+    private static final String TAG_STARTER_HOMES = "StarterHomes";
     private static final int CURRENT_VERSION = 1;
 
     private final Map<FloatingIslandKey, IslandRecord> islands = new HashMap<>();
+    /** Players who received the one-time starter island grant (UUID → key). */
+    private final Map<UUID, FloatingIslandKey> starterHomes = new HashMap<>();
 
     public FloatingIslandSavedData() {}
 
@@ -34,13 +40,60 @@ public final class FloatingIslandSavedData extends SavedData {
 
     private void read(CompoundTag root, HolderLookup.Provider registries) {
         islands.clear();
-        if (!root.contains(TAG_ISLANDS)) {
-            return;
+        starterHomes.clear();
+        if (root.contains(TAG_ISLANDS)) {
+            CompoundTag sec = root.getCompound(TAG_ISLANDS);
+            for (String key : sec.getAllKeys()) {
+                FloatingIslandKey.parseStorageKey(key).ifPresent(k -> islands.put(k, IslandRecord.read(sec.getCompound(key))));
+            }
         }
-        CompoundTag sec = root.getCompound(TAG_ISLANDS);
-        for (String key : sec.getAllKeys()) {
-            FloatingIslandKey.parseStorageKey(key).ifPresent(k -> islands.put(k, IslandRecord.read(sec.getCompound(key))));
+        if (root.contains(TAG_STARTER_HOMES)) {
+            CompoundTag st = root.getCompound(TAG_STARTER_HOMES);
+            for (String uuidStr : st.getAllKeys()) {
+                try {
+                    UUID owner = UUID.fromString(uuidStr);
+                    String sk = st.getString(uuidStr);
+                    FloatingIslandKey.parseStorageKey(sk).ifPresent(k -> starterHomes.put(owner, k));
+                } catch (IllegalArgumentException ignored) {
+                    // skip malformed uuid or key
+                }
+            }
         }
+    }
+
+    /** Starter island granted on first join, if any. */
+    public Optional<FloatingIslandKey> getStarterHome(UUID player) {
+        return Optional.ofNullable(starterHomes.get(player));
+    }
+
+    /** All island keys currently used as someone's starter home (for spacing new starters). */
+    public Collection<FloatingIslandKey> listStarterIslandKeys() {
+        return List.copyOf(starterHomes.values());
+    }
+
+    /**
+     * Atomically claim {@code key} for {@code owner} as starter home if the row is missing or {@link IslandState#AVAILABLE}.
+     * Does nothing if {@code owner} already has a starter home entry. Caller must run on the server thread.
+     */
+    public synchronized Optional<FloatingIslandKey> tryClaimStarterIsland(FloatingIslandKey key, UUID owner, long gameTime) {
+        if (starterHomes.containsKey(owner)) {
+            return Optional.empty();
+        }
+        IslandRecord rec = islands.get(key);
+        if (rec != null && rec.state() != IslandState.AVAILABLE) {
+            return Optional.empty();
+        }
+        if (rec == null) {
+            rec = new IslandRecord();
+            islands.put(key, rec);
+        }
+        if (rec.state() != IslandState.AVAILABLE) {
+            return Optional.empty();
+        }
+        rec.setClaimed(owner, gameTime);
+        starterHomes.put(owner, key);
+        setDirty();
+        return Optional.of(key);
     }
 
     public IslandRecord getOrCreate(FloatingIslandKey key) {
@@ -71,6 +124,11 @@ public final class FloatingIslandSavedData extends SavedData {
             sec.put(e.getKey().toStorageKey(), e.getValue().write());
         }
         root.put(TAG_ISLANDS, sec);
+        CompoundTag st = new CompoundTag();
+        for (Map.Entry<UUID, FloatingIslandKey> e : starterHomes.entrySet()) {
+            st.putString(e.getKey().toString(), e.getValue().toStorageKey());
+        }
+        root.put(TAG_STARTER_HOMES, st);
         return root;
     }
 }

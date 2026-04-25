@@ -93,6 +93,48 @@ public final class Config {
             .comment("Vertical offset in blocks above each island's procedural surface peak for the HUD anchor.")
             .defineInRange("islandHudHeightAbovePeakBlocks", 20, 4, 128);
 
+    public static final ModConfigSpec.BooleanValue STARTER_ISLAND_AUTO_ASSIGN_ENABLED = BUILDER
+            .comment(
+                    "On first join to the floating-islands overworld, assign one AVAILABLE island region as the player's starter home (CLAIMED + persisted), then teleport to that island's procedural center (HUD-aligned).",
+                    "Players who already have a starter home entry are unchanged. Void rescue still runs afterward if needed.")
+            .define("starterIslandAutoAssignEnabled", true);
+
+    public static final ModConfigSpec.BooleanValue STARTER_ISLAND_SEARCH_FROM_WORLD_SPAWN = BUILDER
+            .comment(
+                    "When true, the region spiral for starter placement starts at the overworld shared spawn chunk.",
+                    "When false, the spiral starts at the player's join chunk (useful for tests).")
+            .define("starterIslandSearchFromWorldSpawn", true);
+
+    public static final ModConfigSpec.IntValue STARTER_ISLAND_MAX_REGION_SEARCH_RADIUS = BUILDER
+            .comment(
+                    "Chebyshev radius in island regions (8×8 chunks each) when searching for an AVAILABLE starter candidate.",
+                    "Increase on dense servers if nearby regions are all claimed.")
+            .defineInRange("starterIslandMaxRegionSearchRadius", 96, 1, 4096);
+
+    public static final ModConfigSpec.IntValue STARTER_ISLAND_MIN_REGION_SEPARATION = BUILDER
+            .comment(
+                    "Minimum Chebyshev distance in regions between a new starter island and any existing starter home island.",
+                    "0 disables separation checks.")
+            .defineInRange("starterIslandMinRegionSeparation", 0, 0, 256);
+
+    public static final ModConfigSpec.ConfigValue<String> STARTER_ISLAND_FAILURE_KICK_MESSAGE = BUILDER
+            .comment(
+                    "If non-empty and no starter island could be assigned within the search radius, disconnect the joining player with this literal message (otherwise they stay at join position and void rescue may still run).")
+            .define("starterIslandFailureKickMessage", "");
+
+    public static final ModConfigSpec.BooleanValue VOID_RESCUE_EACH_TICK = BUILDER
+            .comment(
+                    "When true, the server watches floating-islands overworld players in the void and rescues them **once per fall** when they reach **near the world minimum Y** (see voidRescueTriggerBlocksAboveMinY).",
+                    "Does **not** teleport mid-air while you are still high above the floor (avoids yanking players at island edges).",
+                    "Join / dimension change still runs immediate void relocation when you are not on a surface.")
+            .define("voidRescueEachTick", true);
+
+    public static final ModConfigSpec.IntValue VOID_RESCUE_TRIGGER_BLOCKS_ABOVE_MIN_Y = BUILDER
+            .comment(
+                    "With voidRescueEachTick: when feet Y is at or below (minBuildHeight + this value), run starter / nearest-island rescue if the player is still not supported on procedural surface.",
+                    "Larger values rescue higher (sooner); too small may let void damage tick first.")
+            .defineInRange("voidRescueTriggerBlocksAboveMinY", 48, 0, 512);
+
     static final ModConfigSpec SPEC = BUILDER.build();
 
     private Config() {

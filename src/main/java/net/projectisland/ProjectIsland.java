@@ -12,6 +12,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.projectisland.island.FloatingIslandRespawnHandler;
 import net.projectisland.island.IslandCommands;
 import net.projectisland.island.IslandHudServerSync;
 import net.projectisland.network.ProjectIslandNetworking;
@@ -32,6 +33,7 @@ public final class ProjectIsland {
         FloatingIslandsSpawnPregen.register();
         IslandCommands.register();
         IslandHudServerSync.register();
+        FloatingIslandRespawnHandler.register();
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
     }
