@@ -9,12 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 _Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24**._ _README/TODO sync: **2026-04-25**._
 
+### Changed
+
+- **Rope visuals:** segments attach at the **top of the anchor loop** (`rope_anchor.json`), hang with **parabolic vertical slack** (tessellated), and render as a **square tube** (four chain-textured faces) using **vanilla** `minecraft:textures/block/chain.png`; UVs follow arc length. **Explicit outward normals** per face plus **full-bright** lighting avoid one tube side reading as a black “missing texture” strip from bad cross-product normals / diffuse. **Tighter UVs** and a **slimmer tube** reduce oversized dark link patches.
+
+- **License metadata:** `gradle.properties` `mod_license` is now **`MIT`** to match the existing root [`LICENSE`](LICENSE) file (was **All Rights Reserved**). README license section updated accordingly.
+- **Rope anchors:** breaking one end removes the saved `RopeLink` and restores **both** anchor positions to their stored original block states (restore runs next server tick so it is not clobbered by vanilla break). `RopeLink` exposes `otherAnchor(BlockPos)` for the paired endpoint.
+
 ### Documentation
 
 - **README / TODO:** Full table of **`islandBiomeWeight*`** keys → Minecraft biomes; NeoForge **`ModConfig.Type.COMMON`** file path **`config/projectisland-common.toml`** on clients and dedicated servers; restart / **new chunks** behavior. TODO Phase 2 biome item links to that README anchor.
 - **TODO / README (Phase 4 intent):** Starter island flow spelled out — **region** (not chunk) spiral for **`AVAILABLE`**, **atomic** claim + per-UUID idempotency, **center / HUD** spawn vs **`FloatingIslandsSpawnEvents`** rim rescue; **layout math** before chunks generate; search **cap** + fallback; void rescue kept. README **Current focus** updated to match.
 
 ### Added
+
+- **Harpoon / rope link tuning (common config):** **`ropeLinkRaycastRangeBlocks`** (each shot’s reach) and **`ropeLinkMaxLengthBlocks`** (max anchor–anchor span and value stored on **`RopeLink`**) — **`HarpoonGunItem`** reads both from **`Config`** (`projectisland-common.toml`).
+
+- **Rope link rendering:** server **`RopeLinkServerSync`** sends **`RopeLinkSyncPayload`** (packed anchor positions) on a configurable interval in the floating-islands overworld; client **`RopeLinkClientCache`** + **`RopeLinkSegmentRenderer`** draws rope between anchors. Common config: **`ropeLinkSyncEnabled`**, **`ropeLinkSyncIntervalTicks`**, **`ropeLinkSyncCullRadiusBlocks`**. Client config: **`ropeLinksShow`**.
 
 - **Phase 4 (starter island + claims):** **`FloatingIslandStarterPlacement`** assigns first **`AVAILABLE`** island in a **region Chebyshev spiral** from overworld shared spawn (configurable), **`tryClaimStarterIsland`** on **`FloatingIslandSavedData`** (atomic **CLAIMED** + **`StarterHomes`** UUID map), teleport to **`FloatingIslandLayout.regionIsland`** center surface. **`PlayerLoggedIn`:** starter placement runs **before** void rescue; optional **kick** if search fails (`starterIslandFailureKickMessage`). Common config: **`starterIslandAutoAssignEnabled`**, **`starterIslandSearchFromWorldSpawn`**, **`starterIslandMaxRegionSearchRadius`**, **`starterIslandMinRegionSeparation`**, **`starterIslandFailureKickMessage`**. **`IslandChunkLoader`:** sync **3×3** **`ChunkStatus.FULL`** load before starter / void / respawn teleports and **`findNearestIslandFeet`**. **`trySecondaryClaim`** + **`/projectisland island claim`** (OP 2) for interim non-starter **`AVAILABLE`** claims.
 - **Void / respawn safety (floating overworld):** **`FloatingIslandVoidRescue`** on **`PlayerTickEvent.Pre`** (when **`voidRescueEachTick`**): **once per void fall** when Y reaches **`minBuildHeight` + `voidRescueTriggerBlocksAboveMinY`** (not mid-air), then starter / nearest island; **NBT** tracks open-void fall. **`FloatingIslandRespawnHandler`** on **`PlayerRespawnPositionEvent`**: unsafe overworld void respawn → starter or nearest island (valid **bed** unchanged). **Rim-safe** support uses **hitbox XZ ± 1**; respawn **unsafe** uses **3×3** columns. **`relocatePlayerFromVoid`** no-ops if already supported (join on solid ground).

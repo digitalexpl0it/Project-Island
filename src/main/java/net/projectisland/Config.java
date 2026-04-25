@@ -135,6 +135,34 @@ public final class Config {
                     "Larger values rescue higher (sooner); too small may let void damage tick first.")
             .defineInRange("voidRescueTriggerBlocksAboveMinY", 48, 0, 512);
 
+    public static final ModConfigSpec.BooleanValue ROPE_LINK_SYNC_ENABLED = BUILDER
+            .comment(
+                    "When true, players in the floating-islands overworld receive rope anchor segment positions for client rendering.",
+                    "When false, the server sends an empty list on the same interval so clients clear stale segments.")
+            .define("ropeLinkSyncEnabled", true);
+
+    public static final ModConfigSpec.IntValue ROPE_LINK_SYNC_INTERVAL_TICKS = BUILDER
+            .comment("How often each player is sent a rope link update (in ticks, 20 = 1 second).")
+            .defineInRange("ropeLinkSyncIntervalTicks", 20, 1, 600);
+
+    public static final ModConfigSpec.IntValue ROPE_LINK_SYNC_CULL_RADIUS_BLOCKS = BUILDER
+            .comment(
+                    "A rope segment is included if either anchor or the midpoint is within this horizontal Chebyshev distance (blocks) of the player.",
+                    "Increase if long spans disappear while you stand between islands.")
+            .defineInRange("ropeLinkSyncCullRadiusBlocks", 384, 32, 2048);
+
+    public static final ModConfigSpec.IntValue ROPE_LINK_RAYCAST_RANGE_BLOCKS = BUILDER
+            .comment(
+                    "Harpoon gun raycast reach (blocks) for each shot when placing rope anchors.",
+                    "Should be at least ropeLinkMaxLengthBlocks if players need to aim the far anchor from the first island.")
+            .defineInRange("ropeLinkRaycastRangeBlocks", 64, 8, 512);
+
+    public static final ModConfigSpec.IntValue ROPE_LINK_MAX_LENGTH_BLOCKS = BUILDER
+            .comment(
+                    "Maximum Euclidean distance (blocks) between two anchors for a new rope link (server-validated).",
+                    "Stored on each RopeLink for future tension / gameplay checks.")
+            .defineInRange("ropeLinkMaxLengthBlocks", 96, 16, 1024);
+
     static final ModConfigSpec SPEC = BUILDER.build();
 
     private Config() {

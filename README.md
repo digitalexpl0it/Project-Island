@@ -181,7 +181,9 @@ The first Gradle run downloads Minecraft and NeoForge artifacts and can take sev
 
 ## License
 
-Mod metadata currently uses **All Rights Reserved** ([`gradle.properties`](gradle.properties)); replace with a SPDX license id and a `LICENSE` file when you decide redistribution terms.
+**Project Island mod code** in this repository is released under the **MIT License** — see [`LICENSE`](LICENSE). Mod metadata uses SPDX **`MIT`** in [`gradle.properties`](gradle.properties) (`mods.toml`).
+
+Bundled or third-party assets (resource packs, textures copied from other mods, etc.) keep **their own licenses**; see files under [`licenses/`](licenses/) and notes in this README. If you vendor assets under **CC-BY-NC-SA** (for example), you must still follow **attribution**, **non-commercial**, and **ShareAlike** terms for those assets even though this project’s source is MIT.
 
 ---
 

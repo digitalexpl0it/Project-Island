@@ -1,5 +1,6 @@
 package net.projectisland.island;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -24,11 +26,13 @@ public final class FloatingIslandSavedData extends SavedData {
     private static final String TAG_VERSION = "Version";
     private static final String TAG_ISLANDS = "Islands";
     private static final String TAG_STARTER_HOMES = "StarterHomes";
+    private static final String TAG_ROPE_LINKS = "RopeLinks";
     private static final int CURRENT_VERSION = 1;
 
     private final Map<FloatingIslandKey, IslandRecord> islands = new HashMap<>();
     /** Players who received the one-time starter island grant (UUID → key). */
     private final Map<UUID, FloatingIslandKey> starterHomes = new HashMap<>();
+    private final Map<UUID, RopeLink> ropeLinks = new HashMap<>();
 
     public FloatingIslandSavedData() {}
 
@@ -41,6 +45,7 @@ public final class FloatingIslandSavedData extends SavedData {
     private void read(CompoundTag root, HolderLookup.Provider registries) {
         islands.clear();
         starterHomes.clear();
+        ropeLinks.clear();
         if (root.contains(TAG_ISLANDS)) {
             CompoundTag sec = root.getCompound(TAG_ISLANDS);
             for (String key : sec.getAllKeys()) {
@@ -56,6 +61,27 @@ public final class FloatingIslandSavedData extends SavedData {
                     FloatingIslandKey.parseStorageKey(sk).ifPresent(k -> starterHomes.put(owner, k));
                 } catch (IllegalArgumentException ignored) {
                     // skip malformed uuid or key
+                }
+            }
+        }
+        if (root.contains(TAG_ROPE_LINKS)) {
+            CompoundTag rl = root.getCompound(TAG_ROPE_LINKS);
+            for (String idStr : rl.getAllKeys()) {
+                try {
+                    UUID id = UUID.fromString(idStr);
+                    CompoundTag t = rl.getCompound(idStr);
+                    UUID owner = t.hasUUID("Owner") ? t.getUUID("Owner") : new UUID(0L, 0L);
+                    Optional<FloatingIslandKey> fromKey = FloatingIslandKey.parseStorageKey(t.getString("FromKey"));
+                    Optional<FloatingIslandKey> toKey = FloatingIslandKey.parseStorageKey(t.getString("ToKey"));
+                    if (fromKey.isEmpty() || toKey.isEmpty()) {
+                        continue;
+                    }
+                    var fromPos = BlockPos.of(t.getLong("FromPos"));
+                    var toPos = BlockPos.of(t.getLong("ToPos"));
+                    double maxLen = t.contains("MaxLen") ? t.getDouble("MaxLen") : 96.0d;
+                    ropeLinks.put(id, new RopeLink(id, owner, fromKey.get(), toKey.get(), fromPos, toPos, maxLen));
+                } catch (IllegalArgumentException ignored) {
+                    // skip malformed uuid
                 }
             }
         }
@@ -117,6 +143,26 @@ public final class FloatingIslandSavedData extends SavedData {
         return true;
     }
 
+    public synchronized void putRopeLink(RopeLink link) {
+        ropeLinks.put(link.id(), link);
+        setDirty();
+    }
+
+    public synchronized Optional<RopeLink> getRopeLink(UUID id) {
+        return Optional.ofNullable(ropeLinks.get(id));
+    }
+
+    public synchronized void removeRopeLink(UUID id) {
+        if (ropeLinks.remove(id) != null) {
+            setDirty();
+        }
+    }
+
+    /** Snapshot of current links for sync or iteration (server thread). */
+    public synchronized List<RopeLink> copyRopeLinks() {
+        return new ArrayList<>(ropeLinks.values());
+    }
+
     public IslandRecord getOrCreate(FloatingIslandKey key) {
         IslandRecord existing = islands.get(key);
         if (existing != null) {
@@ -150,6 +196,19 @@ public final class FloatingIslandSavedData extends SavedData {
             st.putString(e.getKey().toString(), e.getValue().toStorageKey());
         }
         root.put(TAG_STARTER_HOMES, st);
+        CompoundTag rl = new CompoundTag();
+        for (Map.Entry<UUID, RopeLink> e : ropeLinks.entrySet()) {
+            RopeLink link = e.getValue();
+            CompoundTag t = new CompoundTag();
+            t.putUUID("Owner", link.owner());
+            t.putString("FromKey", link.fromKey().toStorageKey());
+            t.putString("ToKey", link.toKey().toStorageKey());
+            t.putLong("FromPos", link.fromAnchorPos().asLong());
+            t.putLong("ToPos", link.toAnchorPos().asLong());
+            t.putDouble("MaxLen", link.maxLengthBlocks());
+            rl.put(e.getKey().toString(), t);
+        }
+        root.put(TAG_ROPE_LINKS, rl);
         return root;
     }
 }

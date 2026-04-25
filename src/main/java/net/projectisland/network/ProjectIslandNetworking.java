@@ -15,5 +15,7 @@ public final class ProjectIslandNetworking {
         var registrar = event.registrar(ProjectIsland.MOD_ID);
         registrar.playToClient(
                 IslandHudSyncPayload.TYPE, IslandHudSyncPayload.STREAM_CODEC, IslandHudSyncPayload::handleOnClient);
+        registrar.playToClient(
+                RopeLinkSyncPayload.TYPE, RopeLinkSyncPayload.STREAM_CODEC, RopeLinkSyncPayload::handleOnClient);
     }
 }

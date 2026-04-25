@@ -1,4 +1,18 @@
 {
   "projectisland.configuration.title": "Project Island",
-  "resourcePack.projectisland.unshaded_blocks.title": "Unshaded Blocks (bundled with Project Island)"
+  "resourcePack.projectisland.unshaded_blocks.title": "Unshaded Blocks (bundled with Project Island)",
+  "item.projectisland.harpoon_gun": "Harpoon Gun",
+  "block.projectisland.rope_anchor": "Rope Anchor",
+  "projectisland.harpoon.wrong_dimension": "Harpoon only works in the floating island overworld.",
+  "projectisland.harpoon.no_block": "No solid block in range (%s blocks).",
+  "projectisland.harpoon.falling_block": "Falling blocks (sand, gravel, …) can't be rope anchors.",
+  "projectisland.harpoon.bad_block": "This block can't be used as a rope anchor.",
+  "projectisland.harpoon.not_island_surface": "Aim at solid terrain on a generated island.",
+  "projectisland.harpoon.place_first_failed": "Couldn't place the first anchor here.",
+  "projectisland.harpoon.first_set": "First anchor set. Use on a different island within %s blocks.",
+  "projectisland.harpoon.corrupt_pending": "Rope setup was reset (invalid saved anchor).",
+  "projectisland.harpoon.same_island": "Pick a block on a different island.",
+  "projectisland.harpoon.too_far": "Too far from the first anchor (max %s blocks; this shot is %s blocks).",
+  "projectisland.harpoon.second_place_failed": "Couldn't place the second anchor here.",
+  "projectisland.harpoon.linked": "Rope linked between islands."
 }

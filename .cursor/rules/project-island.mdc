@@ -33,3 +33,27 @@ When implementing or designing systems, **use public examples**: other **mods**,
 - Prefer **pinned** Minecraft + NeoForge (and third-party mod) versions in Gradle.
 - When behavior changes, update **README** / **TODO** / **CHANGELOG** as appropriate.
 - Keep changes **focused**; avoid drive-by refactors unrelated to the task.
+
+## Blockbench models (common “broken texture” fix)
+
+If a custom block’s **shape is correct** but faces show a **jumbled collage of random vanilla textures** (looks like the block atlas), Minecraft is usually sampling the wrong part of the atlas due to **UV scale / texture path mismatch**.
+
+- **Correct paths**
+  - **texture file**: `src/main/resources/assets/projectisland/textures/block/<name>.png`
+  - **block model**: `src/main/resources/assets/projectisland/models/block/<name>.json`
+  - **blockstate**: `src/main/resources/assets/projectisland/blockstates/<name>.json` → points to `projectisland:block/<name>`
+- **Correct texture reference in model JSON**
+  - Use `projectisland:block/<name>` (include the namespace).
+  - Avoid bare `block/<name>` (that resolves to vanilla `minecraft:block/<name>`).
+- **UV units rule (the big one)**
+  - Minecraft **block model UVs are in a 0–16 coordinate space**, regardless of texture resolution (16×16, 64×64, 128×128, …).
+  - If you see UV values like **64** or **128** in a block model, it will sample outside the sprite and produce the atlas-collage look.
+  - Converting pixel-UV → block-UV: divide by \(textureSize / 16\) (e.g. 64×64 → ÷4, 128×128 → ÷8).
+
+If the texture is correct but you still see “X-ray” gaps (neighbor blocks disappearing) or a full-cube outline/hitbox, that’s usually **occlusion + voxel shape**, not UVs:
+
+- **Occlusion / neighbor face-culling**
+  - For non-full-cube blocks, set `.noOcclusion()` in `BlockBehaviour.Properties`.
+  - Override `getOcclusionShape(...)` to `Shapes.empty()` if neighbors are being culled incorrectly.
+- **Selection + collision shape**
+  - Override `getShape(...)` and `getCollisionShape(...)` to match the actual model (e.g. base is 10px tall + a loop on top).

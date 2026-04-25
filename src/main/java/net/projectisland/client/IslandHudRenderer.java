@@ -1,5 +1,7 @@
 package net.projectisland.client;
 
+import java.util.List;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -31,22 +33,28 @@ public final class IslandHudRenderer {
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) {
             return;
         }
-        if (!ClientConfig.ISLAND_HUD_SHOW.getAsBoolean()) {
-            return;
-        }
         Minecraft mc = Minecraft.getInstance();
         if (mc.level == null || mc.player == null) {
             return;
         }
         if (!Level.OVERWORLD.equals(mc.level.dimension())) {
+            RopeLinkClientCache.replace(List.of());
             return;
         }
         ClientLevel clientLevel = (ClientLevel) mc.level;
-        float scale = (float) ClientConfig.ISLAND_HUD_TEXT_SCALE.getAsDouble();
-        boolean seeThrough = ClientConfig.ISLAND_HUD_SEE_THROUGH_TEXT.getAsBoolean();
-
         var pose = event.getPoseStack();
         MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
+
+        if (ClientConfig.ROPE_LINKS_SHOW.getAsBoolean()) {
+            RopeLinkSegmentRenderer.render(mc, pose, buffers);
+        }
+
+        if (!ClientConfig.ISLAND_HUD_SHOW.getAsBoolean()) {
+            buffers.endBatch();
+            return;
+        }
+        float scale = (float) ClientConfig.ISLAND_HUD_TEXT_SCALE.getAsDouble();
+        boolean seeThrough = ClientConfig.ISLAND_HUD_SEE_THROUGH_TEXT.getAsBoolean();
 
         for (IslandHudBeacon b : IslandHudClientCache.beacons()) {
             if (!shouldDrawHudForBeacon(clientLevel, mc, b)) {

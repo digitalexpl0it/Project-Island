@@ -23,6 +23,10 @@ public final class ClientConfig {
                     "Improves readability at night without changing daytime appearance much.")
             .defineInRange("islandHudNightColorBoost", 0.72d, 0.0d, 1.0d);
 
+    public static final ModConfigSpec.BooleanValue ROPE_LINKS_SHOW = BUILDER
+            .comment("Draw synced rope segments between linked anchors in the floating-islands overworld (server still sends data when disabled).")
+            .define("ropeLinksShow", true);
+
     static final ModConfigSpec SPEC = BUILDER.build();
 
     private ClientConfig() {}

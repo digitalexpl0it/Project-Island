@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "": {
+      "model": "projectisland:block/rope_anchor",
+      "render_type": "cutout"
+    }
+  }
+}

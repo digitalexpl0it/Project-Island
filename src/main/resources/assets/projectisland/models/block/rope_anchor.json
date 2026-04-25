@@ -1,0 +1,45 @@
+{
+  "ambientocclusion": true,
+  "textures": {
+    "all": "projectisland:block/rope_anchor",
+    "particle": "projectisland:block/rope_anchor"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 10, 16],
+      "faces": {
+        "north": { "uv": [2, 3.5, 4, 4.75], "texture": "#all" },
+        "east": { "uv": [0, 3.5, 2, 4.75], "texture": "#all" },
+        "south": { "uv": [6, 3.5, 8, 4.75], "texture": "#all" },
+        "west": { "uv": [4, 3.5, 6, 4.75], "texture": "#all" },
+        "up": { "uv": [4, 3.5, 2, 1.5], "texture": "#all" },
+        "down": { "uv": [6, 1.5, 4, 3.5], "texture": "#all" }
+      }
+    },
+    {
+      "from": [4, 10, 3],
+      "to": [12, 16, 13],
+      "faces": {
+        "north": { "uv": [1.25, 6, 2.25, 6.75], "texture": "#all" },
+        "east": { "uv": [0, 6, 1.25, 6.75], "texture": "#all" },
+        "south": { "uv": [3.5, 6, 4.5, 6.75], "texture": "#all" },
+        "west": { "uv": [2.25, 6, 3.5, 6.75], "texture": "#all" },
+        "up": { "uv": [2.25, 6, 1.25, 4.75], "texture": "#all" },
+        "down": { "uv": [3.25, 4.75, 2.25, 6], "texture": "#all" }
+      }
+    },
+    {
+      "from": [4, 11, 5],
+      "to": [12, 15, 11],
+      "faces": {
+        "north": { "uv": [5.5, 0.75, 6.5, 1.25], "texture": "#all" },
+        "east": { "uv": [4.75, 0.75, 5.5, 1.25], "texture": "#all" },
+        "south": { "uv": [7.25, 0.75, 8.25, 1.25], "texture": "#all" },
+        "west": { "uv": [6.5, 0.75, 7.25, 1.25], "texture": "#all" },
+        "up": { "uv": [6.5, 0.75, 5.5, 0], "texture": "#all" },
+        "down": { "uv": [7.5, 0, 6.5, 0.75], "texture": "#all" }
+      }
+    }
+  ]
+}
