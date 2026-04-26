@@ -18,7 +18,9 @@ import net.projectisland.worldgen.FloatingIslandsChunkGenerator;
 
 /**
  * Phase 4: first-join starter island — region spiral for {@link IslandState#AVAILABLE}, atomic claim + starter-home
- * map entry, teleport to procedural island center (same anchor as {@link IslandHudServerSync} beacons).
+ * map entry, teleport to procedural island center (same anchor as {@link IslandHudServerSync} beacons). Spiral origin:
+ * world {@code (0,0)} when {@link Config#STARTER_ISLAND_SEARCH_FROM_WORLD_ORIGIN} is set, else shared spawn or join
+ * chunk per {@link Config#STARTER_ISLAND_SEARCH_FROM_WORLD_SPAWN}.
  *
  * @return {@code true} if the player was kicked because no starter could be assigned and a kick message is configured.
  */
@@ -65,7 +67,11 @@ public final class FloatingIslandStarterPlacement {
 
         int originRx;
         int originRz;
-        if (Config.STARTER_ISLAND_SEARCH_FROM_WORLD_SPAWN.getAsBoolean()) {
+        if (Config.STARTER_ISLAND_SEARCH_FROM_WORLD_ORIGIN.getAsBoolean()) {
+            // World column (0, 0) → chunk (0, 0) → region (0, 0) for default 8-chunk regions.
+            originRx = 0;
+            originRz = 0;
+        } else if (Config.STARTER_ISLAND_SEARCH_FROM_WORLD_SPAWN.getAsBoolean()) {
             BlockPos spawn = level.getSharedSpawnPos();
             int scx = spawn.getX() >> 4;
             int scz = spawn.getZ() >> 4;

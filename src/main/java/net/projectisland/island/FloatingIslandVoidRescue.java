@@ -16,15 +16,21 @@ import net.projectisland.ProjectIslandDimensions;
 import net.projectisland.network.ActionBarToastPayload;
 
 /**
- * Void rescue for the floating-islands overworld: {@linkplain #tickVoidRescue(ServerPlayer, ServerLevel) per-tick}
- * path fires **once per fall** when the player reaches the **void-floor band** (see {@link Config#VOID_RESCUE_TRIGGER_BLOCKS_ABOVE_MIN_Y})
- * while not supported. Join / dimension change still uses {@linkplain #relocatePlayerFromVoid(ServerPlayer, ServerLevel)} when unsupported at any height.
+ * Void rescue for the floating-islands overworld: {@linkplain #tickVoidRescue(ServerPlayer, ServerLevel) per-tick} can
+ * {@linkplain Config#VOID_RESCUE_SNAP_TO_LAST_SAFE_ENABLED snap} you to the last supported feet position mid-fall, then
+ * (if needed) when you reach the **void-floor band** (see {@link Config#VOID_RESCUE_TRIGGER_BLOCKS_ABOVE_MIN_Y}) runs bed /
+ * starter / nearest island. Join / dimension change still uses {@linkplain #relocatePlayerFromVoid(ServerPlayer, ServerLevel)}
+ * when unsupported at any height.
  */
 public final class FloatingIslandVoidRescue {
     private FloatingIslandVoidRescue() {}
 
     /** Marked while the player is in open void (not supported); cleared after a floor rescue or when back on surface. */
     private static final String TAG_VOID_FALLING = ProjectIsland.MOD_ID + "_void_falling";
+
+    private static final String TAG_LAST_SAFE_FEET = ProjectIsland.MOD_ID + "_last_safe_feet";
+
+    private static final String TAG_LAST_SAFE_SNAP_COOLDOWN = ProjectIsland.MOD_ID + "_last_safe_snap_cd";
 
     private static final int MAX_CHUNK_RADIUS = 80;
     private static final int[] LOCAL_X = {8, 2, 14, 8, 8};
@@ -45,10 +51,16 @@ public final class FloatingIslandVoidRescue {
         ActionBarToastPayload.send(player, key);
     }
 
+    /** Clears saved last-safe feet (e.g. dimension change / respawn). */
+    public static void clearLastSafeFeet(ServerPlayer player) {
+        CompoundTag data = player.getPersistentData();
+        data.remove(TAG_LAST_SAFE_FEET);
+        data.remove(TAG_LAST_SAFE_SNAP_COOLDOWN);
+    }
+
     /**
-     * Once per void fall: when **unsupported** and feet are in the **deep void band** (near {@link Level#getMinBuildHeight()}),
-     * try **bed / respawn anchor**, then starter island center, then nearest procedural surface. Does not run while you
-     * are merely underground or on structures well above the world floor.
+     * While supported, saves feet for {@link #trySnapToLastSafeFeet}. When unsupported: optional last-safe snap, then
+     * when feet enter the **deep void band**, bed → starter → {@link #relocatePlayerFromVoid}.
      */
     public static void tickVoidRescue(ServerPlayer player, ServerLevel level) {
         if (!Config.VOID_RESCUE_EACH_TICK.getAsBoolean()) {
@@ -58,8 +70,17 @@ public final class FloatingIslandVoidRescue {
             return;
         }
         CompoundTag data = player.getPersistentData();
+        int cd = data.getInt(TAG_LAST_SAFE_SNAP_COOLDOWN);
+        if (cd > 0) {
+            data.putInt(TAG_LAST_SAFE_SNAP_COOLDOWN, cd - 1);
+        }
         if (isSupportedOnIslandSurface(player, level)) {
             data.remove(TAG_VOID_FALLING);
+            saveLastSafeFeet(player, data);
+            return;
+        }
+        if (Config.VOID_RESCUE_SNAP_TO_LAST_SAFE_ENABLED.getAsBoolean()
+                && trySnapToLastSafeFeet(player, level, data)) {
             return;
         }
         if (!isDeepVoidDangerZone(player, level)) {
@@ -89,6 +110,64 @@ public final class FloatingIslandVoidRescue {
         }
         relocatePlayerFromVoid(player, level);
         data.remove(TAG_VOID_FALLING);
+    }
+
+    private static void saveLastSafeFeet(ServerPlayer player, CompoundTag data) {
+        CompoundTag t = new CompoundTag();
+        t.putDouble("x", player.getX());
+        t.putDouble("y", player.getY());
+        t.putDouble("z", player.getZ());
+        t.putFloat("yr", player.getYRot());
+        data.put(TAG_LAST_SAFE_FEET, t);
+    }
+
+    /**
+     * If the player fell far enough below their last saved supported feet Y, teleport back there (void between islands).
+     *
+     * @return {@code true} if this tick handled rescue (snap or handoff to {@link #relocatePlayerFromVoid}).
+     */
+    private static boolean trySnapToLastSafeFeet(ServerPlayer player, ServerLevel level, CompoundTag data) {
+        if (player.isCreative() || player.isSpectator()) {
+            return false;
+        }
+        if (player.getAbilities().flying) {
+            return false;
+        }
+        if (player.isFallFlying()) {
+            return false;
+        }
+        if (data.getInt(TAG_LAST_SAFE_SNAP_COOLDOWN) > 0) {
+            return false;
+        }
+        if (!data.contains(TAG_LAST_SAFE_FEET, CompoundTag.TAG_COMPOUND)) {
+            return false;
+        }
+        CompoundTag feet = data.getCompound(TAG_LAST_SAFE_FEET);
+        double sx = feet.getDouble("x");
+        double sy = feet.getDouble("y");
+        double sz = feet.getDouble("z");
+        float yr = feet.contains("yr", CompoundTag.TAG_FLOAT) ? feet.getFloat("yr") : player.getYRot();
+        int minFall = Config.VOID_RESCUE_SNAP_TO_LAST_SAFE_MIN_FALL_BLOCKS.getAsInt();
+        if (player.getY() > sy - minFall) {
+            return false;
+        }
+        if (player.getDeltaMovement().y > 0.15d) {
+            return false;
+        }
+        IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(sx), Mth.floor(sz));
+        player.teleportTo(level, sx, sy, sz, yr, player.getXRot());
+        player.resetFallDistance();
+        int cooldown = Config.VOID_RESCUE_SNAP_TO_LAST_SAFE_COOLDOWN_TICKS.getAsInt();
+        if (cooldown > 0) {
+            data.putInt(TAG_LAST_SAFE_SNAP_COOLDOWN, cooldown);
+        }
+        if (isSupportedOnIslandSurface(player, level)) {
+            showVoidRescueActionBar(player);
+            return true;
+        }
+        relocatePlayerFromVoid(player, level);
+        showVoidRescueActionBar(player);
+        return true;
     }
 
     /**

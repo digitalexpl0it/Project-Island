@@ -12,8 +12,8 @@ import net.projectisland.island.FloatingIslandVoidRescue;
 
 /**
  * When a player is in the floating-islands overworld and their feet are over void (first join, bad spawn, or
- * fixed teleport Y), move them onto the nearest procedural island column. Per-tick rescue avoids vanilla flight kicks
- * while falling through void with {@code allow-flight=false}.
+ * fixed teleport Y), move them onto the nearest procedural island column. Mid-void {@linkplain net.projectisland.island.FloatingIslandVoidRescue
+ * last-safe snap} plus floor-band rescue reduce long falls that can trigger vanilla “flying” kicks with {@code allow-flight=false}.
  */
 public final class FloatingIslandsSpawnEvents {
     private FloatingIslandsSpawnEvents() {}
@@ -21,7 +21,14 @@ public final class FloatingIslandsSpawnEvents {
     public static void register() {
         NeoForge.EVENT_BUS.addListener(FloatingIslandsSpawnEvents::onPlayerChangedDimension);
         NeoForge.EVENT_BUS.addListener(FloatingIslandsSpawnEvents::onPlayerLoggedIn);
+        NeoForge.EVENT_BUS.addListener(FloatingIslandsSpawnEvents::onPlayerRespawn);
         NeoForge.EVENT_BUS.addListener(FloatingIslandsSpawnEvents::onPlayerTickPre);
+    }
+
+    private static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            FloatingIslandVoidRescue.clearLastSafeFeet(player);
+        }
     }
 
     private static void onPlayerTickPre(PlayerTickEvent.Pre event) {
@@ -46,10 +53,11 @@ public final class FloatingIslandsSpawnEvents {
     }
 
     private static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
-        if (!event.getTo().equals(Level.OVERWORLD)) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
         }
-        if (!(event.getEntity() instanceof ServerPlayer player)) {
+        FloatingIslandVoidRescue.clearLastSafeFeet(player);
+        if (!event.getTo().equals(Level.OVERWORLD)) {
             return;
         }
         MinecraftServer server = player.getServer();

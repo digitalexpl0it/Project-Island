@@ -99,10 +99,16 @@ public final class Config {
                     "Players who already have a starter home entry are unchanged. Void rescue still runs afterward if needed.")
             .define("starterIslandAutoAssignEnabled", true);
 
+    public static final ModConfigSpec.BooleanValue STARTER_ISLAND_SEARCH_FROM_WORLD_ORIGIN = BUILDER
+            .comment(
+                    "When true, the starter region spiral anchors at world block column (0, 0) (region containing that column).",
+                    "Takes precedence over starterIslandSearchFromWorldSpawn when enabled.")
+            .define("starterIslandSearchFromWorldOrigin", false);
+
     public static final ModConfigSpec.BooleanValue STARTER_ISLAND_SEARCH_FROM_WORLD_SPAWN = BUILDER
             .comment(
-                    "When true, the region spiral for starter placement starts at the overworld shared spawn chunk.",
-                    "When false, the spiral starts at the player's join chunk (useful for tests).")
+                    "When starterIslandSearchFromWorldOrigin is false: if true, the spiral starts at the overworld shared spawn chunk.",
+                    "If false, the spiral starts at the player's join chunk (useful for tests).")
             .define("starterIslandSearchFromWorldSpawn", true);
 
     public static final ModConfigSpec.IntValue STARTER_ISLAND_MAX_REGION_SEARCH_RADIUS = BUILDER
@@ -124,8 +130,7 @@ public final class Config {
 
     public static final ModConfigSpec.BooleanValue VOID_RESCUE_EACH_TICK = BUILDER
             .comment(
-                    "When true, the server watches floating-islands overworld players in the void and rescues them **once per fall** when they reach **near the world minimum Y** (see voidRescueTriggerBlocksAboveMinY).",
-                    "Does **not** teleport mid-air while you are still high above the floor (avoids yanking players at island edges).",
+                    "When true, the server watches floating-islands overworld players in the void: optional **last-safe** mid-fall snap (voidRescueSnapToLastSafe*), then **once per fall** near the world minimum Y (voidRescueTriggerBlocksAboveMinY).",
                     "Join / dimension change still runs immediate void relocation when you are not on a surface.")
             .define("voidRescueEachTick", true);
 
@@ -135,6 +140,21 @@ public final class Config {
                     "This is the **void-floor band** only — keep it small so dungeons / stairs far above the world minimum are not mistaken for the void. Vanilla overworld min is -64; 12 ⇒ rescue at Y≤-52 unless you raise this.",
                     "Join / dimension relocate still runs when unsupported at any height (see FloatingIslandVoidRescue).")
             .defineInRange("voidRescueTriggerBlocksAboveMinY", 12, 0, 512);
+
+    public static final ModConfigSpec.BooleanValue VOID_RESCUE_SNAP_TO_LAST_SAFE_ENABLED = BUILDER
+            .comment(
+                    "While falling through open void (no island support), teleport you back to the last feet position that was on solid / island surface once you drop voidRescueSnapToLastSafeMinFallBlocks below that Y.",
+                    "Shortens long void falls that can trigger vanilla 'Flying is not enabled on this server' with allow-flight=false.")
+            .define("voidRescueSnapToLastSafeEnabled", true);
+
+    public static final ModConfigSpec.IntValue VOID_RESCUE_SNAP_TO_LAST_SAFE_MIN_FALL_BLOCKS = BUILDER
+            .comment(
+                    "Vertical gap below the saved last-safe Y before the mid-void snap runs. Lower = sooner rescue (safer vs flight kick); too low can feel harsh on intentional drops.")
+            .defineInRange("voidRescueSnapToLastSafeMinFallBlocks", 20, 4, 256);
+
+    public static final ModConfigSpec.IntValue VOID_RESCUE_SNAP_TO_LAST_SAFE_COOLDOWN_TICKS = BUILDER
+            .comment("Ticks after a last-safe snap before another mid-void snap can run (prevents thrash if the spot is no longer valid).")
+            .defineInRange("voidRescueSnapToLastSafeCooldownTicks", 40, 0, 200);
 
     public static final ModConfigSpec.BooleanValue ROPE_LINK_SYNC_ENABLED = BUILDER
             .comment(
@@ -213,6 +233,12 @@ public final class Config {
             .comment(
                     "When true, secondary claims require a harpoon RopeLink owned by the claimer between the target island and an island they already own (starter or prior claim).")
             .define("secondaryClaimRequiresRopeLink", true);
+
+    public static final ModConfigSpec.IntValue SECONDARY_CLAIM_COMMAND_MAX_DISTANCE_BLOCKS = BUILDER
+            .comment(
+                    "For `/projectisland island claim` only: if > 0, require the player to be within this horizontal distance (blocks) of a rope anchor endpoint on the target island that is part of a valid owned link (per secondaryClaimRequiresRopeLink gate).",
+                    "Set to 0 to disable the proximity requirement.")
+            .defineInRange("secondaryClaimCommandMaxDistanceBlocks", 160, 0, 2048);
 
     public static final ModConfigSpec.BooleanValue AUTO_CLAIM_ON_ROPE_LINK = BUILDER
             .comment(

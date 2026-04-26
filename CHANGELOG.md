@@ -11,6 +11,12 @@ _Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24*
 
 ### Added
 
+- **Documentation:** [docs/phase4-dock-link-spec.md](docs/phase4-dock-link-spec.md) — Phase **4** **dock / link** spec for secondary claims (harpoon placement, `RopeTopology`, `hasRopeLinkFromClaimedIsland`, `/projectisland island claim` vs rope-anchor sneak-use, revalidation on rope removal, known MVP gaps, optional hardening).
+
+- **Void last-safe snap:** while **`voidRescueEachTick`** is on, the server stores your last **supported** feet position and, if **`voidRescueSnapToLastSafeEnabled`**, teleports you back once you fall **`voidRescueSnapToLastSafeMinFallBlocks`** below that Y (reduces vanilla **“Flying is not enabled”** kicks during long void drops with **`allow-flight=false`**). **`voidRescueSnapToLastSafeCooldownTicks`**; anchor cleared on **dimension change** and **respawn**.
+
+- **Starter search anchor:** common config **`starterIslandSearchFromWorldOrigin`** — when **true**, the first-join starter spiral starts at **world (0, 0)** (region **0, 0**), overriding **`starterIslandSearchFromWorldSpawn`**.
+
 - **Island HUD polish:** server **`FloatingIslandDisplayNameReloader`** on **`AddReloadListenerEvent`** loads **`data/projectisland/floating_island_display_names/names.json`** (`adjectives` / `nouns` string arrays; datapacks may override). Client **`IslandHudWorldBillboard`** uses **`floating-island.png`** (**claimed** + plain **available** frame) and **`floating-island_ex.png`** (alternates for **available**); **contested** uses a vanilla **torch**. Example **resource pack** for texture overrides: **`examples/island_hud_icons_resource_pack/`** (datapacks cannot push textures to every client). **`projectisland-client.toml`:** **`islandHudPanelFillOpacity`**, **`islandHudPanelBorderOpacity`**, **`islandHudPanelScale`** (padding, icon slot, border, title ellipsis width).
 
 - **Rope health & strain (Phase 4):** each **`RopeLink`** stores **health / maxHealth** (NBT + new harpoon links use **`ropeLinkMaxHealth`**). **`RopeLinkStress`** applies damage when span / max length exceeds **`ropeLinkStrainRatioThreshold`**; at **0** health anchors **`severLinkFromSavedData`**. **`RopeLinkSyncPayload`** includes **health fraction**; client **`RopeLinkHealthBarRenderer`** draws billboard bars at **both** anchor ends when **`ropeLinkHealthBarsShow`** is on. Common: **`ropeLinkMaxHealth`**, **`ropeLinkStressTickInterval`**, **`ropeLinkStrainRatioThreshold`**, **`ropeLinkStrainDamagePerTick`** (set damage to **0** to disable strain).

@@ -24,6 +24,7 @@
   "projectisland.claim.not_floating_world": "Claims only work in the floating island overworld.",
   "projectisland.claim.no_island_column": "No island region owns this column.",
   "projectisland.claim.not_available": "This island is not available to claim.",
+  "projectisland.claim.too_far_from_dock": "Too far from your rope dock on this island to claim (move closer to your anchor).",
   "projectisland.claim.not_linked_anchor": "Sneak-use your own linked rope anchor on this island to claim it.",
   "projectisland.claim.race_lost": "Claim failed — someone else got it first or the state changed.",
   "projectisland.rescue.sudden_death": "You have been rescued from sudden death!",
