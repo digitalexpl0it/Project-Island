@@ -13,6 +13,9 @@ _Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24*
 
 - **Documentation:** [docs/phase4-dock-link-spec.md](docs/phase4-dock-link-spec.md) — Phase **4** **dock / link** spec for secondary claims (harpoon placement, `RopeTopology`, `hasRopeLinkFromClaimedIsland`, `/projectisland island claim` vs rope-anchor sneak-use, revalidation on rope removal, known MVP gaps, optional hardening).
 
+- **Rope progression (MVP):** advancements **`projectisland:progression/rope_reinforced`** (chain) and **`projectisland:progression/rope_steel`** (netherite ingot) grant higher rope tiers; **new** harpoon links scale **max length** and **max health** server-side (`RopeProgression`).
+- **Rope progression upgrades:** when enabled, existing rope links owned by online players auto-upgrade to match tier caps (`RopeLinkProgressionUpgrade`), preserving health fraction.
+
 - **Void last-safe snap:** while **`voidRescueEachTick`** is on, the server stores your last **supported** feet position and, if **`voidRescueSnapToLastSafeEnabled`**, teleports you back once you fall **`voidRescueSnapToLastSafeMinFallBlocks`** below that Y (reduces vanilla **“Flying is not enabled”** kicks during long void drops with **`allow-flight=false`**). **`voidRescueSnapToLastSafeCooldownTicks`**; anchor cleared on **dimension change** and **respawn**.
 
 - **Starter search anchor:** common config **`starterIslandSearchFromWorldOrigin`** — when **true**, the first-join starter spiral starts at **world (0, 0)** (region **0, 0**), overriding **`starterIslandSearchFromWorldSpawn`**.

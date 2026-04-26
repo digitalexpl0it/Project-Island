@@ -25,6 +25,7 @@ public final class RopeLinkServerSync {
     private static void onServerTickPost(ServerTickEvent.Post event) {
         MinecraftServer server = event.getServer();
         RopeLinkStress.tick(server);
+        RopeLinkProgressionUpgrade.tick(server);
         int interval = Math.max(1, Config.ROPE_LINK_SYNC_INTERVAL_TICKS.getAsInt());
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             if (player.tickCount % interval != 0) {

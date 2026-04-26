@@ -1,0 +1,20 @@
+{
+  "display": {
+    "icon": { "item": "minecraft:chain" },
+    "title": { "translate": "advancement.projectisland.rope_reinforced.title" },
+    "description": { "translate": "advancement.projectisland.rope_reinforced.desc" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "get_chain": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [{ "items": ["minecraft:chain"] }]
+      }
+    }
+  },
+  "requirements": [["get_chain"]]
+}
+

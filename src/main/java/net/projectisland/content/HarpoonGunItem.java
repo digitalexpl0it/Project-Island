@@ -26,6 +26,7 @@ import net.projectisland.island.FloatingIslandKey;
 import net.projectisland.island.FloatingIslandSavedData;
 import net.projectisland.island.IslandWorld;
 import net.projectisland.island.RopeLink;
+import net.projectisland.island.RopeProgression;
 import net.projectisland.island.RopeTopology;
 import net.projectisland.network.ActionBarToastPayload;
 import net.projectisland.worldgen.FloatingIslandLayout;
@@ -77,7 +78,9 @@ public final class HarpoonGunItem extends Item {
         }
 
         int raycastRange = Math.max(1, Config.ROPE_LINK_RAYCAST_RANGE_BLOCKS.getAsInt());
-        int maxLinkLen = Math.max(1, Config.ROPE_LINK_MAX_LENGTH_BLOCKS.getAsInt());
+        int maxLinkLenBase = Math.max(1, Config.ROPE_LINK_MAX_LENGTH_BLOCKS.getAsInt());
+        RopeProgression.RopeTier tier = RopeProgression.tierFor(sp);
+        int maxLinkLen = Math.max(1, (int) Math.round(maxLinkLenBase * tier.maxLengthMultiplier));
 
         BlockHitResult hit = raycast(sl, sp, raycastRange);
         if (hit.getType() != HitResult.Type.BLOCK) {
@@ -158,7 +161,8 @@ public final class HarpoonGunItem extends Item {
         }
 
         pd.remove(TAG_PENDING);
-        float ropeMaxHp = (float) Config.ROPE_LINK_MAX_HEALTH.getAsDouble();
+        float ropeMaxHpBase = (float) Config.ROPE_LINK_MAX_HEALTH.getAsDouble();
+        float ropeMaxHp = (float) (ropeMaxHpBase * tier.maxHealthMultiplier);
         data.putRopeLink(new RopeLink(linkId, sp.getUUID(), aKey, key, aPos, pos, maxLinkLen, ropeMaxHp, ropeMaxHp));
         boolean autoClaimed = data.tryAutoClaimIslandAfterRopePlaced(sp.getUUID(), aKey, key, sl.getGameTime());
         stack.hurtAndBreak(1, sp, net.minecraft.world.entity.EquipmentSlot.MAINHAND);

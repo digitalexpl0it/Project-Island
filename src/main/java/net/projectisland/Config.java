@@ -189,6 +189,16 @@ public final class Config {
                     "Maximum (and initial) hit points per rope link. Strain lowers health; at 0 the link snaps and anchors restore.")
             .defineInRange("ropeLinkMaxHealth", 100.0d, 1.0d, 1_000_000.0d);
 
+    public static final ModConfigSpec.BooleanValue ROPE_PROGRESSION_UPGRADE_EXISTING_LINKS = BUILDER
+            .comment(
+                    "When true, when a player unlocks a higher rope tier (advancement), existing RopeLinks they own are upgraded server-side (max length + max health).",
+                    "Upgrades preserve the current health fraction. Disable if you want tiers to affect new links only.")
+            .define("ropeProgressionUpgradeExistingLinks", true);
+
+    public static final ModConfigSpec.IntValue ROPE_PROGRESSION_UPGRADE_INTERVAL_TICKS = BUILDER
+            .comment("How often (ticks) to scan and upgrade existing rope links when ropeProgressionUpgradeExistingLinks is enabled.")
+            .defineInRange("ropeProgressionUpgradeIntervalTicks", 200, 1, 20_000);
+
     public static final ModConfigSpec.IntValue ROPE_LINK_STRESS_TICK_INTERVAL = BUILDER
             .comment("Server ticks between strain evaluations (span vs max length) and optional damage. 20 ≈ once per second.")
             .defineInRange("ropeLinkStressTickInterval", 20, 1, 1200);

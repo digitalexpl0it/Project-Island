@@ -22,6 +22,10 @@ public record RopeLink(
                 id, owner, fromKey, toKey, fromAnchorPos, toAnchorPos, maxLengthBlocks, newHealth, maxHealth);
     }
 
+    public RopeLink withCaps(double newMaxLen, float newHealth, float newMaxHealth) {
+        return new RopeLink(id, owner, fromKey, toKey, fromAnchorPos, toAnchorPos, newMaxLen, newHealth, newMaxHealth);
+    }
+
     public float healthFraction() {
         if (maxHealth <= 1e-6f) {
             return 0f;

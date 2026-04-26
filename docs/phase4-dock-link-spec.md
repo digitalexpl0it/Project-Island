@@ -27,6 +27,16 @@ This document is the **authoritative design** for how a non-starter island becom
 
 Implemented in **`HarpoonGunItem`**; second shot must pass **all** of the following.
 
+**Tiered caps (progression):** the server derives a rope tier from advancements (`RopeProgression`) and scales the base
+caps for **new** links:
+
+- **BASIC**: 1.00× max length, 1.00× max health
+- **REINFORCED** (`projectisland:progression/rope_reinforced`): 1.25× length, 1.50× health
+- **STEEL** (`projectisland:progression/rope_steel`): 1.50× length, 2.25× health
+
+Existing links are upgraded server-side when `ropeProgressionUpgradeExistingLinks` is enabled (see `RopeLinkProgressionUpgrade`),
+preserving health fraction.
+
 1. **Dimension** — `ProjectIslandDimensions.isFloatingIslandsGameplay(level)` (floating-islands overworld only).
 2. **Raycast** — From player eye along look vector, `ClipContext` **OUTLINE** blocks, fluid ignored, range **`ropeLinkRaycastRangeBlocks`** (common config).
 3. **Hit block** — Must be **BLOCK** hit; block must not be a **falling** block (`FallingBlock`); must not be **air**; destroy speed ≥ **0** on empty getter (excludes most replaceables / weird cases).
@@ -114,6 +124,8 @@ Breaking **both** anchors removes the link and can revert secondary claims that 
 | `secondaryClaimCommandPermissionLevel` | OP level for `/projectisland island claim`. |
 | `secondaryClaimCommandMaxDistanceBlocks` | For command claims: max horizontal distance to a valid rope endpoint on the target island (0 disables). |
 | `autoClaimIslandOnRopeLink` | Auto `trySecondaryClaim` when completing a rope from hub to AVAILABLE. |
+| `ropeProgressionUpgradeExistingLinks` | When true, existing links are upgraded to match the owner’s tier. |
+| `ropeProgressionUpgradeIntervalTicks` | How often to scan and upgrade existing links (ticks). |
 
 ---
 
