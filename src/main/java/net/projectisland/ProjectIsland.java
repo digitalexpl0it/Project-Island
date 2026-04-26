@@ -35,6 +35,7 @@ public final class ProjectIsland {
         ProjectIslandContent.register(modEventBus);
         NeoForge.EVENT_BUS.register(this);
         FloatingIslandsSpawnEvents.register();
+        FloatingIslandsSpawnTuning.register();
         FloatingIslandsSpawnPregen.register();
         IslandCommands.register();
         IslandHudServerSync.register();

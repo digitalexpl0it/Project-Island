@@ -12,9 +12,9 @@
 	quests: [
 		{
 			description: [
-				"This line follows the core Project Island loop: &bharpoon &7→&b rope tiers &7→&b expand&r."
+				"You survive on &eprocedural floating islands&r in the overworld."
 				""
-				"ProgressiveStages &7(&estages&7)&r and these quests both track the same path — stages can gate recipes/items later; quests explain what to do next."
+				"This book matches the same steps as &bProgressiveStages&r (your stage list): &bharpoon islands together&r → &9upgrade rope strength&r → &dclaim more land&r."
 			]
 			id: "B1DD98FB3E338D81"
 			rewards: [{
@@ -35,7 +35,11 @@
 		{
 			dependencies: ["B1DD98FB3E338D81"]
 			description: [
-				"Get a &6Harpoon Gun&r. In the floating-islands overworld, fire into solid terrain to set anchors; a second shot on a different island starts a &erope link&r (server rules in `docs/phase4-dock-link-spec.md`)."
+				"&7How to get one:&r You need &6iron ingots&r first — with &bProgressiveStages&r, iron and this recipe stay hidden in &eJEI&r until you unlock &6Iron Age&r (smelt iron ore for the vanilla story advancement). Then &6craft&r a &6Harpoon Gun&r: &73 iron ingots&r top row, &7string · tripwire hook · string&r middle, &7stick&r under the hook. In creative, grab one from the &eTools and Utilities&r tab."
+				""
+				"&7How to use it:&r In the &bfloating-islands overworld&r, &euse&r (right-click) while aiming at &esolid blocks on an island&r to place the &efirst anchor&r. Use again on a &edifferent island&r within range to finish a &erope link&r. Messages above the hotbar explain if something blocked the shot."
+				""
+				"&7Rules in short:&r new links must stay on your &estarter island network&r (your hub plus a ring of neighbors unless the server enables deeper hops). If the &esecond&r shot fails a rule, the &efirst&r anchor is cleared so you can try elsewhere."
 			]
 			id: "7E6AB75D3E65449C"
 			icon: { Count: 1, id: "projectisland:harpoon_gun" }
@@ -63,7 +67,9 @@
 		{
 			dependencies: ["7E6AB75D3E65449C"]
 			description: [
-				"Obtain a &6Chain&r to unlock the &9Reinforced Rope&r tier: longer, tougher rope links (see in-game rope stats; server uses `RopeProgression`)."
+				"Hold &6chain&r in your inventory once to earn the &9Reinforced Rope&r advancement — &enew&r harpoon links get &emore reach and health&r (tiers apply when anchors are placed)."
+				""
+				"If your pack shows rope stats on anchors or in tooltips, those numbers update for links you create after unlocking this tier."
 			]
 			id: "2C8E5A6A42C1113F"
 			icon: { Count: 1, id: "minecraft:chain" }
@@ -91,7 +97,7 @@
 		{
 			dependencies: ["2C8E5A6A42C1113F"]
 			description: [
-				"Obtain a &5Netherite Ingot&r to unlock the &8Steel Rope&r tier: maximum span and health for your network."
+				"Hold a &5netherite ingot&r once to earn &8Steel Rope&r — the highest tier for &elink span&r and &erope health&r on &enew&r harpoon links."
 			]
 			id: "2F02EE13EFB18B41"
 			icon: { Count: 1, id: "minecraft:netherite_ingot" }
@@ -119,9 +125,11 @@
 		{
 			dependencies: ["2F02EE13EFB18B41"]
 			description: [
-				"Use your rope link to reach another region, then &eclaim&r a secondary island: &7sneak + use&r on your &elinked rope anchor&r on the target (or the claim command, per server config)."
+				"&7Goal:&r &eClaim&r a second island that was &eavailable&r (neutral) before you arrived."
 				""
-				"Click the check when you&7've done it — this only grants the &5Expansion&r stage; the claim itself is &oserver-checked&r."
+				"&7How:&r Reach it with your rope, stand on that island, then with an &eempty hand&r &esneak + use&r your &erope anchor&r that is part of the &elink&r to this island. Alternatively, many servers allow &e/projectisland island claim&r while you stand on the island (same rules as the anchor)."
+				""
+				"Check this task &eafter&r the claim succeeds. Completing it grants the &dExpansion&r stage; the game still validates the claim on the server."
 			]
 			id: "D85E21C4F51A13B7"
 			rewards: [{

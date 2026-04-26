@@ -1,0 +1,27 @@
+# ============================================================================
+# ProgressiveStages v1.1 - Trigger Configuration (Project Island dev pack)
+# Copy into config/ProgressiveStages/ on client + server, then /progressivestages reload
+# ============================================================================
+
+# ============================================================================
+# ADVANCEMENT TRIGGERS
+# ============================================================================
+[advancements]
+"projectisland:progression/rope_reinforced" = "pi_rope_reinforced"
+"projectisland:progression/rope_steel" = "pi_rope_steel"
+# Stock iron_age.toml locks iron until this stage — tie to vanilla story so JEI unlocks ingredients + harpoon recipe.
+"minecraft:story/mine_stone" = "stone_age"
+"minecraft:story/smelt_iron" = "iron_age"
+
+# ============================================================================
+# ITEM PICKUP TRIGGERS
+# ============================================================================
+[items]
+"projectisland:harpoon_gun" = "pi_harpoon"
+
+# ============================================================================
+# DIMENSION / BOSS (unused; placeholders for pack expansion)
+# ============================================================================
+[dimensions]
+
+[bosses]

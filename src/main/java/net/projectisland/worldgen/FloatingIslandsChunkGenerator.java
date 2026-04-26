@@ -240,8 +240,9 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
     }
 
     private void sprinkleExtraSurfaceTrees(WorldGenLevel level, ChunkAccess chunk) {
-        int n = Config.FLOATING_ISLANDS_EXTRA_SURFACE_TREES_PER_CHUNK.getAsInt();
-        if (n <= 0) {
+        int nGrassSandMycelium = Config.FLOATING_ISLANDS_EXTRA_SURFACE_TREES_PER_CHUNK.getAsInt();
+        int nSnow = Config.FLOATING_ISLANDS_EXTRA_SURFACE_TREES_SNOW_PER_CHUNK.getAsInt();
+        if (nGrassSandMycelium <= 0 && nSnow <= 0) {
             return;
         }
         ChunkPos cpos = chunk.getPos();
@@ -250,25 +251,72 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
         HolderGetter<ConfiguredFeature<?, ?>> configured =
                 level.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE);
         RandomSource rnd = RandomSource.create(cpos.toLong() ^ level.getSeed());
-        for (int i = 0; i < n; i++) {
-            int wx = cpos.getMinBlockX() + rnd.nextInt(16);
-            int wz = cpos.getMinBlockZ() + rnd.nextInt(16);
-            int topY = FloatingIslandLayout.columnTopY(wx, wz, minY, maxY);
-            if (topY <= minY) {
-                continue;
+
+        List<BlockPos> grassCols = new ArrayList<>();
+        List<BlockPos> snowCols = new ArrayList<>();
+        List<BlockPos> sandCols = new ArrayList<>();
+        List<BlockPos> myceliumCols = new ArrayList<>();
+        for (int lz = 0; lz < 16; lz++) {
+            for (int lx = 0; lx < 16; lx++) {
+                int wx = cpos.getMinBlockX() + lx;
+                int wz = cpos.getMinBlockZ() + lz;
+                int topY = FloatingIslandLayout.columnTopY(wx, wz, minY, maxY);
+                if (topY <= minY) {
+                    continue;
+                }
+                BlockPos surfacePos = new BlockPos(lx, topY, lz);
+                BlockState surface = chunk.getBlockState(surfacePos);
+                if (surface.is(Blocks.GRASS_BLOCK)) {
+                    grassCols.add(new BlockPos(wx, topY, wz));
+                } else if (surface.is(Blocks.SNOW_BLOCK)) {
+                    snowCols.add(new BlockPos(wx, topY, wz));
+                } else if (surface.is(Blocks.SAND)) {
+                    sandCols.add(new BlockPos(wx, topY, wz));
+                } else if (surface.is(Blocks.MYCELIUM)) {
+                    myceliumCols.add(new BlockPos(wx, topY, wz));
+                }
             }
-            int lx = wx - cpos.getMinBlockX();
-            int lz = wz - cpos.getMinBlockZ();
-            BlockPos surfacePos = new BlockPos(lx, topY, lz);
-            BlockState surface = chunk.getBlockState(surfacePos);
-            List<Holder<ConfiguredFeature<?, ?>>> variants = sprinkleVariantsForSurface(configured, surface);
-            if (variants.isEmpty()) {
-                continue;
-            }
-            BlockPos placeAt = new BlockPos(wx, topY + 1, wz);
-            Holder<ConfiguredFeature<?, ?>> feature = variants.get(rnd.nextInt(variants.size()));
-            feature.value().place(level, this, rnd, placeAt);
         }
+
+        for (int i = 0; i < nSnow && !snowCols.isEmpty(); i++) {
+            BlockPos col = snowCols.get(rnd.nextInt(snowCols.size()));
+            tryPlaceExtraTree(level, this, chunk, configured, rnd, col);
+        }
+        for (int i = 0; i < nGrassSandMycelium && !grassCols.isEmpty(); i++) {
+            BlockPos col = grassCols.get(rnd.nextInt(grassCols.size()));
+            tryPlaceExtraTree(level, this, chunk, configured, rnd, col);
+        }
+        for (int i = 0; i < nGrassSandMycelium && !sandCols.isEmpty(); i++) {
+            BlockPos col = sandCols.get(rnd.nextInt(sandCols.size()));
+            tryPlaceExtraTree(level, this, chunk, configured, rnd, col);
+        }
+        for (int i = 0; i < nGrassSandMycelium && !myceliumCols.isEmpty(); i++) {
+            BlockPos col = myceliumCols.get(rnd.nextInt(myceliumCols.size()));
+            tryPlaceExtraTree(level, this, chunk, configured, rnd, col);
+        }
+    }
+
+    private static void tryPlaceExtraTree(
+            WorldGenLevel level,
+            ChunkGenerator generator,
+            ChunkAccess chunk,
+            HolderGetter<ConfiguredFeature<?, ?>> configured,
+            RandomSource rnd,
+            BlockPos colWorldTop) {
+        int wx = colWorldTop.getX();
+        int wz = colWorldTop.getZ();
+        int topY = colWorldTop.getY();
+        ChunkPos cpos = chunk.getPos();
+        int lx = wx - cpos.getMinBlockX();
+        int lz = wz - cpos.getMinBlockZ();
+        BlockState surface = chunk.getBlockState(new BlockPos(lx, topY, lz));
+        List<Holder<ConfiguredFeature<?, ?>>> variants = sprinkleVariantsForSurface(configured, surface);
+        if (variants.isEmpty()) {
+            return;
+        }
+        BlockPos placeAt = new BlockPos(wx, topY + 1, wz);
+        Holder<ConfiguredFeature<?, ?>> feature = variants.get(rnd.nextInt(variants.size()));
+        feature.value().place(level, generator, rnd, placeAt);
     }
 
     private static List<Holder<ConfiguredFeature<?, ?>>> sprinkleVariantsForSurface(
@@ -282,7 +330,9 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
         if (surface.is(Blocks.SNOW_BLOCK)) {
             return List.of(
                     configured.getOrThrow(TreeFeatures.SPRUCE),
-                    configured.getOrThrow(TreeFeatures.PINE));
+                    configured.getOrThrow(TreeFeatures.PINE),
+                    configured.getOrThrow(TreeFeatures.MEGA_SPRUCE),
+                    configured.getOrThrow(TreeFeatures.MEGA_PINE));
         }
         if (surface.is(Blocks.MYCELIUM)) {
             return List.of(

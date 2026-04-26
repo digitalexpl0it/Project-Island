@@ -61,8 +61,39 @@ public final class Config {
 
     public static final ModConfigSpec.IntValue FLOATING_ISLANDS_EXTRA_SURFACE_TREES_PER_CHUNK = BUILDER
             .comment(
-                    "After normal biome decoration, try to place this many extra oak / fancy oak / birch trees on grass island tops per chunk (0 disables).")
-            .defineInRange("floatingIslandsExtraSurfaceTreesPerChunk", 5, 0, 32);
+                    "After normal biome decoration, try to place this many extra trees on grass / sand / mycelium island tops per chunk.",
+                    "Attempts pick random **surface columns that have land** (void columns are skipped), so small islands still get coverage.")
+            .defineInRange("floatingIslandsExtraSurfaceTreesPerChunk", 8, 0, 64);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_EXTRA_SURFACE_TREES_SNOW_PER_CHUNK = BUILDER
+            .comment(
+                    "Same as floatingIslandsExtraSurfaceTreesPerChunk but for snow-block tops (cold islands). Usually higher than grass so taiga-style islands are not bare.")
+            .defineInRange("floatingIslandsExtraSurfaceTreesSnowPerChunk", 14, 0, 64);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_SPAWN_TUNING_ENABLED = BUILDER
+            .comment(
+                    "When true, floating-islands overworld **natural** chunk spawns (night mobs, etc.) are thinned with the keep-chance options below.",
+                    "Spawners, structures, breeding, eggs, and commands are not affected.")
+            .define("floatingIslandsSpawnTuningEnabled", true);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_NATURAL_MONSTER_SPAWN_KEEP_CHANCE = BUILDER
+            .comment(
+                    "Per natural spawn attempt for non-creeper **monsters** (zombies, skeletons, spiders, …): keep with this probability (1 = vanilla, 0.35 ≈ 65% fewer).",
+                    "Creepers use floatingIslandsNaturalCreeperSpawnKeepChance instead.")
+            .defineInRange("floatingIslandsNaturalMonsterSpawnKeepChance", 0.42d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_NATURAL_CREEPER_SPAWN_KEEP_CHANCE = BUILDER
+            .comment(
+                    "Per natural spawn attempt for **creepers** only (explosion damage on small islands). Use a low value for at most occasional creepers (0.12 ≈ 1 in 8 attempts).")
+            .defineInRange("floatingIslandsNaturalCreeperSpawnKeepChance", 0.12d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_NATURAL_AMBIENT_SPAWN_KEEP_CHANCE = BUILDER
+            .comment("Natural spawns for **ambient** mobs (bats): keep chance (1 = unchanged).")
+            .defineInRange("floatingIslandsNaturalAmbientSpawnKeepChance", 1.0d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_NATURAL_WATER_CREATURE_SPAWN_KEEP_CHANCE = BUILDER
+            .comment("Natural spawns for **water creatures** (squid, etc.): keep chance on islands (1 = unchanged).")
+            .defineInRange("floatingIslandsNaturalWaterCreatureSpawnKeepChance", 1.0d, 0.0d, 1.0d);
 
     public static final ModConfigSpec.IntValue SPAWN_PREGEN_CHUNK_RADIUS = BUILDER
             .comment(

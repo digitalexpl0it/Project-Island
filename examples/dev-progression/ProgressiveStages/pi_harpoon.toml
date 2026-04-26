@@ -4,7 +4,7 @@
 [stage]
 id = "pi_harpoon"
 display_name = "Harpoon"
-description = "You got the Harpoon Gun and can work toward linking islands with rope."
+description = "Craft a Harpoon Gun (see JEI), then in the floating-islands overworld fire two anchors to start rope links between islands."
 icon = "projectisland:harpoon_gun"
 unlock_message = "&a&lHarpoon!&r You can start building a rope network between islands."
 dependency = "stone_age"

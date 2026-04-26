@@ -38,3 +38,8 @@ run/
 **/src/generated/**/.cache/
 repo/
 !**/src/**/repo/
+
+# NeoForge Gradle game dirs (worlds, logs, downloaded mods, generated configs) — not source of truth.
+# Pack-facing copies for FTB / ProgressiveStages live under examples/dev-progression/.
+run-client/
+run-server/
