@@ -14,6 +14,8 @@ import net.projectisland.Config;
 import net.projectisland.ProjectIsland;
 import net.projectisland.ProjectIslandDimensions;
 import net.projectisland.network.ActionBarToastPayload;
+import net.projectisland.worldgen.FloatingIslandLayout;
+import net.projectisland.worldgen.FloatingIslandsChunkGenerator;
 
 /**
  * Void rescue for the floating-islands overworld: {@linkplain #tickVoidRescue(ServerPlayer, ServerLevel) per-tick} can
@@ -33,6 +35,10 @@ public final class FloatingIslandVoidRescue {
     private static final String TAG_LAST_SAFE_SNAP_COOLDOWN = ProjectIsland.MOD_ID + "_last_safe_snap_cd";
 
     private static final int MAX_CHUNK_RADIUS = 80;
+    /** Matches the island search radius: {@value MAX_CHUNK_RADIUS} chunks → region rings. */
+    private static final int MAX_REGION_CHEBYSHEV =
+            (MAX_CHUNK_RADIUS + FloatingIslandLayout.REGION_CHUNKS - 1) / FloatingIslandLayout.REGION_CHUNKS;
+    /** Last-resort sample offsets inside a chunk (often near rims — only used if center-based rescue failed). */
     private static final int[] LOCAL_X = {8, 2, 14, 8, 8};
     private static final int[] LOCAL_Z = {8, 8, 8, 2, 14};
 
@@ -218,12 +224,58 @@ public final class FloatingIslandVoidRescue {
         if (isSupportedOnIslandSurface(player, level)) {
             return;
         }
+        int originX = Mth.floor(player.getX());
+        int originZ = Mth.floor(player.getZ());
+        for (int r = 0; r <= MAX_REGION_CHEBYSHEV; r++) {
+            for (int drx = -r; drx <= r; drx++) {
+                for (int drz = -r; drz <= r; drz++) {
+                    if (Math.max(Math.abs(drx), Math.abs(drz)) != r) {
+                        continue;
+                    }
+                    if (tryTeleportToRegionCenterRescue(player, level, drx, drz)) {
+                        return;
+                    }
+                }
+            }
+        }
+        fallbackRelocateToChunkSamplePoints(player, level, originX, originZ);
+    }
+
+    /**
+     * Prefer each region’s procedural island center (same anchor as the starter / HUD) — edge samples in
+     * {@link #fallbackRelocateToChunkSamplePoints} often land on rims where the next tick still looks “unsupported”,
+     * causing fall → rescue loops and disconnects.
+     */
+    private static boolean tryTeleportToRegionCenterRescue(ServerPlayer player, ServerLevel level, int dRegionX, int dRegionZ) {
+        int chunkX = Mth.floorDiv(Mth.floor(player.getX()), 16);
+        int chunkZ = Mth.floorDiv(Mth.floor(player.getZ()), 16);
+        int rcx = Mth.floorDiv(chunkX, FloatingIslandLayout.REGION_CHUNKS);
+        int rcz = Mth.floorDiv(chunkZ, FloatingIslandLayout.REGION_CHUNKS);
+        int rx = rcx + dRegionX;
+        int rz = rcz + dRegionZ;
+        if (!FloatingIslandLayout.regionHasIsland(rx, rz)) {
+            return false;
+        }
+        FloatingIslandKey key = new FloatingIslandKey(rx, rz);
+        Optional<Vec3> feet = FloatingIslandStarterPlacement.optionalFeetAtIslandCenter(level, key);
+        if (feet.isEmpty()) {
+            return false;
+        }
+        Vec3 f = feet.get();
+        IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(f.x), Mth.floor(f.z));
+        player.teleportTo(level, f.x, f.y, f.z, player.getYRot(), player.getXRot());
+        if (isSupportedOnIslandSurface(player, level)) {
+            showVoidRescueActionBar(player);
+            return true;
+        }
+        return false;
+    }
+
+    private static void fallbackRelocateToChunkSamplePoints(
+            ServerPlayer player, ServerLevel level, int originX, int originZ) {
         ChunkGenerator generator = level.getChunkSource().getGenerator();
         int minY = level.getMinBuildHeight();
         int maxY = level.getMaxBuildHeight();
-
-        int originX = Mth.floor(player.getX());
-        int originZ = Mth.floor(player.getZ());
         int ox = originX >> 4;
         int oz = originZ >> 4;
 
@@ -240,11 +292,13 @@ public final class FloatingIslandVoidRescue {
                     for (int s = 0; s < LOCAL_X.length; s++) {
                         int wx = bx + LOCAL_X[s];
                         int wz = bz + LOCAL_Z[s];
-                        int top = net.projectisland.worldgen.FloatingIslandsChunkGenerator.islandSurfaceBlockY(
-                                generator, wx, wz, minY, maxY);
-                        if (top != Integer.MIN_VALUE) {
-                            IslandChunkLoader.ensureChunksAroundWorldBlock(level, wx, wz);
-                            player.teleportTo(level, wx + 0.5d, top + 1.0d, wz + 0.5d, player.getYRot(), player.getXRot());
+                        int top = FloatingIslandsChunkGenerator.islandSurfaceBlockY(generator, wx, wz, minY, maxY);
+                        if (top == Integer.MIN_VALUE) {
+                            continue;
+                        }
+                        IslandChunkLoader.ensureChunksAroundWorldBlock(level, wx, wz);
+                        player.teleportTo(level, wx + 0.5d, top + 1.0d, wz + 0.5d, player.getYRot(), player.getXRot());
+                        if (isSupportedOnIslandSurface(player, level)) {
                             showVoidRescueActionBar(player);
                             return;
                         }
@@ -254,7 +308,7 @@ public final class FloatingIslandVoidRescue {
         }
 
         ProjectIsland.LOGGER.warn(
-                "Could not find an island surface within {} chunks of block {}, {} in overworld — player left at void position",
+                "Could not find a supported island surface within {} chunks of block {}, {} in overworld — player left in void",
                 MAX_CHUNK_RADIUS,
                 originX,
                 originZ);
@@ -269,9 +323,35 @@ public final class FloatingIslandVoidRescue {
         int maxY = level.getMaxBuildHeight();
         int originX = Mth.floor(x);
         int originZ = Mth.floor(z);
+        int chunkX = Mth.floorDiv(originX, 16);
+        int chunkZ = Mth.floorDiv(originZ, 16);
+        int rcx = Mth.floorDiv(chunkX, FloatingIslandLayout.REGION_CHUNKS);
+        int rcz = Mth.floorDiv(chunkZ, FloatingIslandLayout.REGION_CHUNKS);
+
+        for (int r = 0; r <= MAX_REGION_CHEBYSHEV; r++) {
+            for (int drx = -r; drx <= r; drx++) {
+                for (int drz = -r; drz <= r; drz++) {
+                    if (Math.max(Math.abs(drx), Math.abs(drz)) != r) {
+                        continue;
+                    }
+                    int arx = rcx + drx;
+                    int arz = rcz + drz;
+                    if (!FloatingIslandLayout.regionHasIsland(arx, arz)) {
+                        continue;
+                    }
+                    Optional<Vec3> o = FloatingIslandStarterPlacement.optionalFeetAtIslandCenter(
+                            level, new FloatingIslandKey(arx, arz));
+                    if (o.isPresent()
+                            && columnFeetPlausible(
+                                    level, generator, o.get(), minY, maxY)) {
+                        return o;
+                    }
+                }
+            }
+        }
+
         int ox = originX >> 4;
         int oz = originZ >> 4;
-
         for (int r = 0; r <= MAX_CHUNK_RADIUS; r++) {
             for (int dx = -r; dx <= r; dx++) {
                 for (int dz = -r; dz <= r; dz++) {
@@ -285,16 +365,24 @@ public final class FloatingIslandVoidRescue {
                     for (int s = 0; s < LOCAL_X.length; s++) {
                         int wx = bx + LOCAL_X[s];
                         int wz = bz + LOCAL_Z[s];
-                        int top = net.projectisland.worldgen.FloatingIslandsChunkGenerator.islandSurfaceBlockY(
-                                generator, wx, wz, minY, maxY);
-                        if (top != Integer.MIN_VALUE) {
-                            IslandChunkLoader.ensureChunksAroundWorldBlock(level, wx, wz);
-                            return Optional.of(new Vec3(wx + 0.5d, top + 1.0d, wz + 0.5d));
+                        int top = FloatingIslandsChunkGenerator.islandSurfaceBlockY(generator, wx, wz, minY, maxY);
+                        if (top == Integer.MIN_VALUE) {
+                            continue;
+                        }
+                        Vec3 f = new Vec3(wx + 0.5d, top + 1.0d, wz + 0.5d);
+                        if (columnFeetPlausible(level, generator, f, minY, maxY)) {
+                            return Optional.of(f);
                         }
                     }
                 }
             }
         }
         return Optional.empty();
+    }
+
+    private static boolean columnFeetPlausible(
+            ServerLevel level, ChunkGenerator generator, Vec3 feet, int minY, int maxY) {
+        return FloatingIslandSurfaceSupport.columnSupportsFeet(
+                level, generator, Mth.floor(feet.x), Mth.floor(feet.z), feet.y, minY, maxY);
     }
 }

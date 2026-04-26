@@ -1,0 +1,239 @@
+[general]
+	#Starting stages for new players (v1.3)
+	#List of stage IDs to auto-grant on first join
+	#Example: ["stone_age", "tutorial_complete"]
+	#Set to empty list [] for no starting stages
+	starting_stages = ["stone_age"]
+	#Team mode: "ftb_teams" (requires FTB Teams mod) or "solo" (each player is their own team)
+	#If "ftb_teams", stages are shared across team members
+	#If "solo", each player has independent progression
+	team_mode = "ftb_teams"
+	#Enable debug logging for stage checks, lock queries, and team operations
+	debug_logging = false
+	#Enable linear progression (auto-grant dependency stages)
+	#If true, granting a stage also auto-grants all missing dependencies recursively
+	#If false, stages require explicit dependency satisfaction (admin can bypass with double-confirm)
+	linear_progression = false
+
+[enforcement]
+	#Block item use (right-click with item in hand)
+	block_item_use = true
+	#Block item pickup (prevent picking up locked items from ground)
+	block_item_pickup = true
+	#Prevent locked items from being in the hotbar
+	#When true, locked items in hotbar slots are moved to main inventory (not dropped)
+	#When false, locked items can remain in the hotbar but still cannot be used
+	#This is a softer alternative to block_item_inventory — lets players store items for later
+	#Ignored if block_item_inventory is true (which drops items from everywhere)
+	block_item_hotbar = true
+	#Prevent picking up locked items with the mouse cursor in GUIs
+	#When true, players cannot click on locked items in inventories/containers
+	#When false, players can freely move locked items between inventory and chests
+	#This allows players to store locked items for later use once they unlock the stage
+	#Ignored if block_item_inventory is true (which blocks all interaction)
+	block_item_mouse_pickup = true
+	#Block item holding in inventory (auto-drop locked items)
+	#This is the strictest option — locked items are dropped on the ground
+	#If false, see block_item_hotbar and block_item_mouse_pickup for softer alternatives
+	block_item_inventory = true
+	#Frequency to scan inventory for locked items (in ticks, 20 ticks = 1 second)
+	#Set to 0 to disable periodic scanning
+	# Default: 20
+	# Range: 0 ~ 200
+	inventory_scan_frequency = 20
+	#Block crafting locked recipes
+	block_crafting = true
+	#Hide locked recipes from crafting table output
+	hide_locked_recipe_output = true
+	#Block placement of locked blocks
+	block_block_placement = true
+	#Block right-clicking locked blocks
+	block_block_interaction = true
+	#Block travel to locked dimensions
+	block_dimension_travel = true
+	#Block items from locked mods
+	block_locked_mods = true
+	#Block Create-style item-on-block interactions
+	block_interactions = true
+	#Block attacking locked entities
+	#If true, players cannot attack entity types locked behind a stage
+	block_entity_attack = true
+	#Gate mob spawns behind stages
+	#If true, mobs listed in spawn_entities / spawn_entity_tags / spawn_entity_mods
+	#will be prevented from spawning in the world until the nearest player has the required stage.
+	#Useful for 'world responds to progression' setups (e.g., Born In Chaos mobs only spawn after a quest).
+	block_mob_spawns = true
+	#Radius (in blocks) to search for the nearest player when gating mob spawns
+	#If no player is within this radius of the spawn, the spawn is ALLOWED (no one will see it).
+	#If a player is within range, their stages determine whether the spawn is allowed.
+	#Default 128 blocks (~8 chunks, standard mob tracking range).
+	# Default: 128
+	# Range: 16 ~ 512
+	mob_spawn_check_radius = 128
+	#Allow creative mode players to bypass stage locks
+	#If true, players in creative mode can use/place locked items
+	#They will still be locked when switching to survival
+	allow_creative_bypass = true
+	#Rename locked items to hide their identity
+	#If true, locked items show as 'Unknown Item' instead of real name
+	#Players must unlock the stage to see the real name
+	mask_locked_item_names = true
+	#Cooldown in milliseconds between lock notification messages
+	#Prevents chat spam when standing on locked items
+	# Default: 3000
+	# Range: 0 ~ 30000
+	notification_cooldown = 3000
+	#Show chat message when player is blocked by a lock
+	show_lock_message = true
+	#Play sound when player is blocked by a lock
+	play_lock_sound = true
+	#Sound to play when blocked
+	lock_sound = "minecraft:block.note_block.pling"
+	#Sound volume (0.0 to 1.0)
+	# Default: 1.0
+	# Range: 0.0 ~ 1.0
+	lock_sound_volume = 1.0
+	#Sound pitch (0.5 to 2.0)
+	# Default: 1.0
+	# Range: 0.5 ~ 2.0
+	lock_sound_pitch = 1.0
+
+[team]
+	#Stages persist when leaving team
+	persist_stages_on_leave = true
+
+[emi]
+	#Enable EMI integration
+	enabled = true
+	#Show lock icon overlay on locked items/recipes in EMI
+	show_lock_icon = true
+	#Lock icon position: top_left, top_right, bottom_left, bottom_right, center
+	lock_icon_position = "top_left"
+	#Lock icon size in pixels
+	# Default: 8
+	# Range: 4 ~ 32
+	lock_icon_size = 8
+	#Show semi-transparent highlight on locked recipe outputs
+	show_highlight = true
+	#Highlight color (ARGB hex format: 0xAARRGGBB)
+	highlight_color = "0x50FFAA40"
+	#Show lock info in item tooltips
+	show_tooltip = true
+	#Show locked recipes in EMI
+	#If false, locked items and recipes will be hidden from EMI entirely
+	#If true, locked items will show with lock overlays
+	show_locked_recipes = false
+
+[performance]
+	#Cache lock queries for better performance
+	enable_lock_cache = true
+	#Cache size per player
+	# Default: 1024
+	# Range: 128 ~ 8192
+	lock_cache_size = 1024
+
+[messages]
+	#Text shown in place of item name when mask_locked_item_names is true.
+	#Supports & color codes. Example: '&4&lUnknown Item'
+	tooltip_masked_name = "&cUnknown Item"
+	#Tooltip header when both the item and its recipe are locked.
+	#Supports & color codes.
+	tooltip_item_and_recipe_locked = "&c&l🔒 Item and Recipe Locked"
+	#Tooltip header when only the item is locked.
+	#Supports & color codes.
+	tooltip_item_locked = "&c&l🔒 Item Locked"
+	#Tooltip header when only the recipe is locked.
+	#Supports & color codes.
+	tooltip_recipe_locked = "&c&l🔒 Recipe Locked"
+	#Tooltip line showing required stage. {stage} = stage display name.
+	#Supports & color codes.
+	tooltip_stage_required = "&7Stage required: &f{stage}"
+	#Tooltip line showing current stage.
+	#{stage} = current stage name, {progress} = progress string (e.g. 2/5).
+	#Supports & color codes.
+	tooltip_current_stage = "&7Current stage: &f{stage} &8({progress})"
+	#Chat message when a player tries to use/pickup a locked item.
+	#{stage} = required stage display name. Supports & color codes.
+	item_locked = "&c🔒 You haven't unlocked this item yet! &7Required: &f{stage}"
+	#Chat message for generic locked things (block, dimension, entity, recipe, interaction).
+	#{type} = description (e.g. 'This block'), {stage} = required stage display name.
+	#Supports & color codes.
+	type_locked = "&c🔒 {type} is locked! &7Required: &f{stage}"
+	#Chat message when locked items are dropped from inventory.
+	#{count} = number of items dropped. Supports & color codes.
+	items_dropped = "&c🔒 Dropped {count} locked items from your inventory!"
+	#Chat message when locked items are moved out of the hotbar.
+	#{count} = number of items moved. Supports & color codes.
+	items_moved_hotbar = "&c🔒 Moved {count} locked item(s) out of your hotbar!"
+	#Chat message when a stage cannot be granted due to missing dependencies.
+	#{stage} = stage path, {dependencies} = comma-separated missing deps.
+	#Supports & color codes.
+	missing_dependencies = "&7[ProgressiveStages] Stage '&f{stage}&7' could not be granted: missing required stage(s): &f{dependencies}&7. Complete the prerequisites first."
+	#Command error when a stage ID does not exist.
+	#{stage} = the stage name. Supports & color codes.
+	cmd_stage_not_found = "&cStage not found: {stage}"
+	#Command error when the player already has the stage.
+	#{stage} = the stage name. Supports & color codes.
+	cmd_already_has_stage = "&ePlayer already has stage: {stage}"
+	#Command success when granting a stage.
+	#{stage} = stage name, {player} = player name. Supports & color codes.
+	cmd_grant_success = "&aGranted stage &2{stage} &ato &f{player}"
+	#Command success when granting with dependency bypass.
+	#{stage} = stage name, {player} = player name. Supports & color codes.
+	cmd_grant_bypass = "&aGranted stage &2{stage} &ato &f{player} &e(dependency bypass)"
+	#Command error when dependencies are missing.
+	#{stage} = stage name, {player} = player name, {dependencies} = missing deps.
+	#Supports & color codes.
+	cmd_grant_missing_deps = "&cCannot grant {stage}: &f{player} &cis missing dependencies: &6{dependencies}"
+	#Hint shown after missing deps error.
+	#Supports & color codes.
+	cmd_grant_bypass_hint = "&7&oType the command again within 10 seconds to bypass."
+	#Command success when revoking a stage.
+	#{stage} = stage name, {player} = player name. Supports & color codes.
+	cmd_revoke_success = "&aRevoked stage &c{stage} &afrom &f{player}"
+	#Command error when no player is specified for /stage list.
+	#Supports & color codes.
+	cmd_specify_player = "&cSpecify a player"
+	#Header for /stage list output.
+	#{player} = player name, {count} = unlocked count, {total} = total stages.
+	#Supports & color codes.
+	cmd_list_header = "&6=== Stages for &f{player} &6({count}/{total}) ==="
+	#Shown when player has no stages unlocked.
+	#Supports & color codes.
+	cmd_list_empty = "&7  No stages unlocked"
+	#Shown when player has the checked stage.
+	#{player} = player name, {stage} = stage name. Supports & color codes.
+	cmd_check_has = "&f{player} &ahas &2{stage}"
+	#Shown when player does NOT have the checked stage.
+	#{player} = player name, {stage} = stage name. Supports & color codes.
+	cmd_check_not_has = "&f{player} &cdoes not have &4{stage}"
+	#Shown after /progressivestages reload.
+	#{count} = number of synced players. Supports & color codes.
+	cmd_reload_success = "&aReloaded stage definitions and triggers, synced {count} players. EMI will refresh."
+	#Shown when an invalid trigger type is given.
+	#{type} = the invalid type. Supports & color codes.
+	cmd_trigger_invalid_type = "&cInvalid trigger type: {type}. Must be 'dimension' or 'boss'."
+	#Shown after resetting a trigger.
+	#{type} = trigger type, {key} = trigger key, {player} = player name.
+	#Supports & color codes.
+	cmd_trigger_reset = "&aReset {type} trigger '{key}' for {player}"
+
+	[integration.ftbteams]
+		#Enable FTB Teams integration
+		#If true and FTB Teams is installed, stages are shared across team members
+		#If false or FTB Teams is not installed, falls back to solo mode automatically
+		#Disabling this prevents ProgressiveStages from loading FTB Teams classes entirely
+		enabled = true
+
+	[integration.ftbquests]
+		#Enable FTB Quests integration
+		#If true, ProgressiveStages registers as the stage provider for FTB Quests
+		#Stage tasks will update instantly when stages change
+		#Set to false if you experience compatibility issues
+		enabled = true
+		#Maximum FTB Quests stage rechecks per tick
+		#Limits processing to prevent lag spikes on bulk operations
+		#Remaining players are processed on subsequent ticks
+		# Default: 10
+		# Range: 1 ~ 100
+		recheck_budget_per_tick = 10

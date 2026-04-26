@@ -26,7 +26,7 @@ Other branches (defense, docking / merge, power, automation) should get **their 
 - [TODO.md](TODO.md) — phased checklist from bootstrap through ops.
 - [CHANGELOG.md](CHANGELOG.md) — notable changes ([Keep a Changelog](https://keepachangelog.com/en/1.1.0/) style).
 
-**Current focus:** **Phase 2 is done** (overworld floating islands + procedural island biomes). Next up: **Phase 4** claims — starter: **region-spiral** search for **`AVAILABLE`** keys, **atomic auto-claim** once per player UUID, teleport on **region center / HUD-aligned** surface (not the current chunk-spiral **void-rescue** rim); **dense spawn**: capped search + documented fallback; **dock / link** for extra islands — see [TODO.md](TODO.md) Phase 4.
+**Current focus:** **Phase 2 is done**; **Phase 4** starter + dock/link + rope topology + rope tiers are in. **Player progression UI:** **FTB Quests** + **ProgressiveStages** starter pack under **`examples/dev-progression/`** (mirrored into `run-client` / `run-server` `config/` for dev). **Void rescue** teleports to **procedural island centers** first (same anchor as starter/HUD) to avoid rim loops. Roadmap detail: [TODO.md](TODO.md).
 
 ## Target stack
 
@@ -46,9 +46,14 @@ The mod registers it as a **built-in client resource pack** (`AddPackFindersEven
 
 For **glowing ores / neon** style, you usually want a **shader** (e.g. Complementary, BSL) in addition to or instead of only a texture pack.
 
-### Optional client mods (not bundled; pin per modpack)
+### Progress UI (preferred for modpacks)
 
-- **[Advancements Reloaded](https://github.com/42atomys/mc-advancements-reloaded)** ([Modrinth](https://modrinth.com/mod/advancements-reloaded)) — NeoForge, **MIT**. Use it as a **progress tracker**: better **vanilla advancements** UI (layout, search, tab ordering) so players can see what they **have completed** and what they **still need** to unlock **new gear** or **upgrade existing** gear (ropes/chains, engines, propellers, etc.). **Important split:** those systems’ **rules and mechanics** (rope tension, thrust caps, recipes) live in **Project Island** and the **server**; datapack **`data/.../advancement`** + criteria reflect progression, while Advancements Reloaded only changes **how** that tree is browsed—it does not grant power by itself. Prefer **pinning** their release for your MC version; **fork** only if you need UI behavior they will not take upstream (forks add merge cost). Check their **Known issues** if another mod replaces the same screen.
+- **FTB Quests** — the primary “modern tree” UI (tasks + rewards).
+- **ProgressiveStages** — a stage/level system the **server** can check to gate mechanics (items/recipes/tiers), independent of client UI.
+
+Vanilla advancements can still exist for lightweight toasts/milestones, but they’re not the core progression UI for Project Island.
+
+**Dev runs:** a starter quest chapter and Project Island–specific stage files live under `examples/dev-progression/`; the Gradle `runClient` / `runServer` directories mirror those into `config/ftbquests/quests/` and `config/ProgressiveStages/`. **Quest/chapter files** are picked up on the next start (or your FTB Quests reload path if you use it); use **`/progressivestages reload`** after editing stage TOML (and **`/progressivestages validate`** to catch typos).
 
 ## Learning from existing work
 
@@ -147,12 +152,12 @@ If you land in void sky, the mod **moves you onto the nearest procedural island*
 
 ### Dedicated server (`./gradlew runServer`): you must be OP
 
-The MDK server starts with an **empty** [`run/ops.json`](run/ops.json). Without operator permission, Brigadier often reports **`Unknown or incomplete command`** with the caret under the first **`/`** even though the syntax is fine.
+The dev server (`./gradlew runServer`, game dir `run-server/`) may have an **empty** [`run-server/ops.json`](run-server/ops.json). Without operator permission, Brigadier often reports **`Unknown or incomplete command`** with the caret under the first **`/`** even though the syntax is fine. The repo keeps [`dev-ops.example.json`](dev-ops.example.json) (offline UUID for user **Dev**); copy it to `run-server/ops.json` and **restart** if you are not an OP.
 
 Pick one:
 
 1. **From the server console** (no `/` prefix): `op Dev` — use the **exact** name shown when you join (default dev client user is often `Dev`).
-2. **Copy the example ops file** from the repo root: [`dev-ops.example.json`](dev-ops.example.json) → `run/ops.json` (already done in this workspace for offline UUID of `Dev`), then **restart** the server.
+2. **Copy the example ops file** from the repo root: [`dev-ops.example.json`](dev-ops.example.json) → `run-server/ops.json`, then **restart** the server (the workspace copy targets the **Dev** offline UUID; change name/UUID if you use a different test account).
 
 Single-player worlds need **Allow Cheats** (or **Open to LAN** with cheats) instead.
 
@@ -162,7 +167,7 @@ Fly around (`F3` debug lists `ChunkGenerator: projectisland:floating_islands` on
 
 - **Stable id:** `FloatingIslandKey` = coarse grid `(regionX, regionZ)` — the same cell the procedural RNG uses (`FloatingIslandLayout.REGION_CHUNKS`). For a block column, `FloatingIslandLayout.islandOwningSurface` picks the neighbor region whose ellipsoid **wins** the surface height (ties broken deterministically).
 - **Saved data:** overworld file `projectisland_floating_islands.dat` via `FloatingIslandSavedData` (`IslandState`: `AVAILABLE`, `CLAIMED`, `CONTESTED` placeholder). Rows are created on demand.
-- **Starter claim (Phase 4):** on **`PlayerLoggedIn`**, players without a **`StarterHomes`** entry get the first **`AVAILABLE`** island in a **region** spiral from shared spawn (configurable); **`FloatingIslandSavedData`** records **CLAIMED** + starter map; returning players in the **void** are moved back to that island’s **center** surface when possible. **`PlayerTickEvent.Pre`:** **`FloatingIslandVoidRescue`** — last-safe mid-void snap, then rescue **once per void fall** when Y nears **`minBuildHeight` + `voidRescueTriggerBlocksAboveMinY`** (bed, starter, nearest island) if **`voidRescueEachTick`** is on. **`PlayerRespawnPositionEvent`:** **`FloatingIslandRespawnHandler`** fixes respawns that would land in void (prefers **starter**, else nearest surface); **bed** anchors that are already safe are unchanged.
+- **Starter claim (Phase 4):** on **`PlayerLoggedIn`**, players without a **`StarterHomes`** entry get the first **`AVAILABLE`** island in a **region** spiral from shared spawn (configurable); **`FloatingIslandSavedData`** records **CLAIMED** + starter map; returning players in the **void** are moved back to that island’s **center** surface when possible. **`PlayerTickEvent.Pre`:** **`FloatingIslandVoidRescue`** — last-safe mid-void snap, then rescue **once per void fall** when Y nears **`minBuildHeight` + `voidRescueTriggerBlocksAboveMinY`** (bed, starter, nearest island) if **`voidRescueEachTick`** is on. **`relocatePlayerFromVoid` / `findNearestIslandFeet`** spiral **region centers** (via **`FloatingIslandStarterPlacement.optionalFeetAtIslandCenter`**) before legacy chunk-edge samples, and only accept fallbacks if the player is **actually supported** after teleport — reduces rim → fall → repeat → disconnect loops. **`PlayerRespawnPositionEvent`:** **`FloatingIslandRespawnHandler`** fixes respawns that would land in void (prefers **starter**, else nearest surface); **bed** anchors that are already safe are unchanged.
 - **Island commands:** `/projectisland island here` — any player; prints the island key and `IslandRecord` state at your feet (void columns report none). **`/projectisland island claim`** — **AVAILABLE → CLAIMED** for the island under your feet when `secondaryClaimRequiresRopeLink` is satisfied (see [TODO.md](TODO.md)); permission level **`secondaryClaimCommandPermissionLevel`** in **`projectisland-common.toml`** (default **`0`** = survival-friendly; set **`2`** to restrict to operators). If `secondaryClaimCommandMaxDistanceBlocks` > 0, command claims also require you to be within that horizontal distance of your rope anchor endpoint on the target island (prevents remote claims). **In-world:** **sneak + use** (empty hand) on **your** linked **rope anchor** on the target island runs the same claim rules (no Brigadier permission gate).
 - **Rope network (Phase 4):** **Starter = main hub**. **Server enforcement** on the **second harpoon anchor** (`RopeTopology`): stay connected to starter, **depth** capped by **`ropeTopologyMaxDepthFromStarter`** and **`ropeAllowTertiaryIslandLinks`** (default **off** = hub + one ring only; turn on for tertiary at depth **2**), **direct spoke** cap off starter (default **1**, up to **4** in config), **sister outbound** cap per claimed non-starter (default **1**, up to **3**). **Abandon** by **breaking ropes**; with **`secondaryClaimRequiresRopeLink`**, orphan **non-starter** claims revert to **AVAILABLE**. Advancement-driven caps can replace the tertiary toggle later (Phase 6). **Dock / link design (secondary claims):** [docs/phase4-dock-link-spec.md](docs/phase4-dock-link-spec.md) — claim surfaces, logical rope gate, known MVP gaps, future hardening.
 - **Rope tier progression (MVP):** new rope links scale **max span** and **max health** based on advancements: **Reinforced Rope** (`projectisland:progression/rope_reinforced`, triggered by obtaining a **chain**) and **Steel Rope** (`projectisland:progression/rope_steel`, triggered by obtaining a **netherite ingot**). This is server-authoritative (`RopeProgression`) and only affects **new** links.
@@ -194,4 +199,4 @@ Bundled or third-party assets (resource packs, textures copied from other mods, 
 
 ---
 
-_Documentation last revised **22 April 2026** (island biome weight table; `projectisland-common.toml` on dedicated servers; Phase 4 starter / spawn intent in **Current focus**)._
+_Documentation last revised **25 April 2026** (FTB Quests / ProgressiveStages dev pack; void rescue center-first; `run-server/ops.json`; **Current focus** + Phase 3 void-rescue bullet)._

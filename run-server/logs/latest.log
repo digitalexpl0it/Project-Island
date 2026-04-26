@@ -1,0 +1,176 @@
+[25Apr2026 21:05:04.743] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeserverdev, --gameDir, ., --fml.fmlVersion, 4.0.42, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.227, --fml.neoFormVersion, 20240808.144430, --nogui]
+[25Apr2026 21:05:04.745] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: JVM identified as Ubuntu OpenJDK 64-Bit Server VM 21.0.10+7-Ubuntu-124.04
+[25Apr2026 21:05:04.747] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.10 by Ubuntu; OS Linux arch amd64 version 6.17.0-22-generic
+[25Apr2026 21:05:04.855] [main/INFO] [net.neoforged.fml.loading.ImmediateWindowHandler/]: ImmediateWindowProvider not loading because launch target is forgeserverdev
+[25Apr2026 21:05:04.905] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/home/drose/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%2394!/ Service=ModLauncher Env=SERVER
+[25Apr2026 21:05:05.719] [main/INFO] [net.neoforged.fml.loading.moddiscovery.locators.JarInJarDependencyLocator/]: Found 17 dependencies adding them to mods collection
+[25Apr2026 21:05:05.721] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		Architectury 13.0.8 (architectury)
+		Cloth Config v15 API 15.0.140 (cloth_config)
+		Create 6.0.10 (create)
+		Create Aeronautics 1.1.3 (aeronautics)
+		Create Aeronautics 1.1.3 (aeronautics_bundled)
+		Create Offroad 1.1.3 (offroad)
+		Create Simulated 1.1.3 (simulated)
+		Flywheel 1.0.6 (flywheel)
+		FTB Library 2101.1.31 (ftblibrary)
+		FTB Quests 2101.1.24 (ftbquests)
+		FTB Teams 2101.1.10 (ftbteams)
+		FTB XMod Compat 21.1.8 (ftbxmodcompat)
+		Just Enough Items 19.27.0.340 (jei)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.227 (neoforge)
+		Ponder 1.0.82+mc1.21.1 (ponder)
+		ProgressiveStages 1.4 (progressivestages)
+		Project Island 0.1.0 (projectisland)
+		Sable 1.1.3 (sable)
+		Sable Companion 1.5.0 (sablecompanion)
+		Veil 3.6.2 (veil)
+[25Apr2026 21:05:06.356] [main/INFO] [mixin/]: Compatibility level set to JAVA_21
+[25Apr2026 21:05:06.417] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeserverdev' with arguments [--gameDir, ., --nogui]
+[25Apr2026 21:05:06.465] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.debug.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.466] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.dynamicbuffer.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.466] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.fix.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.467] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.framebuffer.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.468] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.imgui.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.468] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.necromancer.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.468] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.performance.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.469] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.perspective.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.469] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.pipeline.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.469] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.quasar.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.470] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.registry.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.470] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.rendertype.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.470] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.resource.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.471] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.scheduler.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.471] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.shader.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.471] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.neoforge.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.472] [main/WARN] [mixin/]: Reference map 'simulated.refmap.json' for simulated.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.475] [main/WARN] [mixin/]: Reference map 'aeronautics.refmap.json' for aeronautics.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.484] [main/WARN] [mixin/]: Reference map 'ponder.refmap.json' for ponder-common.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.493] [main/INFO] [dev.ryanhcode.sable.mixin.AbstractSableMixinPlugin/]: Using Vanilla renderer mixins
+[25Apr2026 21:05:06.494] [main/INFO] [dev.ryanhcode.sable.mixin.AbstractSableMixinPlugin/]: Using Vanilla renderer mixins
+[25Apr2026 21:05:06.494] [main/WARN] [mixin/]: Reference map 'offroad.refmap.json' for offroad.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:06.928] [main/ERROR] [net.neoforged.fml.common.asm.RuntimeDistCleaner/DISTXFORM]: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER
+[25Apr2026 21:05:06.929] [main/WARN] [mixin/]: Error loading class: net/minecraft/client/multiplayer/ClientLevel (java.lang.RuntimeException: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER)
+[25Apr2026 21:05:06.969] [main/ERROR] [net.neoforged.fml.common.asm.RuntimeDistCleaner/DISTXFORM]: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER
+[25Apr2026 21:05:06.969] [main/WARN] [mixin/]: Error loading class: net/minecraft/client/multiplayer/ClientLevel (java.lang.RuntimeException: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER)
+[25Apr2026 21:05:06.983] [main/ERROR] [net.neoforged.fml.common.asm.RuntimeDistCleaner/DISTXFORM]: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER
+[25Apr2026 21:05:06.984] [main/WARN] [mixin/]: Error loading class: net/minecraft/client/multiplayer/ClientLevel (java.lang.RuntimeException: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER)
+[25Apr2026 21:05:07.186] [main/WARN] [mixin/]: Error loading class: org/jetbrains/annotations/ApiStatus$ScheduledForRemoval (java.lang.ClassNotFoundException: org.jetbrains.annotations.ApiStatus$ScheduledForRemoval)
+[25Apr2026 21:05:07.207] [main/ERROR] [net.neoforged.fml.common.asm.RuntimeDistCleaner/DISTXFORM]: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER
+[25Apr2026 21:05:07.207] [main/WARN] [mixin/]: Error loading class: net/minecraft/client/multiplayer/ClientLevel (java.lang.RuntimeException: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER)
+[25Apr2026 21:05:07.210] [main/ERROR] [net.neoforged.fml.common.asm.RuntimeDistCleaner/DISTXFORM]: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER
+[25Apr2026 21:05:07.210] [main/WARN] [mixin/]: Error loading class: net/minecraft/client/multiplayer/ClientLevel (java.lang.RuntimeException: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER)
+[25Apr2026 21:05:07.226] [main/ERROR] [net.neoforged.fml.common.asm.RuntimeDistCleaner/DISTXFORM]: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER
+[25Apr2026 21:05:07.226] [main/WARN] [mixin/]: Error loading class: net/minecraft/client/multiplayer/ClientLevel (java.lang.RuntimeException: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER)
+[25Apr2026 21:05:07.228] [main/ERROR] [net.neoforged.fml.common.asm.RuntimeDistCleaner/DISTXFORM]: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER
+[25Apr2026 21:05:07.228] [main/WARN] [mixin/]: Error loading class: net/minecraft/client/multiplayer/ClientLevel (java.lang.RuntimeException: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER)
+[25Apr2026 21:05:07.242] [main/ERROR] [net.neoforged.fml.common.asm.RuntimeDistCleaner/DISTXFORM]: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER
+[25Apr2026 21:05:07.242] [main/WARN] [mixin/]: Error loading class: net/minecraft/client/multiplayer/ClientLevel (java.lang.RuntimeException: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER)
+[25Apr2026 21:05:07.245] [main/ERROR] [net.neoforged.fml.common.asm.RuntimeDistCleaner/DISTXFORM]: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER
+[25Apr2026 21:05:07.245] [main/WARN] [mixin/]: Error loading class: net/minecraft/client/multiplayer/ClientLevel (java.lang.RuntimeException: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER)
+[25Apr2026 21:05:07.351] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.3).
+[25Apr2026 21:05:08.683] [main/ERROR] [net.neoforged.fml.common.asm.RuntimeDistCleaner/DISTXFORM]: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER
+[25Apr2026 21:05:08.683] [main/WARN] [mixin/]: Error loading class: net/minecraft/client/multiplayer/ClientLevel (java.lang.RuntimeException: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER)
+[25Apr2026 21:05:08.691] [main/ERROR] [net.neoforged.fml.common.asm.RuntimeDistCleaner/DISTXFORM]: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER
+[25Apr2026 21:05:08.691] [main/WARN] [mixin/]: Error loading class: net/minecraft/client/multiplayer/ClientLevel (java.lang.RuntimeException: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER)
+[25Apr2026 21:05:08.699] [main/ERROR] [net.neoforged.fml.common.asm.RuntimeDistCleaner/DISTXFORM]: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER
+[25Apr2026 21:05:08.699] [main/WARN] [mixin/]: Error loading class: net/minecraft/client/multiplayer/ClientLevel (java.lang.RuntimeException: Attempted to load class net/minecraft/client/multiplayer/ClientLevel for invalid dist DEDICATED_SERVER)
+[25Apr2026 21:05:14.137] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[25Apr2026 21:05:14.139] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[25Apr2026 21:05:14.142] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[25Apr2026 21:05:14.144] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[25Apr2026 21:05:14.146] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[25Apr2026 21:05:14.216] [modloading-worker-0/INFO] [Veil/]: Veil is initializing.
+[25Apr2026 21:05:14.242] [modloading-worker-0/INFO] [net.neoforged.neoforge.common.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.227, for MC 1.21.1
+[25Apr2026 21:05:14.244] [modloading-worker-0/INFO] [com.simibubi.create.Create/]: Create 6.0.10 initializing! Commit hash: ac0c444d9828da3453ae8cc65338e8de063286fb
+[25Apr2026 21:05:14.854] [modloading-worker-0/INFO] [com.enviouse.progressivestages.Progressivestages/]: ProgressiveStages initializing...
+[25Apr2026 21:05:14.864] [modloading-worker-0/INFO] [com.enviouse.progressivestages.Progressivestages/]: ProgressiveStages initialized successfully
+[25Apr2026 21:05:15.901] [modloading-worker-0/INFO] [dev.ryanhcode.sable.Sable/]: Sable loaded!
+[25Apr2026 21:05:18.368] [modloading-worker-0/INFO] [net.projectisland.ProjectIsland/]: Project Island common setup
+[25Apr2026 21:05:18.375] [modloading-worker-0/INFO] [FTB XMod Compat/]: Chose [Entity Tags] as the active game stages implementation
+[25Apr2026 21:05:18.380] [modloading-worker-0/INFO] [FTB XMod Compat/]: Chose [FALLBACK] as the active permissions implementation
+[25Apr2026 21:05:18.382] [modloading-worker-0/INFO] [FTB Library/]: Setting permissions currency implementation to: <NONE>
+[25Apr2026 21:05:18.382] [modloading-worker-0/INFO] [FTB XMod Compat/]: Chose [<NONE>] as the active currency implementation
+[25Apr2026 21:05:18.383] [modloading-worker-0/INFO] [FTB XMod Compat/]: [FTB Quests] recipe helper provider is [JEI]
+[25Apr2026 21:05:18.384] [modloading-worker-0/INFO] [com.enviouse.progressivestages.Progressivestages/]: ProgressiveStages common setup
+[25Apr2026 21:05:18.581] [main/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[25Apr2026 21:05:18.589] [NeoForge Version Check/INFO] [net.neoforged.fml.VersionChecker/]: [create] Starting version check at https://api.modrinth.com/updates/create/forge_updates.json?neoforge=only
+[25Apr2026 21:05:18.734] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/home/drose/Projects/Project%20Island/build/moddev/artifacts/neoforge-21.1.227.jar%23136!/assets/.mcassetsroot' uses unexpected schema
+[25Apr2026 21:05:18.734] [main/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/home/drose/Projects/Project%20Island/build/moddev/artifacts/neoforge-21.1.227.jar%23136!/data/.mcassetsroot' uses unexpected schema
+[25Apr2026 21:05:18.840] [main/INFO] [com.simibubi.create.Create/]: Created 157 recipes which will be injected into the game
+[25Apr2026 21:05:18.851] [main/INFO] [com.simibubi.create.Create/]: Created 0 tags which will be injected into the game
+[25Apr2026 21:05:19.083] [NeoForge Version Check/INFO] [net.neoforged.fml.VersionChecker/]: [create] Found status: OUTDATED Current: 6.0.10 Target: 6.0.10+mc1.21.1
+[25Apr2026 21:05:20.100] [Worker-Main-4/INFO] [net.projectisland.island.FloatingIslandDisplayNameReloader/]: Loaded 30 adjectives and 30 nouns for floating island display names
+[25Apr2026 21:05:20.450] [main/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 2948 recipes
+[25Apr2026 21:05:20.718] [main/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 2646 advancements
+[25Apr2026 21:05:22.060] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting minecraft server version 1.21.1
+[25Apr2026 21:05:22.061] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Loading properties
+[25Apr2026 21:05:22.061] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Default game type: SURVIVAL
+[25Apr2026 21:05:22.061] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Generating keypair
+[25Apr2026 21:05:22.139] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Starting Minecraft server on *:25565
+[25Apr2026 21:05:22.196] [Server thread/INFO] [dev.ryanhcode.sable.Sable/]: Adding UDP server channel future
+[25Apr2026 21:05:22.242] [Netty Epoll Server IO #0/INFO] [dev.ryanhcode.sable.Sable/]: Server UDP channel active
+[25Apr2026 21:05:22.243] [Server thread/INFO] [net.minecraft.server.network.ServerConnectionListener/]: Using epoll channel type
+[25Apr2026 21:05:22.250] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[25Apr2026 21:05:22.250] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: The server will make no attempt to authenticate usernames. Beware.
+[25Apr2026 21:05:22.250] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[25Apr2026 21:05:22.250] [Server thread/WARN] [net.minecraft.server.dedicated.DedicatedServer/]: To change this, set "online-mode" to "true" in the server.properties file.
+[25Apr2026 21:05:22.323] [Server thread/INFO] [FTB Teams/]: loaded team data: 1 known players, 1 teams total
+[25Apr2026 21:05:22.326] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Preparing level "world"
+[25Apr2026 21:05:22.370] [Server thread/INFO] [dev.ryanhcode.sable.Sable/]: Assigned physics scene ID 0 to minecraft:overworld
+[25Apr2026 21:05:22.589] [Server thread/INFO] [dev.ryanhcode.sable.Sable/]: Assigned physics scene ID 1 to minecraft:the_nether
+[25Apr2026 21:05:22.645] [Server thread/INFO] [dev.ryanhcode.sable.Sable/]: Assigned physics scene ID 2 to minecraft:the_end
+[25Apr2026 21:05:22.682] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Preparing start region for dimension minecraft:overworld
+[25Apr2026 21:05:22.857] [worldgen/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Preparing spawn area: 0%
+[25Apr2026 21:05:22.921] [Server thread/INFO] [net.minecraft.server.level.progress.LoggerChunkProgressListener/]: Time elapsed: 238 ms
+[25Apr2026 21:05:22.921] [Server thread/INFO] [net.minecraft.server.dedicated.DedicatedServer/]: Done (0.657s)! For help, type "help"
+[25Apr2026 21:05:22.968] [Server thread/INFO] [net.neoforged.neoforge.gametest.GameTestHooks/]: Enabled Gametest Namespaces: [projectisland]
+[25Apr2026 21:05:22.996] [Server thread/INFO] [net.neoforged.neoforge.server.permission.PermissionAPI/]: Successfully initialized permission handler neoforge:default_handler
+[25Apr2026 21:05:22.996] [Server thread/INFO] [net.projectisland.ProjectIsland/]: Project Island dedicated server starting
+[25Apr2026 21:05:22.998] [Server thread/INFO] [com.enviouse.progressivestages.common.team.TeamProvider/]: FTB Teams detected, enabling team integration
+[25Apr2026 21:05:23.011] [Server thread/INFO] [com.enviouse.progressivestages.server.loader.StageFileLoader/]: Loaded 7 stage definitions
+[25Apr2026 21:05:23.014] [Server thread/INFO] [com.enviouse.progressivestages.common.tags.StageTagRegistry/]: [ProgressiveStages] Built dynamic stage tags: 7 stages, 45 total items
+[25Apr2026 21:05:23.019] [Server thread/INFO] [com.enviouse.progressivestages.server.triggers.TriggerConfigLoader/]: [ProgressiveStages] Loaded trigger config from /home/drose/Projects/Project Island/run-server/config/ProgressiveStages/triggers.toml
+[25Apr2026 21:05:23.022] [Server thread/INFO] [com.enviouse.progressivestages.server.integration.FTBTeamsIntegration/]: [ProgressiveStages] FTB Teams integration registered successfully
+[25Apr2026 21:05:23.024] [Server thread/INFO] [com.enviouse.progressivestages.compat.ftbquests.FTBQuestsCompat/]: [ProgressiveStages] Attempting to register FTB Library stage provider...
+[25Apr2026 21:05:23.025] [Server thread/INFO] [com.enviouse.progressivestages.compat.ftbquests.FtbQuestsHooks/]: [ProgressiveStages] Starting FTB Library stage provider registration...
+[25Apr2026 21:05:23.025] [Server thread/INFO] [com.enviouse.progressivestages.compat.ftbquests.FtbQuestsHooks/]: [ProgressiveStages] Replacing existing stage provider: dev.ftb.mods.ftblibrary.integration.stages.EntityTagStageProvider@79d35c68
+[25Apr2026 21:05:23.027] [Server thread/INFO] [FTB Library/]: Setting game stages provider implementation to: ProgressiveStagesStageProvider
+[25Apr2026 21:05:23.027] [Server thread/INFO] [com.enviouse.progressivestages.compat.ftbquests.FtbQuestsHooks/]: [ProgressiveStages] Successfully registered as FTB Library stage provider
+[25Apr2026 21:05:23.027] [Server thread/INFO] [com.enviouse.progressivestages.compat.ftbquests.FTBQuestsCompat/]: [ProgressiveStages] FTB Quests integration active - provider registered successfully
+[25Apr2026 21:05:23.027] [Server thread/INFO] [com.enviouse.progressivestages.compat.ftbquests.FTBQuestsCompat/]: [ProgressiveStages] FTB Quests integration initialized
+[25Apr2026 21:05:23.032] [Server thread/INFO] [FTB Quests/]: Loading quests from /home/drose/Projects/Project Island/run-server/config/ftbquests/quests
+[25Apr2026 21:05:23.035] [Server thread/INFO] [FTB Quests/]: loaded translation tables for 1 language(s)
+[25Apr2026 21:05:23.053] [Server thread/INFO] [FTB Quests/]: Loaded 1 chapter groups, 1 chapters, 5 quests, 0 reward tables
+[25Apr2026 21:05:23.134] [Server thread/INFO] [com.enviouse.progressivestages.server.integration.FTBTeamsIntegration/]: [ProgressiveStages] FTB Teams detected, team stage monitoring enabled
+[25Apr2026 21:05:43.209] [Server thread/INFO] [net.minecraft.server.players.PlayerList/]: Dev[/[fd7d:f38b:fc32:cf76:8c31:4b3a:907e:1d49]:41722] logged in with entity id 1 at (70.62312328042576, 78.3752402070214, 213.04644721836715)
+[25Apr2026 21:05:43.215] [Server thread/INFO] [dev.ryanhcode.sable.Sable/]: Beginning attempted authentication with player Dev
+[25Apr2026 21:05:43.293] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev joined the game
+[25Apr2026 21:05:43.696] [Netty Epoll Server IO #0/INFO] [dev.ryanhcode.sable.Sable/]: UDP authentication complete with /[fd7d:f38b:fc32:cf76:8c31:4b3a:907e:1d49%0]:41722, UDP routing to /[fd7d:f38b:fc32:cf76:8c31:4b3a:907e:1d49%0]:57981
+[25Apr2026 21:05:45.783] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev fell from a high place
+[25Apr2026 21:05:52.183] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: [Dev: Set own game mode to Creative Mode]
+[25Apr2026 21:06:13.115] [Server thread/WARN] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev moved too quickly! -0.7637314141401461,183.16135296066787,-36.88863417408098
+[25Apr2026 21:06:13.124] [Server thread/WARN] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev moved too quickly! -0.7637314141401461,183.16135296066787,-36.88863417408098
+[25Apr2026 21:06:13.132] [Server thread/WARN] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev moved too quickly! -0.7637314141401461,183.16135296066787,-36.88863417408098
+[25Apr2026 21:06:13.141] [Server thread/WARN] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev moved too quickly! -0.7637314141401461,183.16135296066787,-36.88863417408098
+[25Apr2026 21:06:13.150] [Server thread/WARN] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev moved too quickly! -0.7637314141401461,183.16135296066787,-36.88863417408098
+[25Apr2026 21:06:13.158] [Server thread/WARN] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev moved too quickly! -0.7637314141401461,183.16135296066787,-36.88863417408098
+[25Apr2026 21:08:31.112] [Server thread/INFO] [net.minecraft.server.network.ServerGamePacketListenerImpl/]: Dev lost connection: Disconnected
+[25Apr2026 21:08:31.112] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Dev left the game
+[25Apr2026 21:08:55.666] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Stopping server
+[25Apr2026 21:08:55.667] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving players
+[25Apr2026 21:08:55.667] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving worlds
+[25Apr2026 21:08:55.691] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[world]'/minecraft:overworld
+[25Apr2026 21:08:55.692] [Server thread/INFO] [dev.ryanhcode.sable.Sable/]: Saving sub-levels for level 'ServerLevel[world]'/minecraft:overworld
+[25Apr2026 21:08:55.719] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_nether
+[25Apr2026 21:08:55.719] [Server thread/INFO] [dev.ryanhcode.sable.Sable/]: Saving sub-levels for level 'ServerLevel[world]'/minecraft:the_nether
+[25Apr2026 21:08:55.722] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: Saving chunks for level 'ServerLevel[world]'/minecraft:the_end
+[25Apr2026 21:08:55.722] [Server thread/INFO] [dev.ryanhcode.sable.Sable/]: Saving sub-levels for level 'ServerLevel[world]'/minecraft:the_end
+[25Apr2026 21:08:55.729] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (world): All chunks are saved
+[25Apr2026 21:08:55.729] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[25Apr2026 21:08:55.729] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[25Apr2026 21:08:55.729] [Server thread/INFO] [net.minecraft.server.MinecraftServer/]: ThreadedAnvilChunkStorage: All dimensions are saved

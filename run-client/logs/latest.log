@@ -1,0 +1,473 @@
+[25Apr2026 21:05:16.255] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeclientdev, --version, 21.1.227, --assetIndex, 17, --assetsDir, /home/drose/.gradle/caches/neoformruntime/assets, --gameDir, ., --fml.fmlVersion, 4.0.42, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.227, --fml.neoFormVersion, 20240808.144430]
+[25Apr2026 21:05:16.258] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: JVM identified as Ubuntu OpenJDK 64-Bit Server VM 21.0.10+7-Ubuntu-124.04
+[25Apr2026 21:05:16.259] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.10 by Ubuntu; OS Linux arch amd64 version 6.17.0-22-generic
+[25Apr2026 21:05:16.375] [main/INFO] [net.neoforged.fml.loading.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
+[25Apr2026 21:05:16.489] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
+[25Apr2026 21:05:16.542] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.6 got version 4.6
+[25Apr2026 21:05:16.646] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/home/drose/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%23126!/ Service=ModLauncher Env=CLIENT
+[25Apr2026 21:05:16.759] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: Mesa Intel(R) UHD Graphics (CML GT2) GL version 4.6 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.1, Intel
+[25Apr2026 21:05:17.615] [main/INFO] [net.neoforged.fml.loading.moddiscovery.locators.JarInJarDependencyLocator/]: Found 17 dependencies adding them to mods collection
+[25Apr2026 21:05:17.616] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/]: 
+     Mod List:
+		Name Version (Mod Id)
+
+		Architectury 13.0.8 (architectury)
+		Cloth Config v15 API 15.0.140 (cloth_config)
+		Create 6.0.10 (create)
+		Create Aeronautics 1.1.3 (aeronautics)
+		Create Aeronautics 1.1.3 (aeronautics_bundled)
+		Create Offroad 1.1.3 (offroad)
+		Create Simulated 1.1.3 (simulated)
+		Flywheel 1.0.6 (flywheel)
+		FTB Library 2101.1.31 (ftblibrary)
+		FTB Quests 2101.1.24 (ftbquests)
+		FTB Teams 2101.1.10 (ftbteams)
+		FTB XMod Compat 21.1.8 (ftbxmodcompat)
+		Just Enough Items 19.27.0.340 (jei)
+		Minecraft 1.21.1 (minecraft)
+		NeoForge 21.1.227 (neoforge)
+		Ponder 1.0.82+mc1.21.1 (ponder)
+		ProgressiveStages 1.4 (progressivestages)
+		Project Island 0.1.0 (projectisland)
+		Sable 1.1.3 (sable)
+		Sable Companion 1.5.0 (sablecompanion)
+		Veil 3.6.2 (veil)
+[25Apr2026 21:05:18.496] [main/INFO] [mixin/]: Compatibility level set to JAVA_21
+[25Apr2026 21:05:18.573] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclientdev' with arguments [--version, 21.1.227, --gameDir, ., --assetsDir, /home/drose/.gradle/caches/neoformruntime/assets, --assetIndex, 17]
+[25Apr2026 21:05:18.642] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.debug.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.643] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.dynamicbuffer.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.644] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.fix.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.644] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.framebuffer.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.645] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.imgui.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.646] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.necromancer.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.647] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.performance.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.648] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.perspective.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.649] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.pipeline.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.650] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.quasar.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.650] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.registry.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.651] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.rendertype.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.651] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.resource.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.652] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.scheduler.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.652] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.shader.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.653] [main/WARN] [mixin/]: Reference map 'veil.refmap.json' for veil.neoforge.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.654] [main/WARN] [mixin/]: Reference map 'simulated.refmap.json' for simulated.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.683] [main/WARN] [mixin/]: Reference map 'aeronautics.refmap.json' for aeronautics.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.695] [main/WARN] [mixin/]: Reference map 'ponder.refmap.json' for ponder-common.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:18.704] [main/INFO] [dev.ryanhcode.sable.mixin.AbstractSableMixinPlugin/]: Using Vanilla renderer mixins
+[25Apr2026 21:05:18.706] [main/INFO] [dev.ryanhcode.sable.mixin.AbstractSableMixinPlugin/]: Using Vanilla renderer mixins
+[25Apr2026 21:05:18.707] [main/WARN] [mixin/]: Reference map 'offroad.refmap.json' for offroad.mixins.json could not be read. If this is a development environment you can ignore this message
+[25Apr2026 21:05:19.198] [main/WARN] [mixin/]: Error loading class: net/irisshaders/iris/pipeline/PipelineManager (java.lang.ClassNotFoundException: net.irisshaders.iris.pipeline.PipelineManager)
+[25Apr2026 21:05:19.198] [main/WARN] [mixin/]: @Mixin target net.irisshaders.iris.pipeline.PipelineManager was not found veil.neoforge.mixins.json:client.perspective.iris.PipelineManagerMixin from mod veil
+[25Apr2026 21:05:19.469] [main/WARN] [mixin/]: Error loading class: dev/emi/emi/api/widget/SlotWidget (java.lang.ClassNotFoundException: dev.emi.emi.api.widget.SlotWidget)
+[25Apr2026 21:05:19.469] [main/WARN] [mixin/]: @Mixin target dev.emi.emi.api.widget.SlotWidget was not found progressivestages-emi.mixins.json:client.EmiStackWidgetMixin from mod progressivestages
+[25Apr2026 21:05:19.470] [main/WARN] [mixin/]: Error loading class: dev/emi/emi/screen/EmiScreenManager$ScreenSpace (java.lang.ClassNotFoundException: dev.emi.emi.screen.EmiScreenManager$ScreenSpace)
+[25Apr2026 21:05:19.470] [main/WARN] [mixin/]: @Mixin target dev.emi.emi.screen.EmiScreenManager$ScreenSpace was not found progressivestages-emi.mixins.json:client.EmiScreenManagerMixin from mod progressivestages
+[25Apr2026 21:05:20.195] [main/WARN] [mixin/]: Error loading class: org/jetbrains/annotations/ApiStatus$ScheduledForRemoval (java.lang.ClassNotFoundException: org.jetbrains.annotations.ApiStatus$ScheduledForRemoval)
+[25Apr2026 21:05:20.286] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.3).
+[25Apr2026 21:05:21.812] [Datafixer Bootstrap/INFO] [com.mojang.datafixers.DataFixerBuilder/]: 229 Datafixer optimizations took 350 milliseconds
+[25Apr2026 21:05:26.689] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[25Apr2026 21:05:26.691] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[25Apr2026 21:05:26.693] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[25Apr2026 21:05:26.694] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[25Apr2026 21:05:26.695] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[25Apr2026 21:05:26.854] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/home/drose/Projects/Project%20Island/build/moddev/artifacts/neoforge-21.1.227.jar%23188!/assets/.mcassetsroot' uses unexpected schema
+[25Apr2026 21:05:26.854] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/home/drose/Projects/Project%20Island/build/moddev/artifacts/neoforge-21.1.227.jar%23188!/data/.mcassetsroot' uses unexpected schema
+[25Apr2026 21:05:26.873] [Render thread/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[25Apr2026 21:05:26.880] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Setting user: Dev
+[25Apr2026 21:05:26.949] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Backend library: LWJGL version 3.3.3+5
+[25Apr2026 21:05:27.324] [modloading-worker-0/INFO] [Veil/]: Veil is initializing.
+[25Apr2026 21:05:27.343] [modloading-worker-0/INFO] [net.neoforged.neoforge.common.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.227, for MC 1.21.1
+[25Apr2026 21:05:27.735] [modloading-worker-0/INFO] [com.simibubi.create.Create/]: Create 6.0.10 initializing! Commit hash: ac0c444d9828da3453ae8cc65338e8de063286fb
+[25Apr2026 21:05:27.898] [modloading-worker-0/INFO] [mezz.jei.library.load.PluginCaller/]: Sending ConfigManager...
+[25Apr2026 21:05:27.900] [modloading-worker-0/INFO] [mezz.jei.library.load.PluginCaller/]: Sending ConfigManager took 1.780 milliseconds
+[25Apr2026 21:05:28.227] [modloading-worker-0/INFO] [com.enviouse.progressivestages.Progressivestages/]: ProgressiveStages initializing...
+[25Apr2026 21:05:28.235] [modloading-worker-0/INFO] [com.enviouse.progressivestages.Progressivestages/]: ProgressiveStages initialized successfully
+[25Apr2026 21:05:29.228] [modloading-worker-0/INFO] [dev.ryanhcode.sable.Sable/]: Sable loaded!
+[25Apr2026 21:05:29.242] [modloading-worker-0/WARN] [dev.ryanhcode.sable.Sable/]: NOTE: Sable is loaded with Flywheel. Sable contains extensive shader overrides and a full light-storage replacement. Expect this to cause compatibility issues. If issues arise, please report them to the Sable issue tracker (https://github.com/ryanhcode/sable/issues) instead of the Flywheel issue tracker.
+[25Apr2026 21:05:31.301] [Render thread/INFO] [Veil/]: GL Debug supported
+[25Apr2026 21:05:31.581] [Render thread/INFO] [net.neoforged.neoforge.gametest.GameTestHooks/]: Enabled Gametest Namespaces: [projectisland]
+[25Apr2026 21:05:32.069] [Render thread/INFO] [net.minecraft.server.packs.resources.ReloadableResourceManager/]: Reloading ResourceManager: vanilla, mod_resources, mod/veil, mod/simulated, mod/architectury, mod/ftblibrary, mod/jei, mod/aeronautics, mod/aeronautics_bundled, mod/projectisland, mod/ftbteams, mod/ftbquests, mod/ftbxmodcompat, mod/progressivestages, mod/cloth_config, mod/sablecompanion, mod/flywheel, mod/ponder, mod/create, mod/sable, mod/offroad, mod/neoforge
+[25Apr2026 21:05:32.084] [Worker-Main-7/INFO] [net.projectisland.ProjectIsland/]: Project Island common setup
+[25Apr2026 21:05:32.093] [Worker-Main-1/INFO] [FTB XMod Compat/]: Chose [Entity Tags] as the active game stages implementation
+[25Apr2026 21:05:32.094] [Worker-Main-1/INFO] [FTB XMod Compat/]: Chose [FALLBACK] as the active permissions implementation
+[25Apr2026 21:05:32.096] [Worker-Main-1/INFO] [FTB Library/]: Setting permissions currency implementation to: <NONE>
+[25Apr2026 21:05:32.096] [Worker-Main-1/INFO] [FTB XMod Compat/]: Chose [<NONE>] as the active currency implementation
+[25Apr2026 21:05:32.097] [Worker-Main-1/INFO] [FTB XMod Compat/]: [FTB Quests] recipe helper provider is [JEI]
+[25Apr2026 21:05:32.097] [Worker-Main-1/INFO] [com.enviouse.progressivestages.Progressivestages/]: ProgressiveStages common setup
+[25Apr2026 21:05:32.122] [NeoForge Version Check/INFO] [net.neoforged.fml.VersionChecker/]: [create] Starting version check at https://api.modrinth.com/updates/create/forge_updates.json?neoforge=only
+[25Apr2026 21:05:32.135] [Worker-Main-10/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_all_no_pua-15.1.05.hex, loading
+[25Apr2026 21:05:32.138] [Worker-Main-7/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_jp_patch-15.1.05.hex, loading
+[25Apr2026 21:05:32.426] [Worker-Main-11/INFO] [com.enviouse.progressivestages.Progressivestages/]: ProgressiveStages client setup
+[25Apr2026 21:05:32.634] [NeoForge Version Check/INFO] [net.neoforged.fml.VersionChecker/]: [create] Found status: OUTDATED Current: 6.0.10 Target: 6.0.10+mc1.21.1
+[25Apr2026 21:05:33.390] [Worker-Main-1/WARN] [net.minecraft.client.resources.model.ModelBakery/]: Unable to load model: 'minecraft:block' referenced from: simulated:block/rope_connector/block_horizontal: java.io.FileNotFoundException: minecraft:models/block.json
+[25Apr2026 21:05:34.724] [Render thread/INFO] [Veil/]: Loaded 0 shader modifications
+[25Apr2026 21:05:34.903] [Render thread/INFO] [Veil/]: Loaded 29 shaders from: pinwheel/shaders/program
+[25Apr2026 21:05:35.042] [Worker-Main-10/INFO] [PonderIndex/]: Registering Ponder Scenes took 102.5 ms
+[25Apr2026 21:05:35.047] [Worker-Main-10/INFO] [PonderIndex/]: Registering Ponder Tags took 4.789 ms
+[25Apr2026 21:05:35.170] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:item.goat_horn.play
+[25Apr2026 21:05:35.170] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
+[25Apr2026 21:05:35.291] [Render thread/INFO] [com.mojang.blaze3d.audio.Library/]: OpenAL initialized on device Built-in Audio Analog Stereo
+[25Apr2026 21:05:35.291] [Render thread/INFO] [net.minecraft.client.sounds.SoundEngine/SOUNDS]: Sound engine started
+[25Apr2026 21:05:35.400] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 2048x1024x4 minecraft:textures/atlas/blocks.png-atlas
+[25Apr2026 21:05:35.524] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
+[25Apr2026 21:05:35.525] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[25Apr2026 21:05:35.529] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[25Apr2026 21:05:35.531] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 2048x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
+[25Apr2026 21:05:35.572] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
+[25Apr2026 21:05:35.572] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
+[25Apr2026 21:05:35.573] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[25Apr2026 21:05:35.574] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[25Apr2026 21:05:35.629] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x0 minecraft:textures/atlas/particles.png-atlas
+[25Apr2026 21:05:35.634] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
+[25Apr2026 21:05:35.636] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[25Apr2026 21:05:35.637] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[25Apr2026 21:05:35.637] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas
+[25Apr2026 21:05:35.674] [Render thread/WARN] [net.minecraft.client.renderer.ShaderInstance/]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
+[25Apr2026 21:05:35.758] [Render thread/INFO] [Veil/]: Loaded 2 ImGui fonts
+[25Apr2026 21:05:35.758] [Render thread/INFO] [Veil/]: Loaded 3 framebuffers
+[25Apr2026 21:05:35.780] [Render thread/INFO] [Veil/]: Loaded 6 post pipelines
+[25Apr2026 21:05:35.786] [Render thread/INFO] [Veil/]: Loaded 4 render types
+[25Apr2026 21:05:35.786] [Render thread/INFO] [Veil/]: Enabled bloom pipeline
+[25Apr2026 21:05:35.787] [Render thread/INFO] [Veil/]: Loaded 0 quasar particles
+[25Apr2026 21:05:35.787] [Render thread/INFO] [Veil/]: Loaded 0 templates
+[25Apr2026 21:05:35.787] [Render thread/INFO] [Veil/]: Loaded 0 modules
+[25Apr2026 21:05:35.790] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x0 jei:textures/atlas/gui.png-atlas
+[25Apr2026 21:05:35.827] [Render thread/INFO] [flywheel/backend/shaders/]: Loaded 77 shader sources in 30.968 ms
+[25Apr2026 21:05:35.853] [Render thread/INFO] [com.simibubi.create.Create/]: Loaded 58 train hat configurations.
+[25Apr2026 21:05:35.853] [Render thread/INFO] [net.neoforged.neoforge.client.entity.animation.json.AnimationLoader/]: Loaded 0 entity animations
+[25Apr2026 21:05:35.863] [Render thread/INFO] [Veil/]: Built veil:jetbrains_mono
+[25Apr2026 21:05:35.865] [Render thread/INFO] [Veil/]: Built veil:remixicon
+[25Apr2026 21:05:36.139] [Render thread/INFO] [Veil/]: Compiled 58 vanilla shaders in 396.8 ms
+[25Apr2026 21:05:36.948] [Render thread/INFO] [Veil/]: Finished uploading vanilla shaders
+[25Apr2026 21:05:40.863] [Render thread/INFO] [net.minecraft.client.gui.screens.ConnectScreen/]: Connecting to fd7d:f38b:fc32:cf76:8c31:4b3a:907e:1d49, 25565
+[25Apr2026 21:05:41.105] [Server Connector #1/INFO] [dev.ryanhcode.sable.Sable/]: Starting remote client UDP channel future
+[25Apr2026 21:05:41.116] [Netty Epoll Client IO #1/INFO] [dev.ryanhcode.sable.Sable/]: Client UDP channel active
+[25Apr2026 21:05:41.551] [Render thread/INFO] [com.simibubi.create.Create/]: Created 157 recipes which will be injected into the game
+[25Apr2026 21:05:41.555] [Render thread/INFO] [com.simibubi.create.Create/]: Created 0 tags which will be injected into the game
+[25Apr2026 21:05:43.667] [Render thread/INFO] [flywheel/]: Started 6 worker threads
+[25Apr2026 21:05:43.682] [Render thread/INFO] [dev.ryanhcode.sable.Sable/]: Received authentication request, sending response over UDP to fd7d:f38b:fc32:cf76:8c31:4b3a:907e:1d49/[fd7d:f38b:fc32:cf76:8c31:4b3a:907e:1d49]:25565
+[25Apr2026 21:05:43.759] [Render thread/INFO] [mezz.jei.core.util.LoggedTimer/]: Starting JEI...
+[25Apr2026 21:05:43.772] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering item subtypes...
+[25Apr2026 21:05:43.778] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering item subtypes took 5.265 milliseconds
+[25Apr2026 21:05:43.778] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering fluid subtypes...
+[25Apr2026 21:05:43.780] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering fluid subtypes took 1.584 milliseconds
+[25Apr2026 21:05:43.781] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering ingredients...
+[25Apr2026 21:05:43.940] [Render thread/INFO] [mezz.jei.library.load.PluginCallerTimerRunnable/]: Registering ingredients: jei:minecraft took 158.9 milliseconds
+[25Apr2026 21:05:43.942] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering ingredients took 161.0 milliseconds
+[25Apr2026 21:05:43.943] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering extra ingredients...
+[25Apr2026 21:05:43.949] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering extra ingredients took 5.505 milliseconds
+[25Apr2026 21:05:43.949] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering search ingredient aliases...
+[25Apr2026 21:05:43.952] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering search ingredient aliases took 2.650 milliseconds
+[25Apr2026 21:05:43.966] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering Mod Info...
+[25Apr2026 21:05:43.968] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering Mod Info took 1.907 milliseconds
+[25Apr2026 21:05:43.983] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering categories...
+[25Apr2026 21:05:43.997] [Render thread/INFO] [mezz.jei.library.load.PluginCallerTimerRunnable/]: Registering categories: jei:minecraft took 12.79 milliseconds
+[25Apr2026 21:05:44.040] [Render thread/INFO] [mezz.jei.library.load.PluginCallerTimerRunnable/]: Registering categories: create:jei_plugin took 38.75 milliseconds
+[25Apr2026 21:05:44.044] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering categories took 60.85 milliseconds
+[25Apr2026 21:05:44.045] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering vanilla category extensions...
+[25Apr2026 21:05:44.048] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering vanilla category extensions took 2.762 milliseconds
+[25Apr2026 21:05:44.049] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering recipe catalysts...
+[25Apr2026 21:05:44.051] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering recipe catalysts took 1.905 milliseconds
+[25Apr2026 21:05:44.052] [Render thread/INFO] [mezz.jei.core.util.LoggedTimer/]: Building recipe registry...
+[25Apr2026 21:05:44.062] [Render thread/INFO] [mezz.jei.core.util.LoggedTimer/]: Building recipe registry took 9.748 milliseconds
+[25Apr2026 21:05:44.063] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering advanced plugins...
+[25Apr2026 21:05:44.066] [Render thread/INFO] [mezz.jei.library.load.registration.AdvancedRegistration/]: Added recipe manager plugin: class dev.ftb.mods.ftbxmodcompat.ftbquests.jei.QuestRecipeManagerPlugin
+[25Apr2026 21:05:44.068] [Render thread/INFO] [mezz.jei.library.load.registration.AdvancedRegistration/]: Added recipe manager plugin: class dev.ftb.mods.ftbxmodcompat.ftbquests.jei.LootCrateRecipeManagerPlugin
+[25Apr2026 21:05:44.068] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering advanced plugins took 5.107 milliseconds
+[25Apr2026 21:05:44.069] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering recipes...
+[25Apr2026 21:05:44.297] [Render thread/INFO] [mezz.jei.library.load.PluginCallerTimerRunnable/]: Registering recipes: jei:minecraft took 228.0 milliseconds
+[25Apr2026 21:05:44.440] [Render thread/INFO] [mezz.jei.library.load.PluginCallerTimerRunnable/]: Registering recipes: create:jei_plugin took 140.6 milliseconds
+[25Apr2026 21:05:44.493] [Render thread/INFO] [mezz.jei.library.load.PluginCallerTimerRunnable/]: Registering recipes: jei:internal took 52.28 milliseconds
+[25Apr2026 21:05:44.493] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering recipes took 424.1 milliseconds
+[25Apr2026 21:05:44.499] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering recipes transfer handlers...
+[25Apr2026 21:05:44.503] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering recipes transfer handlers took 3.874 milliseconds
+[25Apr2026 21:05:44.510] [Render thread/INFO] [mezz.jei.core.util.LoggedTimer/]: Building runtime...
+[25Apr2026 21:05:44.521] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering gui handlers...
+[25Apr2026 21:05:44.529] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering gui handlers took 7.820 milliseconds
+[25Apr2026 21:05:44.532] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering Runtime...
+[25Apr2026 21:05:44.534] [Render thread/INFO] [mezz.jei.gui.startup.JeiGuiStarter/]: Starting JEI GUI
+[25Apr2026 21:05:44.534] [Render thread/INFO] [mezz.jei.core.util.LoggedTimer/]: Building ingredient list...
+[25Apr2026 21:05:44.566] [Render thread/INFO] [mezz.jei.core.util.LoggedTimer/]: Building ingredient list took 31.98 milliseconds
+[25Apr2026 21:05:44.566] [Render thread/INFO] [mezz.jei.core.util.LoggedTimer/]: Building ingredient filter...
+[25Apr2026 21:05:44.591] [Render thread/INFO] [mezz.jei.gui.ingredients.IngredientFilter/]: Adding 2514 ingredients
+[25Apr2026 21:05:44.962] [Render thread/INFO] [mezz.jei.gui.ingredients.IngredientFilter/]: Added 2514 ingredients
+[25Apr2026 21:05:44.962] [Render thread/INFO] [mezz.jei.core.util.LoggedTimer/]: Building ingredient filter took 395.9 milliseconds
+[25Apr2026 21:05:45.028] [Render thread/INFO] [mezz.jei.library.load.PluginCallerTimerRunnable/]: Registering Runtime: jei:neoforge_gui took 495.6 milliseconds
+[25Apr2026 21:05:45.028] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Registering Runtime took 496.7 milliseconds
+[25Apr2026 21:05:45.029] [Render thread/INFO] [mezz.jei.core.util.LoggedTimer/]: Building runtime took 518.6 milliseconds
+[25Apr2026 21:05:45.029] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Sending Runtime...
+[25Apr2026 21:05:45.030] [Render thread/INFO] [com.enviouse.progressivestages.client.jei.ProgressiveStagesJEIPlugin/]: [ProgressiveStages] JEI runtime available
+[25Apr2026 21:05:45.030] [Render thread/INFO] [com.enviouse.progressivestages.client.jei.ProgressiveStagesJEIPlugin/]: [ProgressiveStages] JEI: No locked items to hide
+[25Apr2026 21:05:45.030] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Sending Runtime took 761.0 microseconds
+[25Apr2026 21:05:45.030] [Render thread/INFO] [mezz.jei.core.util.LoggedTimer/]: Starting JEI took 1.271 seconds
+[25Apr2026 21:05:45.049] [Render thread/INFO] [com.enviouse.progressivestages.client.ClientStageCache/]: [ProgressiveStages] Client cached 7 stage definitions
+[25Apr2026 21:05:45.051] [Render thread/ERROR] [net.minecraft.util.thread.BlockableEventLoop/FATAL]: Error executing task on Client
+java.util.concurrent.CompletionException: java.lang.NoClassDefFoundError: dev/emi/emi/api/EmiPlugin
+	at java.base/java.util.concurrent.CompletableFuture.encodeThrowable(CompletableFuture.java:315) ~[?:?]
+	at java.base/java.util.concurrent.CompletableFuture.completeThrowable(CompletableFuture.java:320) ~[?:?]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1770) ~[?:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.doRunTask(BlockableEventLoop.java:151) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.ReentrantBlockableEventLoop.doRunTask(ReentrantBlockableEventLoop.java:24) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.pollTask(BlockableEventLoop.java:122) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.runAllTasks(BlockableEventLoop.java:111) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.Minecraft.runTick(Minecraft.java:1161) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.Minecraft.run(Minecraft.java:813) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.main.Main.main(Main.java:230) ~[neoforge-21.1.227.jar%23188!/:?]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[?:?]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[?:?]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:136) ~[loader-4.0.42.jar%23134!/:4.0]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:124) ~[loader-4.0.42.jar%23134!/:4.0]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.NeoForgeClientDevLaunchHandler.runService(NeoForgeClientDevLaunchHandler.java:23) ~[loader-4.0.42.jar%23134!/:4.0]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:118) ~[loader-4.0.42.jar%23134!/:4.0]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.Launcher.run(Launcher.java:103) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.Launcher.main(Launcher.java:74) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) [modlauncher-11.0.5.jar%23114!/:?]
+	at cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.run(BootstrapLauncher.java:210) [bootstraplauncher-2.0.2.jar:?]
+	at cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:69) [bootstraplauncher-2.0.2.jar:?]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[?:?]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[?:?]
+	at net.neoforged.devlaunch.Main.main(Main.java:57) [DevLaunch-1.0.2.jar:?]
+Caused by: java.lang.NoClassDefFoundError: dev/emi/emi/api/EmiPlugin
+	at java.base/java.lang.ClassLoader.defineClass1(Native Method) ~[?:?]
+	at java.base/java.lang.ClassLoader.defineClass(ClassLoader.java:1027) ~[?:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.readerToClass(ModuleClassLoader.java:196) ~[securejarhandler-3.0.8.jar:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.lambda$findClass$20(ModuleClassLoader.java:298) ~[securejarhandler-3.0.8.jar:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.loadFromModule(ModuleClassLoader.java:311) ~[securejarhandler-3.0.8.jar:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:298) ~[securejarhandler-3.0.8.jar:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:214) ~[securejarhandler-3.0.8.jar:?]
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526) ~[?:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.client.ClientLockCache.triggerEmiReload(ClientLockCache.java:89) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.client.ClientLockCache.setItemLocks(ClientLockCache.java:80) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.common.network.NetworkHandler.lambda$handleLockSyncClient$8(NetworkHandler.java:195) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.ClientPayloadContext.enqueueWork(ClientPayloadContext.java:31) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.common.network.NetworkHandler.handleLockSyncClient(NetworkHandler.java:190) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.DirectionalPayloadHandler.handle(DirectionalPayloadHandler.java:17) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.MainThreadPayloadHandler.lambda$handle$0(MainThreadPayloadHandler.java:16) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.lambda$submitAsync$0(BlockableEventLoop.java:60) ~[neoforge-21.1.227.jar%23188!/:?]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768) ~[?:?]
+	... 25 more
+Caused by: java.lang.ClassNotFoundException: dev.emi.emi.api.EmiPlugin
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:641) ~[?:?]
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526) ~[?:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:216) ~[securejarhandler-3.0.8.jar:?]
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526) ~[?:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:216) ~[securejarhandler-3.0.8.jar:?]
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526) ~[?:?]
+	at java.base/java.lang.ClassLoader.defineClass1(Native Method) ~[?:?]
+	at java.base/java.lang.ClassLoader.defineClass(ClassLoader.java:1027) ~[?:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.readerToClass(ModuleClassLoader.java:196) ~[securejarhandler-3.0.8.jar:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.lambda$findClass$20(ModuleClassLoader.java:298) ~[securejarhandler-3.0.8.jar:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.loadFromModule(ModuleClassLoader.java:311) ~[securejarhandler-3.0.8.jar:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:298) ~[securejarhandler-3.0.8.jar:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:214) ~[securejarhandler-3.0.8.jar:?]
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526) ~[?:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.client.ClientLockCache.triggerEmiReload(ClientLockCache.java:89) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.client.ClientLockCache.setItemLocks(ClientLockCache.java:80) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.common.network.NetworkHandler.lambda$handleLockSyncClient$8(NetworkHandler.java:195) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.ClientPayloadContext.enqueueWork(ClientPayloadContext.java:31) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.common.network.NetworkHandler.handleLockSyncClient(NetworkHandler.java:190) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.DirectionalPayloadHandler.handle(DirectionalPayloadHandler.java:17) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.MainThreadPayloadHandler.lambda$handle$0(MainThreadPayloadHandler.java:16) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.lambda$submitAsync$0(BlockableEventLoop.java:60) ~[neoforge-21.1.227.jar%23188!/:?]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768) ~[?:?]
+	... 25 more
+[25Apr2026 21:05:45.053] [Render thread/ERROR] [net.neoforged.neoforge.network.registration.NetworkRegistry/]: Failed to process a synchronized task of the payload: progressivestages:lock_sync
+java.util.concurrent.CompletionException: java.lang.NoClassDefFoundError: dev/emi/emi/api/EmiPlugin
+	at java.base/java.util.concurrent.CompletableFuture.encodeThrowable(CompletableFuture.java:315) ~[?:?]
+	at java.base/java.util.concurrent.CompletableFuture.completeThrowable(CompletableFuture.java:320) ~[?:?]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1770) ~[?:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.doRunTask(BlockableEventLoop.java:151) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.ReentrantBlockableEventLoop.doRunTask(ReentrantBlockableEventLoop.java:24) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.pollTask(BlockableEventLoop.java:122) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.runAllTasks(BlockableEventLoop.java:111) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.Minecraft.runTick(Minecraft.java:1161) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.Minecraft.run(Minecraft.java:813) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.main.Main.main(Main.java:230) ~[neoforge-21.1.227.jar%23188!/:?]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[?:?]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[?:?]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:136) ~[loader-4.0.42.jar%23134!/:4.0]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:124) ~[loader-4.0.42.jar%23134!/:4.0]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.NeoForgeClientDevLaunchHandler.runService(NeoForgeClientDevLaunchHandler.java:23) ~[loader-4.0.42.jar%23134!/:4.0]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:118) ~[loader-4.0.42.jar%23134!/:4.0]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.Launcher.run(Launcher.java:103) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.Launcher.main(Launcher.java:74) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) [modlauncher-11.0.5.jar%23114!/:?]
+	at cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.run(BootstrapLauncher.java:210) [bootstraplauncher-2.0.2.jar:?]
+	at cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:69) [bootstraplauncher-2.0.2.jar:?]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[?:?]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[?:?]
+	at net.neoforged.devlaunch.Main.main(Main.java:57) [DevLaunch-1.0.2.jar:?]
+Caused by: java.lang.NoClassDefFoundError: dev/emi/emi/api/EmiPlugin
+	at java.base/java.lang.ClassLoader.defineClass1(Native Method) ~[?:?]
+	at java.base/java.lang.ClassLoader.defineClass(ClassLoader.java:1027) ~[?:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.readerToClass(ModuleClassLoader.java:196) ~[securejarhandler-3.0.8.jar:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.lambda$findClass$20(ModuleClassLoader.java:298) ~[securejarhandler-3.0.8.jar:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.loadFromModule(ModuleClassLoader.java:311) ~[securejarhandler-3.0.8.jar:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:298) ~[securejarhandler-3.0.8.jar:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:214) ~[securejarhandler-3.0.8.jar:?]
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526) ~[?:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.client.ClientLockCache.triggerEmiReload(ClientLockCache.java:89) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.client.ClientLockCache.setItemLocks(ClientLockCache.java:80) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.common.network.NetworkHandler.lambda$handleLockSyncClient$8(NetworkHandler.java:195) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.ClientPayloadContext.enqueueWork(ClientPayloadContext.java:31) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.common.network.NetworkHandler.handleLockSyncClient(NetworkHandler.java:190) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.DirectionalPayloadHandler.handle(DirectionalPayloadHandler.java:17) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.MainThreadPayloadHandler.lambda$handle$0(MainThreadPayloadHandler.java:16) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.lambda$submitAsync$0(BlockableEventLoop.java:60) ~[neoforge-21.1.227.jar%23188!/:?]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768) ~[?:?]
+	... 25 more
+Caused by: java.lang.ClassNotFoundException: dev.emi.emi.api.EmiPlugin
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:641) ~[?:?]
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526) ~[?:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:216) ~[securejarhandler-3.0.8.jar:?]
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526) ~[?:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:216) ~[securejarhandler-3.0.8.jar:?]
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526) ~[?:?]
+	at java.base/java.lang.ClassLoader.defineClass1(Native Method) ~[?:?]
+	at java.base/java.lang.ClassLoader.defineClass(ClassLoader.java:1027) ~[?:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.readerToClass(ModuleClassLoader.java:196) ~[securejarhandler-3.0.8.jar:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.lambda$findClass$20(ModuleClassLoader.java:298) ~[securejarhandler-3.0.8.jar:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.loadFromModule(ModuleClassLoader.java:311) ~[securejarhandler-3.0.8.jar:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.findClass(ModuleClassLoader.java:298) ~[securejarhandler-3.0.8.jar:?]
+	at cpw.mods.securejarhandler/cpw.mods.cl.ModuleClassLoader.loadClass(ModuleClassLoader.java:214) ~[securejarhandler-3.0.8.jar:?]
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526) ~[?:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.client.ClientLockCache.triggerEmiReload(ClientLockCache.java:89) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.client.ClientLockCache.setItemLocks(ClientLockCache.java:80) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.common.network.NetworkHandler.lambda$handleLockSyncClient$8(NetworkHandler.java:195) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.ClientPayloadContext.enqueueWork(ClientPayloadContext.java:31) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.common.network.NetworkHandler.handleLockSyncClient(NetworkHandler.java:190) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.DirectionalPayloadHandler.handle(DirectionalPayloadHandler.java:17) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.MainThreadPayloadHandler.lambda$handle$0(MainThreadPayloadHandler.java:16) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.lambda$submitAsync$0(BlockableEventLoop.java:60) ~[neoforge-21.1.227.jar%23188!/:?]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768) ~[?:?]
+	... 25 more
+[25Apr2026 21:05:45.055] [Render thread/INFO] [com.enviouse.progressivestages.client.ClientStageCache/]: [ProgressiveStages] Stage change detected, scheduling EMI/JEI reload...
+[25Apr2026 21:05:45.057] [Render thread/INFO] [mezz.jei.library.ingredients.IngredientManager/]: Ingredients are being removed at runtime: 48 net.minecraft.world.item.ItemStack
+[25Apr2026 21:05:45.070] [Render thread/INFO] [FTB Library/]: config has been updated! server = false - clear any cached data etc. here
+[25Apr2026 21:05:45.070] [Render thread/INFO] [FTB Library/]: received server config settings for config: ftblibrary-server
+[25Apr2026 21:05:45.074] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Hello from FTB Library!
+[25Apr2026 21:05:45.112] [Render thread/INFO] [FTB Quests/]: Read 1190 bytes, 20 objects
+[25Apr2026 21:05:45.124] [Render thread/INFO] [FTB Quests/]: received translation table en_us (with 13 entries) from server
+[25Apr2026 21:05:45.127] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 2 advancements
+[25Apr2026 21:05:45.633] [Render thread/INFO] [Veil/]: Multi-Bind unsupported, using legacy
+[25Apr2026 21:05:45.923] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev fell from a high place
+[25Apr2026 21:05:46.979] [Render thread/INFO] [com.enviouse.progressivestages.client.ClientStageCache/]: [ProgressiveStages] Client cached 7 stage definitions
+[25Apr2026 21:05:52.187] [Render thread/ERROR] [net.minecraft.util.thread.BlockableEventLoop/FATAL]: Error executing task on Client
+java.util.concurrent.CompletionException: java.lang.NoClassDefFoundError: dev/emi/emi/api/EmiPlugin
+	at java.base/java.util.concurrent.CompletableFuture.encodeThrowable(CompletableFuture.java:315) ~[?:?]
+	at java.base/java.util.concurrent.CompletableFuture.completeThrowable(CompletableFuture.java:320) ~[?:?]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1770) ~[?:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.doRunTask(BlockableEventLoop.java:151) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.ReentrantBlockableEventLoop.doRunTask(ReentrantBlockableEventLoop.java:24) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.pollTask(BlockableEventLoop.java:122) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.runAllTasks(BlockableEventLoop.java:111) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.Minecraft.runTick(Minecraft.java:1161) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.Minecraft.run(Minecraft.java:813) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.main.Main.main(Main.java:230) ~[neoforge-21.1.227.jar%23188!/:?]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[?:?]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[?:?]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:136) ~[loader-4.0.42.jar%23134!/:4.0]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:124) ~[loader-4.0.42.jar%23134!/:4.0]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.NeoForgeClientDevLaunchHandler.runService(NeoForgeClientDevLaunchHandler.java:23) ~[loader-4.0.42.jar%23134!/:4.0]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:118) ~[loader-4.0.42.jar%23134!/:4.0]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.Launcher.run(Launcher.java:103) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.Launcher.main(Launcher.java:74) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) [modlauncher-11.0.5.jar%23114!/:?]
+	at cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.run(BootstrapLauncher.java:210) [bootstraplauncher-2.0.2.jar:?]
+	at cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:69) [bootstraplauncher-2.0.2.jar:?]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[?:?]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[?:?]
+	at net.neoforged.devlaunch.Main.main(Main.java:57) [DevLaunch-1.0.2.jar:?]
+Caused by: java.lang.NoClassDefFoundError: dev/emi/emi/api/EmiPlugin
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.client.ClientLockCache.triggerEmiReload(ClientLockCache.java:89) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.client.ClientLockCache.setCreativeBypass(ClientLockCache.java:54) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.common.network.NetworkHandler.lambda$handleCreativeBypassClient$10(NetworkHandler.java:233) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.ClientPayloadContext.enqueueWork(ClientPayloadContext.java:31) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.common.network.NetworkHandler.handleCreativeBypassClient(NetworkHandler.java:232) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.DirectionalPayloadHandler.handle(DirectionalPayloadHandler.java:17) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.MainThreadPayloadHandler.lambda$handle$0(MainThreadPayloadHandler.java:16) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.lambda$submitAsync$0(BlockableEventLoop.java:60) ~[neoforge-21.1.227.jar%23188!/:?]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768) ~[?:?]
+	... 25 more
+Caused by: java.lang.ClassNotFoundException: dev.emi.emi.api.EmiPlugin
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.client.ClientLockCache.triggerEmiReload(ClientLockCache.java:89) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.client.ClientLockCache.setCreativeBypass(ClientLockCache.java:54) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.common.network.NetworkHandler.lambda$handleCreativeBypassClient$10(NetworkHandler.java:233) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.ClientPayloadContext.enqueueWork(ClientPayloadContext.java:31) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.common.network.NetworkHandler.handleCreativeBypassClient(NetworkHandler.java:232) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.DirectionalPayloadHandler.handle(DirectionalPayloadHandler.java:17) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.MainThreadPayloadHandler.lambda$handle$0(MainThreadPayloadHandler.java:16) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.lambda$submitAsync$0(BlockableEventLoop.java:60) ~[neoforge-21.1.227.jar%23188!/:?]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768) ~[?:?]
+	... 25 more
+[25Apr2026 21:05:52.189] [Render thread/ERROR] [net.neoforged.neoforge.network.registration.NetworkRegistry/]: Failed to process a synchronized task of the payload: progressivestages:creative_bypass
+java.util.concurrent.CompletionException: java.lang.NoClassDefFoundError: dev/emi/emi/api/EmiPlugin
+	at java.base/java.util.concurrent.CompletableFuture.encodeThrowable(CompletableFuture.java:315) ~[?:?]
+	at java.base/java.util.concurrent.CompletableFuture.completeThrowable(CompletableFuture.java:320) ~[?:?]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1770) ~[?:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.doRunTask(BlockableEventLoop.java:151) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.ReentrantBlockableEventLoop.doRunTask(ReentrantBlockableEventLoop.java:24) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.pollTask(BlockableEventLoop.java:122) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.runAllTasks(BlockableEventLoop.java:111) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.Minecraft.runTick(Minecraft.java:1161) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.Minecraft.run(Minecraft.java:813) ~[neoforge-21.1.227.jar%23188!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.client.main.Main.main(Main.java:230) ~[neoforge-21.1.227.jar%23188!/:?]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[?:?]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[?:?]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.runTarget(CommonLaunchHandler.java:136) ~[loader-4.0.42.jar%23134!/:4.0]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.clientService(CommonLaunchHandler.java:124) ~[loader-4.0.42.jar%23134!/:4.0]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.NeoForgeClientDevLaunchHandler.runService(NeoForgeClientDevLaunchHandler.java:23) ~[loader-4.0.42.jar%23134!/:4.0]
+	at MC-BOOTSTRAP/fml_loader@4.0.42/net.neoforged.fml.loading.targets.CommonLaunchHandler.lambda$launchService$4(CommonLaunchHandler.java:118) ~[loader-4.0.42.jar%23134!/:4.0]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandlerDecorator.launch(LaunchServiceHandlerDecorator.java:30) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:53) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.LaunchServiceHandler.launch(LaunchServiceHandler.java:71) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.Launcher.run(Launcher.java:103) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.Launcher.main(Launcher.java:74) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:26) [modlauncher-11.0.5.jar%23114!/:?]
+	at MC-BOOTSTRAP/cpw.mods.modlauncher@11.0.5/cpw.mods.modlauncher.BootstrapLaunchConsumer.accept(BootstrapLaunchConsumer.java:23) [modlauncher-11.0.5.jar%23114!/:?]
+	at cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.run(BootstrapLauncher.java:210) [bootstraplauncher-2.0.2.jar:?]
+	at cpw.mods.bootstraplauncher@2.0.2/cpw.mods.bootstraplauncher.BootstrapLauncher.main(BootstrapLauncher.java:69) [bootstraplauncher-2.0.2.jar:?]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[?:?]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[?:?]
+	at net.neoforged.devlaunch.Main.main(Main.java:57) [DevLaunch-1.0.2.jar:?]
+Caused by: java.lang.NoClassDefFoundError: dev/emi/emi/api/EmiPlugin
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.client.ClientLockCache.triggerEmiReload(ClientLockCache.java:89) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.client.ClientLockCache.setCreativeBypass(ClientLockCache.java:54) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.common.network.NetworkHandler.lambda$handleCreativeBypassClient$10(NetworkHandler.java:233) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.ClientPayloadContext.enqueueWork(ClientPayloadContext.java:31) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.common.network.NetworkHandler.handleCreativeBypassClient(NetworkHandler.java:232) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.DirectionalPayloadHandler.handle(DirectionalPayloadHandler.java:17) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.MainThreadPayloadHandler.lambda$handle$0(MainThreadPayloadHandler.java:16) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.lambda$submitAsync$0(BlockableEventLoop.java:60) ~[neoforge-21.1.227.jar%23188!/:?]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768) ~[?:?]
+	... 25 more
+Caused by: java.lang.ClassNotFoundException: dev.emi.emi.api.EmiPlugin
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.client.ClientLockCache.triggerEmiReload(ClientLockCache.java:89) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.client.ClientLockCache.setCreativeBypass(ClientLockCache.java:54) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.common.network.NetworkHandler.lambda$handleCreativeBypassClient$10(NetworkHandler.java:233) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.ClientPayloadContext.enqueueWork(ClientPayloadContext.java:31) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/progressivestages@1.4/com.enviouse.progressivestages.common.network.NetworkHandler.handleCreativeBypassClient(NetworkHandler.java:232) ~[progressivestages-1.4.jar%23199!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.DirectionalPayloadHandler.handle(DirectionalPayloadHandler.java:17) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/neoforge@21.1.227/net.neoforged.neoforge.network.handling.MainThreadPayloadHandler.lambda$handle$0(MainThreadPayloadHandler.java:16) ~[neoforge-21.1.227.jar%23189!/:?]
+	at TRANSFORMER/minecraft@1.21.1/net.minecraft.util.thread.BlockableEventLoop.lambda$submitAsync$0(BlockableEventLoop.java:60) ~[neoforge-21.1.227.jar%23188!/:?]
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1768) ~[?:?]
+	... 25 more
+[25Apr2026 21:05:52.190] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set own game mode to Creative Mode
+[25Apr2026 21:08:31.104] [Netty Epoll Client IO #1/INFO] [dev.ryanhcode.sable.Sable/]: Client UDP channel inactive
+[25Apr2026 21:08:31.104] [Netty Epoll Client IO #1/INFO] [dev.ryanhcode.sable.Sable/]: Closed UDP channel!
+[25Apr2026 21:08:31.106] [Render thread/INFO] [mezz.jei.library.startup.JeiStarter/]: Stopping JEI
+[25Apr2026 21:08:31.106] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Sending Runtime Unavailable...
+[25Apr2026 21:08:31.107] [Render thread/INFO] [mezz.jei.neoforge.plugins.neoforge.NeoForgeGuiPlugin/]: Stopping JEI GUI
+[25Apr2026 21:08:31.111] [Render thread/INFO] [mezz.jei.library.load.PluginCaller/]: Sending Runtime Unavailable took 4.398 milliseconds

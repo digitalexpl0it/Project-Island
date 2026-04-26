@@ -7,10 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24**._ _README/TODO sync: **2026-04-25**._
+_Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24**._ _README/TODO sync: **2026-04-25**._ _FTB Quests / ProgressiveStages baseline + void-rescue center preference: **2026-04-25**._
 
 ### Added
 
+- **Dev progression (modpack-style):** **`examples/dev-progression/`** — **FTB Quests** `data.snbt` + chapter **`project_island.snbt`** (welcome → harpoon → rope-tier advancements → manual “Expand” + **gamestage** reward), **ProgressiveStages** **`pi_*.toml`** stages and **`triggers.toml`** entries (harpoon item + **`projectisland:progression/rope_reinforced` / `rope_steel`** advancements). Gradle **`run-client`** / **`run-server`** copy these into **`config/ftbquests/quests/`** and **`config/ProgressiveStages/`** for local dev.
+- **Dev server OP:** root **`run-server/ops.json`** populated from **`dev-ops.example.json`** (offline **Dev** UUID); README documents **`run-server/`** game dir vs legacy `run/ops.json`.
 - **Documentation:** [docs/phase4-dock-link-spec.md](docs/phase4-dock-link-spec.md) — Phase **4** **dock / link** spec for secondary claims (harpoon placement, `RopeTopology`, `hasRopeLinkFromClaimedIsland`, `/projectisland island claim` vs rope-anchor sneak-use, revalidation on rope removal, known MVP gaps, optional hardening).
 
 - **Rope progression (MVP):** advancements **`projectisland:progression/rope_reinforced`** (chain) and **`projectisland:progression/rope_steel`** (netherite ingot) grant higher rope tiers; **new** harpoon links scale **max length** and **max health** server-side (`RopeProgression`).
@@ -31,6 +33,8 @@ _Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24*
 - **`autoClaimIslandOnRopeLink`** (default **true**): after a successful harpoon link, an **AVAILABLE** endpoint is **auto-claimed** when the other endpoint is your **starter** or an island you already **claim** (same saved-data path as secondary claim; sneak-use remains for cases where auto-claim is off or both ends were already claimed).
 
 ### Changed
+
+- **Void rescue / nearest-island feet:** **`FloatingIslandVoidRescue`** prefers **each region’s procedural island center** (same layout anchor as starter/HUD) when searching for a rescue or **nearest** surface; legacy per-chunk sample points are **last resort** and only succeed if **`isSupportedOnIslandSurface`** after teleport. **`findNearestIslandFeet`** uses the same center-first search + **`columnFeetPlausible`** pre-check on fallbacks.
 
 - **Harpoon span defaults:** **`ropeLinkMaxLengthBlocks`** default **96 → 256** and **`ropeLinkRaycastRangeBlocks`** **64 → 256** so neighbor islands (often **100+** blocks anchor–anchor) relink without editing config; raycast is no longer shorter than max span. Existing `projectisland-common.toml` keeps saved values — delete those keys or set them manually to pick up the new defaults.
 
