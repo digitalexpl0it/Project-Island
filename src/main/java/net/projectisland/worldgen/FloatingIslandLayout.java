@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.projectisland.Config;
 import net.projectisland.island.FloatingIslandKey;
 
 /**
@@ -43,7 +44,7 @@ public final class FloatingIslandLayout {
         out.centerX = baseChunkX * 16 + rnd.nextInt(16);
         out.centerZ = baseChunkZ * 16 + rnd.nextInt(16);
         out.centerY = 92 + rnd.nextInt(36);
-        out.hr = 18 + rnd.nextInt(20);
+        out.hr = 24 + rnd.nextInt(24) + Config.FLOATING_ISLAND_HORIZONTAL_RADIUS_BONUS.getAsInt();
         out.vrTop = 5 + rnd.nextInt(7);
         out.vrBottom = 24 + rnd.nextInt(24);
         out.shapeSalt = rnd.nextLong();

@@ -59,6 +59,16 @@ public final class Config {
             .comment("Weight for minecraft:swamp (0 = exclude).")
             .defineInRange("islandBiomeWeightSwamp", 6, 0, 1000);
 
+    /**
+     * Added to each island’s horizontal ellipsoid radius ({@link net.projectisland.worldgen.FloatingIslandLayout}).
+     * Larger islands leave more flat-ish surface for vanilla villages (paths extend beyond tight stone blobs).
+     */
+    public static final ModConfigSpec.IntValue FLOATING_ISLAND_HORIZONTAL_RADIUS_BONUS = BUILDER
+            .comment(
+                    "Extra horizontal radius in blocks for procedural floating islands (added on top of the random base).",
+                    "Increase if villages or large structures clip off the rim; 0 yields smaller legacy-sized masses.")
+            .defineInRange("floatingIslandHorizontalRadiusBonus", 12, 0, 24);
+
     public static final ModConfigSpec.IntValue FLOATING_ISLANDS_EXTRA_SURFACE_TREES_PER_CHUNK = BUILDER
             .comment(
                     "After normal biome decoration, try to place this many extra trees on grass / sand / mycelium island tops per chunk.",
@@ -69,6 +79,43 @@ public final class Config {
             .comment(
                     "Same as floatingIslandsExtraSurfaceTreesPerChunk but for snow-block tops (cold islands). Usually higher than grass so taiga-style islands are not bare.")
             .defineInRange("floatingIslandsExtraSurfaceTreesSnowPerChunk", 14, 0, 64);
+
+    /**
+     * After biome decoration, each ore block is kept with this probability (1.0 = unchanged). Values below 1 thin veins;
+     * 0 removes that ore category from generated chunks. Applies only to {@link net.projectisland.worldgen.FloatingIslandsChunkGenerator}.
+     * Uses vanilla {@code BlockTags} coal/copper/iron/gold/redstone/lapis/diamond/emerald ores.
+     */
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_ORE_MULT_COAL = BUILDER
+            .comment("Keep probability for blocks in minecraft:coal_ores (1.0 = vanilla after decoration).")
+            .defineInRange("floatingIslandsOreMultiplierCoal", 1.0d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_ORE_MULT_COPPER = BUILDER
+            .comment("Keep probability for blocks in minecraft:copper_ores.")
+            .defineInRange("floatingIslandsOreMultiplierCopper", 1.0d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_ORE_MULT_IRON = BUILDER
+            .comment("Keep probability for blocks in minecraft:iron_ores.")
+            .defineInRange("floatingIslandsOreMultiplierIron", 1.0d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_ORE_MULT_GOLD = BUILDER
+            .comment("Keep probability for blocks in minecraft:gold_ores (overworld + nether gold in those tags).")
+            .defineInRange("floatingIslandsOreMultiplierGold", 1.0d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_ORE_MULT_REDSTONE = BUILDER
+            .comment("Keep probability for blocks in minecraft:redstone_ores.")
+            .defineInRange("floatingIslandsOreMultiplierRedstone", 1.0d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_ORE_MULT_LAPIS = BUILDER
+            .comment("Keep probability for blocks in minecraft:lapis_ores.")
+            .defineInRange("floatingIslandsOreMultiplierLapis", 1.0d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_ORE_MULT_DIAMOND = BUILDER
+            .comment("Keep probability for blocks in minecraft:diamond_ores.")
+            .defineInRange("floatingIslandsOreMultiplierDiamond", 1.0d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_ORE_MULT_EMERALD = BUILDER
+            .comment("Keep probability for blocks in minecraft:emerald_ores.")
+            .defineInRange("floatingIslandsOreMultiplierEmerald", 1.0d, 0.0d, 1.0d);
 
     public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_SPAWN_TUNING_ENABLED = BUILDER
             .comment(
@@ -244,6 +291,13 @@ public final class Config {
                     "Hit points removed per stress tick while over the strain threshold. Scales up as span approaches max length.")
             .defineInRange("ropeLinkStrainDamagePerTick", 1.5d, 0.0d, 10_000.0d);
 
+    public static final ModConfigSpec.DoubleValue ROPE_ANCHOR_LINK_DAMAGE_PER_DIG_TICK = BUILDER
+            .comment(
+                    "Survival/adventure: each time a **linked** rope anchor would be removed by mining, **link HP** is reduced (scaled by swing cooldown and how fast the block would break) and the break is blocked until 0% HP.",
+                    "At **0** the anchor breaks like a normal block (one removal still severs the link via strain-style cleanup).",
+                    "Default **0.35** is tuned for **ropeLinkMaxHealth** 100; raise to chip faster per completed mining attempt.")
+            .defineInRange("ropeAnchorLinkDamagePerDigTick", 0.35d, 0.0d, 20.0d);
+
     public static final ModConfigSpec.BooleanValue ROPE_TOPOLOGY_ENABLED = BUILDER
             .comment(
                     "When true, completing a harpoon link must keep the network connected to your starter island and within depth / spoke caps below.",
@@ -291,6 +345,32 @@ public final class Config {
                     "Minimum permission level for `/projectisland island claim` (0 = any player; 2 = OP on vanilla).",
                     "Rope-anchor shift-use is not gated by this — only the Brigadier command.")
             .defineInRange("secondaryClaimCommandPermissionLevel", 0, 0, 4);
+
+    public static final ModConfigSpec.BooleanValue ROPE_TRAVERSAL_SURF_ENABLED = BUILDER
+            .comment(
+                    "When true, empty-hand use (not sneaking) on a linked rope anchor starts rope surfing along the rope sag toward the other anchor.",
+                    "Sneak + empty hand remains secondary island claim.")
+            .define("ropeTraversalSurfEnabled", true);
+
+    public static final ModConfigSpec.DoubleValue ROPE_TRAVERSAL_SURF_MIN_HEALTH_FRACTION = BUILDER
+            .comment("Minimum rope health fraction (0–1) required to start or continue rope surfing.")
+            .defineInRange("ropeTraversalSurfMinHealthFraction", 0.12d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.DoubleValue ROPE_TRAVERSAL_SURF_SPEED_BLOCKS_PER_SECOND = BUILDER
+            .comment(
+                    "Approximate rope-surf speed along the rope curve (blocks per second).",
+                    "Lower if dedicated-server movement validation kicks you; raise for faster zips (SP or allow-flight true).")
+            .defineInRange("ropeTraversalSurfSpeedBlocksPerSecond", 12.0d, 0.5d, 80.0d);
+
+    public static final ModConfigSpec.IntValue ROPE_TRAVERSAL_SURF_COOLDOWN_TICKS = BUILDER
+            .comment("Ticks after completing a rope surf before another can start (0 = none). Sneak-cancel does not apply cooldown.")
+            .defineInRange("ropeTraversalSurfCooldownTicks", 45, 0, 1200);
+
+    public static final ModConfigSpec.IntValue ROPE_TRAVERSAL_SURF_MAX_DURATION_TICKS = BUILDER
+            .comment(
+                    "Safety cap: if rope surfing lasts longer than this (ticks), the server clears surf state.",
+                    "Prevents a stuck \"already surfing\" session if movement packets desync.")
+            .defineInRange("ropeTraversalSurfMaxDurationTicks", 2400, 40, 120_000);
 
     static final ModConfigSpec SPEC = BUILDER.build();
 

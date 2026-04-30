@@ -12,25 +12,16 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
+import net.projectisland.island.RopeCurveUtil;
 import net.projectisland.network.RopeLinkSyncPayload.RopeLinkSegment;
 
 /**
  * Island links: attaches at the anchor loop, samples a smooth **parabolic sag** (vertical slack), tessellates the span,
  * and draws a **square tube** (four textured faces) using vanilla {@code minecraft:textures/block/chain.png}.
- * Each face uses an **explicit outward normal** (not a quad cross product) and {@link LightTexture#FULL_BRIGHT} so no
- * side reads as a black “missing texture” strip under diffuse lighting.
+ * Curve sampling uses {@link RopeCurveUtil} so visuals match {@linkplain net.projectisland.island.RopeSurfingState server surf}.
  */
 public final class RopeLinkSegmentRenderer {
     private static final ResourceLocation CHAIN_TEXTURE = ResourceLocation.withDefaultNamespace("textures/block/chain.png");
-
-    /**
-     * Top of outer loop element (block 0–16 space): just inside the top voxel so the chain leaves the hook visibly
-     * above the cyan face center — see {@code rope_anchor.json} second element {@code to: [12, 16, 13]}.
-     */
-    private static final double ATTACH_X = (4.0 + 12.0) * 0.5 / 16.0;
-
-    private static final double ATTACH_Y = (16.0 - 0.5) / 16.0;
-    private static final double ATTACH_Z = (3.0 + 13.0) * 0.5 / 16.0;
 
     /** Half-size of the square cross-section (smaller = slimmer chain, less “plank” face area). */
     private static final float TUBE_HALF = 0.095f;
@@ -38,17 +29,14 @@ public final class RopeLinkSegmentRenderer {
     /** Polyline samples along the sag curve (more = smoother curve + smaller UV steps per segment). */
     private static final int CURVE_SEGMENTS = 32;
 
-    /** Max sag at mid-span as a fraction of chord length (then clamped). */
-    private static final double SAG_REL_TO_SPAN = 0.078;
+    /**
+     * Vertical chain repeats per block of arc length along the rope. Higher = more, smaller links packed together.
+     * Vanilla chain.png reads better around {@code 4}–{@code 5} here; {@code 10} looked microscopic on long spans.
+     */
+    private static final float CHAIN_V_REPEATS_PER_BLOCK = 4.25f;
 
-    /** Hard cap so very long spans do not dip into absurd depths. */
-    private static final double MAX_SAG_BLOCKS = 5.0;
-
-    /** How many vertical chain repeats in UV space per block of arc length (higher = smaller links). */
-    private static final float CHAIN_V_REPEATS_PER_BLOCK = 10.0f;
-
-    /** Horizontal slice of the chain texture (narrower = less wide dark bands from the atlas crop). */
-    private static final float U_CENTER_HALF_WIDTH = 0.19f;
+    /** Horizontal UV half-width around texture center (wider = show more of each chain column). */
+    private static final float U_CENTER_HALF_WIDTH = 0.26f;
 
     private RopeLinkSegmentRenderer() {}
 
@@ -67,32 +55,24 @@ public final class RopeLinkSegmentRenderer {
         Pose pose = poseStack.last();
 
         for (RopeLinkSegment seg : RopeLinkClientCache.segments()) {
-            Vec3 a = attachmentWorld(BlockPos.of(seg.fromPacked()));
-            Vec3 b = attachmentWorld(BlockPos.of(seg.toPacked()));
+            Vec3 a = RopeCurveUtil.attachmentWorld(BlockPos.of(seg.fromPacked()));
+            Vec3 b = RopeCurveUtil.attachmentWorld(BlockPos.of(seg.toPacked()));
             renderSquareTubeWithSag(quads, pose, a, b);
         }
 
         poseStack.popPose();
     }
 
+    /** Delegates to {@link RopeCurveUtil#attachmentWorld(BlockPos)} (same as {@link RopeLinkHealthBarRenderer} beam anchors). */
     public static Vec3 attachmentWorld(BlockPos pos) {
-        return new Vec3(pos.getX() + ATTACH_X, pos.getY() + ATTACH_Y, pos.getZ() + ATTACH_Z);
-    }
-
-    /** Lerp with vertical parabolic slack: endpoints fixed, midpoint drops along -Y. */
-    private static Vec3 sagPoint(Vec3 a, Vec3 b, double t) {
-        double u = 1.0 - t;
-        double chord = a.distanceTo(b);
-        double sagAmp = Math.min(MAX_SAG_BLOCKS, chord * SAG_REL_TO_SPAN);
-        double sagShape = 4.0 * t * (1.0 - t);
-        return new Vec3(u * a.x + t * b.x, u * a.y + t * b.y - sagAmp * sagShape, u * a.z + t * b.z);
+        return RopeCurveUtil.attachmentWorld(pos);
     }
 
     private static void renderSquareTubeWithSag(VertexConsumer quads, Pose pose, Vec3 aWorld, Vec3 bWorld) {
         int seg = CURVE_SEGMENTS;
         Vec3[] p = new Vec3[seg + 1];
         for (int i = 0; i <= seg; i++) {
-            p[i] = sagPoint(aWorld, bWorld, i / (double) seg);
+            p[i] = RopeCurveUtil.sagPoint(aWorld, bWorld, i / (double) seg);
         }
         double[] cum = new double[seg + 1];
         cum[0] = 0.0;
@@ -132,11 +112,7 @@ public final class RopeLinkSegmentRenderer {
             float v0 = (float) (cum[i] * CHAIN_V_REPEATS_PER_BLOCK);
             float v1 = (float) (cum[i + 1] * CHAIN_V_REPEATS_PER_BLOCK);
 
-            // Each face must keep a consistent (A→B) vertex mapping, otherwise the chain UVs “tear” and look detached.
-            // Corners are in side1/side2 space: c0(+,+), c1(+,-), c2(-,-), c3(-,+).
-            // +side1 face (normal +side1)
             texturedQuad(quads, pose, p0.add(c0), p0.add(c1), p1.add(c1), p1.add(c0), uMin, uMax, v0, v1, side1);
-            // -side1 face (normal -side1)
             texturedQuad(
                     quads,
                     pose,
@@ -149,9 +125,7 @@ public final class RopeLinkSegmentRenderer {
                     v0,
                     v1,
                     side1.scale(-1.0));
-            // +side2 face (normal +side2)
             texturedQuad(quads, pose, p0.add(c0), p0.add(c3), p1.add(c3), p1.add(c0), uMin, uMax, v0, v1, side2);
-            // -side2 face (normal -side2)
             texturedQuad(
                     quads,
                     pose,
@@ -167,7 +141,6 @@ public final class RopeLinkSegmentRenderer {
         }
     }
 
-    /** Quad aL → aR → bR → bL; u across width, v along chain; {@code outward} is the face normal (tube exterior). */
     private static void texturedQuad(
             VertexConsumer c,
             Pose pose,

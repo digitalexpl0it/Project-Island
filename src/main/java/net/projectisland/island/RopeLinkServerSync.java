@@ -44,6 +44,27 @@ public final class RopeLinkServerSync {
         }
     }
 
+    /**
+     * Pushes rope segments to every player in this level after immediate HP changes (e.g. anchor mining), without
+     * waiting for the periodic sync interval.
+     */
+    public static void sendRopeLinkSyncForLevel(ServerLevel level) {
+        if (!Config.ROPE_LINK_SYNC_ENABLED.getAsBoolean()) {
+            return;
+        }
+        if (!ProjectIslandDimensions.isFloatingIslandsGameplay(level)) {
+            return;
+        }
+        FloatingIslandSavedData data = IslandWorld.get(level);
+        for (ServerPlayer p : level.getServer().getPlayerList().getPlayers()) {
+            if (p.serverLevel() != level) {
+                continue;
+            }
+            List<RopeLinkSegment> segments = buildSegmentsForPlayer(p, data);
+            PacketDistributor.sendToPlayer(p, new RopeLinkSyncPayload(segments));
+        }
+    }
+
     private static List<RopeLinkSegment> buildSegmentsForPlayer(ServerPlayer player, FloatingIslandSavedData data) {
         int radius = Math.max(1, Config.ROPE_LINK_SYNC_CULL_RADIUS_BLOCKS.getAsInt());
         BlockPos feet = player.blockPosition();

@@ -72,6 +72,9 @@ public final class FloatingIslandVoidRescue {
         if (!Config.VOID_RESCUE_EACH_TICK.getAsBoolean()) {
             return;
         }
+        if (RopeSurfingState.isSurfing(player)) {
+            return;
+        }
         if (!ProjectIslandDimensions.isFloatingIslandsGameplay(level)) {
             return;
         }

@@ -236,6 +236,7 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
     @Override
     public void applyBiomeDecoration(WorldGenLevel level, ChunkAccess chunk, StructureManager structureManager) {
         super.applyBiomeDecoration(level, chunk, structureManager);
+        FloatingIslandsOreThinning.applyAfterDecoration(level, chunk);
         sprinkleExtraSurfaceTrees(level, chunk);
     }
 

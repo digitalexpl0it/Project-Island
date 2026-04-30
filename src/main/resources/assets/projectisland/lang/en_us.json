@@ -36,5 +36,11 @@
   "projectisland.rescue.life_saved": "Your life was saved. Mind the gap next time.",
   "projectisland.rescue.plucked": "Plucked you out of the void. You're welcome.",
   "projectisland.rescue.gravity": "Gravity had plans. Project Island disagreed.",
-  "projectisland.rescue.airship_insurance": "Void fall coverage: paid in full. Welcome back."
+  "projectisland.rescue.airship_insurance": "Void fall coverage: paid in full. Welcome back.",
+  "projectisland.rope.surf.started": "Rope surfing!",
+  "projectisland.rope.surf.no_link": "No rope link on this anchor.",
+  "projectisland.rope.surf.low_health": "Rope too weak to surf.",
+  "projectisland.rope.surf.cooldown": "Rope surf cooling down.",
+  "projectisland.rope.surf.busy": "Already surfing the rope.",
+  "projectisland.rope.surf.bad_world": "Rope surfing only works in the floating island overworld."
 }

@@ -18,7 +18,9 @@ import net.projectisland.island.FloatingIslandDisplayNameReloader;
 import net.projectisland.island.FloatingIslandRespawnHandler;
 import net.projectisland.island.IslandCommands;
 import net.projectisland.island.IslandHudServerSync;
+import net.projectisland.island.RopeAnchorMining;
 import net.projectisland.island.RopeLinkServerSync;
+import net.projectisland.island.RopeTraversalEvents;
 import net.projectisland.network.ProjectIslandNetworking;
 import net.projectisland.worldgen.FloatingIslandsSpawnPregen;
 import net.projectisland.worldgen.ProjectIslandWorldgen;
@@ -40,6 +42,8 @@ public final class ProjectIsland {
         IslandCommands.register();
         IslandHudServerSync.register();
         RopeLinkServerSync.register();
+        RopeAnchorMining.register();
+        RopeTraversalEvents.register();
         FloatingIslandRespawnHandler.register();
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);

@@ -7,10 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24**._ _README/TODO sync: **2026-04-25**._ _FTB Quests / ProgressiveStages baseline + void-rescue center preference: **2026-04-25**._
+_Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24**._ _README/TODO sync: **2026-04-25**._ _FTB Quests / ProgressiveStages baseline + void-rescue center preference: **2026-04-25**._ _Rope surf + ore/island tuning docs: **2026-04-30**._
 
 ### Added
 
+- **Rope surfing:** server **`RopeSurfingState`** + **`RopeCurveUtil`** (shared sag / attachment math); empty-hand use on a linked anchor (non-sneak) travels along the rope curve; config **`ropeTraversalSurf*`** (speed, min health, cooldown, max duration); **`RopeTraversalEvents`** (tick, dimension/login/out, damage cancel); **`FloatingIslandVoidRescue`** skips per-tick rescue while surfing.
+- **Linked anchor mining:** **`RopeAnchorMining`** — survival breaks on linked **`ROPE_ANCHOR`** damage **`RopeLink`** HP until severed; **`ropeAnchorLinkDamagePerDigTick`** (`0` = vanilla break); **`RopeLinkServerSync.sendRopeLinkSyncForLevel`** pushes rope HUD after damage.
+- **Larger islands:** **`floatingIslandHorizontalRadiusBonus`** in **`FloatingIslandLayout`** (horizontal **`hr`** = **24 + random(24) + bonus**).
+- **Ore thinning:** **`FloatingIslandsOreThinning`** after **`applyBiomeDecoration`**; per-tag **`floatingIslandsOreMultiplier*`** (coal … emerald) as **keep probability** `0..1`.
+- **Documentation:** README subsection **“Rope links, surfing & island resources”**; TODO checklist rows for surf/mining/ore/radius/renderer.
 - **Dev progression (modpack-style):** **`examples/dev-progression/`** — **FTB Quests** `data.snbt` + chapter **`project_island.snbt`** (welcome → harpoon → rope-tier advancements → manual “Expand” + **gamestage** reward), **ProgressiveStages** **`pi_*.toml`** stages and **`triggers.toml`** entries (harpoon item + **`projectisland:progression/rope_reinforced` / `rope_steel`** advancements). Gradle **`run-client`** / **`run-server`** copy these into **`config/ftbquests/quests/`** and **`config/ProgressiveStages/`** for local dev.
 - **Dev server OP:** root **`run-server/ops.json`** populated from **`dev-ops.example.json`** (offline **Dev** UUID); README documents **`run-server/`** game dir vs legacy `run/ops.json`.
 - **Modpack manifest:** [MOD_LIST.md](MOD_LIST.md) — required third-party mods (pinned JAR names) for the official **NeoForge 1.21.1** pack; mirrors `run-client/mods` / `run-server/mods`. Linked from [README.md](README.md).
@@ -34,6 +39,9 @@ _Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24*
 - **`autoClaimIslandOnRopeLink`** (default **true**): after a successful harpoon link, an **AVAILABLE** endpoint is **auto-claimed** when the other endpoint is your **starter** or an island you already **claim** (same saved-data path as secondary claim; sneak-use remains for cases where auto-claim is off or both ends were already claimed).
 
 ### Changed
+
+- **`RopeLinkSegmentRenderer`:** delegates sag + **`attachmentWorld`** to **`RopeCurveUtil`** (matches server motion); chain UV tiling adjusted (**`CHAIN_V_REPEATS_PER_BLOCK`**, **`U_CENTER_HALF_WIDTH`**) so vanilla **`chain.png`** reads larger along the span.
+- **Default rope surf speed:** **`ropeTraversalSurfSpeedBlocksPerSecond`** default raised (was tuned very conservative for dedicated servers).
 
 - **Git:** **`run-client/`** and **`run-server/`** are listed in **`.gitignore`** and removed from version control (use **`examples/dev-progression/`** as the canonical pack snippets; local Gradle game dirs stay untracked).
 
