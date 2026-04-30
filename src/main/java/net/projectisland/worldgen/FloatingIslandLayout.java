@@ -12,7 +12,6 @@ import net.projectisland.island.FloatingIslandKey;
  */
 public final class FloatingIslandLayout {
     public static final int REGION_CHUNKS = 8;
-    public static final float REGION_SPAWN_CHANCE = 0.17f;
     private static final int REGION_SEED_SALT = 84062247;
     public static final double TOP_HORIZ_POWER = 0.72d;
 
@@ -20,7 +19,8 @@ public final class FloatingIslandLayout {
 
     public static boolean regionHasIsland(int regionX, int regionZ) {
         RandomSource rnd = RandomSource.create(Mth.getSeed(regionX, REGION_SEED_SALT, regionZ));
-        return rnd.nextFloat() < REGION_SPAWN_CHANCE;
+        double chance = Config.FLOATING_ISLAND_REGION_SPAWN_CHANCE.getAsDouble();
+        return rnd.nextDouble() < chance;
     }
 
     /**
@@ -44,7 +44,7 @@ public final class FloatingIslandLayout {
         out.centerX = baseChunkX * 16 + rnd.nextInt(16);
         out.centerZ = baseChunkZ * 16 + rnd.nextInt(16);
         out.centerY = 92 + rnd.nextInt(36);
-        out.hr = 24 + rnd.nextInt(24) + Config.FLOATING_ISLAND_HORIZONTAL_RADIUS_BONUS.getAsInt();
+        out.hr = 28 + rnd.nextInt(36) + Config.FLOATING_ISLAND_HORIZONTAL_RADIUS_BONUS.getAsInt();
         out.vrTop = 5 + rnd.nextInt(7);
         out.vrBottom = 24 + rnd.nextInt(24);
         out.shapeSalt = rnd.nextLong();

@@ -295,12 +295,15 @@ public final class FloatingIslandVoidRescue {
                     for (int s = 0; s < LOCAL_X.length; s++) {
                         int wx = bx + LOCAL_X[s];
                         int wz = bz + LOCAL_Z[s];
-                        int top = FloatingIslandsChunkGenerator.islandSurfaceBlockY(generator, wx, wz, minY, maxY);
-                        if (top == Integer.MIN_VALUE) {
+                        Optional<Vec3> clear =
+                                FloatingIslandStarterPlacement.findOpenFeetNear(
+                                        level, generator, wx, wz, minY, maxY, 24);
+                        if (clear.isEmpty()) {
                             continue;
                         }
-                        IslandChunkLoader.ensureChunksAroundWorldBlock(level, wx, wz);
-                        player.teleportTo(level, wx + 0.5d, top + 1.0d, wz + 0.5d, player.getYRot(), player.getXRot());
+                        Vec3 p = clear.get();
+                        IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(p.x), Mth.floor(p.z));
+                        player.teleportTo(level, p.x, p.y, p.z, player.getYRot(), player.getXRot());
                         if (isSupportedOnIslandSurface(player, level)) {
                             showVoidRescueActionBar(player);
                             return;
@@ -368,13 +371,12 @@ public final class FloatingIslandVoidRescue {
                     for (int s = 0; s < LOCAL_X.length; s++) {
                         int wx = bx + LOCAL_X[s];
                         int wz = bz + LOCAL_Z[s];
-                        int top = FloatingIslandsChunkGenerator.islandSurfaceBlockY(generator, wx, wz, minY, maxY);
-                        if (top == Integer.MIN_VALUE) {
-                            continue;
-                        }
-                        Vec3 f = new Vec3(wx + 0.5d, top + 1.0d, wz + 0.5d);
-                        if (columnFeetPlausible(level, generator, f, minY, maxY)) {
-                            return Optional.of(f);
+                        Optional<Vec3> clear =
+                                FloatingIslandStarterPlacement.findOpenFeetNear(
+                                        level, generator, wx, wz, minY, maxY, 24);
+                        if (clear.isPresent()
+                                && columnFeetPlausible(level, generator, clear.get(), minY, maxY)) {
+                            return clear;
                         }
                     }
                 }

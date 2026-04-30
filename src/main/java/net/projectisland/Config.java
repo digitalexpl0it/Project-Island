@@ -12,16 +12,22 @@ public final class Config {
     public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_RARE_STRUCTURE_KEEP_CHANCE = BUILDER
             .comment(
                     "In the floating-islands overworld, each vanilla monster room or trial chamber that generates in a chunk is kept with this probability (0 = remove all, 1 = keep all).",
-                    "Lowering this reduces floating stone ruins in the void; raising it preserves more combat structures.")
-            .defineInRange("floatingIslandsRareStructureKeepChance", 0.12d, 0.0d, 1.0d);
+                    "Default **0** removes isolated floating dungeons in the void; raise toward **1** if you want those structures back.")
+            .defineInRange("floatingIslandsRareStructureKeepChance", 0.0d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLAND_REGION_SPAWN_CHANCE = BUILDER
+            .comment(
+                    "Per **8×8-chunk** island region: probability that a procedural floating island exists there.",
+                    "Higher values shrink void gaps between land (~**0.34** ≈ twice as dense as legacy **0.17**). Range **0.05–1**.")
+            .defineInRange("floatingIslandRegionSpawnChance", 0.34d, 0.05d, 1.0d);
 
     public static final ModConfigSpec.IntValue ISLAND_BIOME_WEIGHT_RIVER = BUILDER
             .comment("Weight for minecraft:river when rolling per-island biome (0 = never). Land uses procedural biomes, not vanilla multi_noise sectors.")
             .defineInRange("islandBiomeWeightRiver", 28, 0, 1000);
 
     public static final ModConfigSpec.IntValue ISLAND_BIOME_WEIGHT_PLAINS = BUILDER
-            .comment("Weight for minecraft:plains (0 = exclude).")
-            .defineInRange("islandBiomeWeightPlains", 14, 0, 1000);
+            .comment("Weight for minecraft:plains (0 = exclude). Slightly higher default helps vanilla villages find suitable surfaces.")
+            .defineInRange("islandBiomeWeightPlains", 20, 0, 1000);
 
     public static final ModConfigSpec.IntValue ISLAND_BIOME_WEIGHT_FOREST = BUILDER
             .comment("Weight for minecraft:forest (0 = exclude).")
@@ -67,7 +73,31 @@ public final class Config {
             .comment(
                     "Extra horizontal radius in blocks for procedural floating islands (added on top of the random base).",
                     "Increase if villages or large structures clip off the rim; 0 yields smaller legacy-sized masses.")
-            .defineInRange("floatingIslandHorizontalRadiusBonus", 12, 0, 24);
+            .defineInRange("floatingIslandHorizontalRadiusBonus", 18, 0, 48);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_CHUNK_GENERATOR_SEA_LEVEL = BUILDER
+            .comment(
+                    "Returned only by **ChunkGenerator#getSeaLevel()** for the floating-islands overworld (not the same as **Level#getSeaLevel()**, which still comes from the overworld **dimension type**, usually **~63**).",
+                    "Many structure placement helpers and some mods anchor vertical placement to generator sea level. The legacy **−63** value misaligned Y relative to island tops; set this near your typical **surface Y** (often **~90–120**). Tune when adding structure/worldgen mods.")
+            .defineInRange("floatingIslandsChunkGeneratorSeaLevel", 100, -64, 512);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_REMOVE_STRUCTURES_WITH_NO_LAND_CONTACT = BUILDER
+            .comment(
+                    "After structures generate, remove any **start** in this chunk whose horizontal footprint does not intersect procedural island columns (void-only). Cleared blocks are wiped for this chunk only; multi-chunk pieces behave like other partial trims.",
+                    "Improves packs that add villages/buildings so void debris is less common. Set **false** if a mod requires structures that intentionally float with no land.")
+            .define("floatingIslandsRemoveStructuresWithNoLandContact", true);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_MINESHAFT_STRICT_ISLAND_OVERLAP = BUILDER
+            .comment(
+                    "For **minecraft:mineshaft** only: require the structure bounding-box **center** to sit on an island column and at least **floatingIslandsMineshaftMinIslandColumnFraction** of sampled footprint columns to have land.",
+                    "Vanilla’s huge mineshaft box often **barely touched** one rim while corridors and chains filled void sky — the loose test still kept the whole start. Set **false** to restore the legacy **any-corner touch** rule (more void junk).")
+            .define("floatingIslandsMineshaftStrictIslandOverlap", true);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_MINESHAFT_MIN_ISLAND_COLUMN_FRACTION = BUILDER
+            .comment(
+                    "Used only when **floatingIslandsMineshaftStrictIslandOverlap** is **true**: minimum fraction (0–1) of horizontal BB samples that must have procedural island stone beneath.",
+                    "**0** = center-column check only; **~0.12** rejects skinny edge grazing.")
+            .defineInRange("floatingIslandsMineshaftMinIslandColumnFraction", 0.12d, 0.0d, 1.0d);
 
     public static final ModConfigSpec.IntValue FLOATING_ISLANDS_EXTRA_SURFACE_TREES_PER_CHUNK = BUILDER
             .comment(
@@ -79,6 +109,18 @@ public final class Config {
             .comment(
                     "Same as floatingIslandsExtraSurfaceTreesPerChunk but for snow-block tops (cold islands). Usually higher than grass so taiga-style islands are not bare.")
             .defineInRange("floatingIslandsExtraSurfaceTreesSnowPerChunk", 14, 0, 64);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_SURFACE_WATER_POOL_CHUNK_CHANCE = BUILDER
+            .comment(
+                    "Fraction of chunks that run **any** surface water pool placement (0–1). Combined with a low per-chunk cap, keeps pools rare on large islands.",
+                    "**1** = every chunk may get pools; **0.25** ≈ **75%** fewer chunk placements than always-on.")
+            .defineInRange("floatingIslandsSurfaceWaterPoolChunkChance", 0.25d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_SURFACE_WATER_POOLS_PER_CHUNK = BUILDER
+            .comment(
+                    "Max **small surface water pools** per chunk **when** this chunk passes floatingIslandsSurfaceWaterPoolChunkChance (grass / sand / mycelium; not snow tops).",
+                    "Runs before extra trees. Default **1** with **~0.25** chunk chance ≈ **~80%** less coverage than the old default of **4** pools every chunk.")
+            .defineInRange("floatingIslandsSurfaceWaterPoolsPerChunk", 1, 0, 32);
 
     /**
      * After biome decoration, each ore block is kept with this probability (1.0 = unchanged). Values below 1 thin veins;
@@ -131,8 +173,25 @@ public final class Config {
 
     public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_NATURAL_CREEPER_SPAWN_KEEP_CHANCE = BUILDER
             .comment(
-                    "Per natural spawn attempt for **creepers** only (explosion damage on small islands). Use a low value for at most occasional creepers (0.12 ≈ 1 in 8 attempts).")
-            .defineInRange("floatingIslandsNaturalCreeperSpawnKeepChance", 0.12d, 0.0d, 1.0d);
+                    "Per natural spawn attempt for **creepers** only (explosion damage on small islands). Lower = fewer creepers (e.g. **0.08** ≈ 1 in 12 attempts).")
+            .defineInRange("floatingIslandsNaturalCreeperSpawnKeepChance", 0.08d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_NATURAL_CREATURE_SPAWN_KEEP_CHANCE = BUILDER
+            .comment(
+                    "Per natural spawn attempt for **land animals** (pigs, sheep, cows, chickens, …): keep with this probability (**1** = vanilla rate before optional multiplier below).")
+            .defineInRange("floatingIslandsNaturalCreatureSpawnKeepChance", 1.0d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_NATURAL_CREATURE_SPAWN_MULTIPLIER = BUILDER
+            .comment(
+                    "After a natural land **animal** spawn succeeds and passes the keep chance above, roll again: with probability **(multiplier − 1)** (capped at 1) spawn one extra tagged duplicate nearby.",
+                    "**1** disables; **1.2** ≈ 20% extra animals. Does not apply to breeding, eggs, or spawners.")
+            .defineInRange("floatingIslandsNaturalCreatureSpawnMultiplier", 1.2d, 1.0d, 2.5d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_NATURAL_VILLAGER_SPAWN_KEEP_CHANCE = BUILDER
+            .comment(
+                    "Per natural spawn attempt for **villagers** (e.g. from village mechanics): keep with this probability (**1** = unchanged).",
+                    "Most villagers come from village structures; this covers villager-type spawns that use natural/chunk-generation.")
+            .defineInRange("floatingIslandsNaturalVillagerSpawnKeepChance", 1.0d, 0.0d, 1.0d);
 
     public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_NATURAL_AMBIENT_SPAWN_KEEP_CHANCE = BUILDER
             .comment("Natural spawns for **ambient** mobs (bats): keep chance (1 = unchanged).")

@@ -7,13 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24**._ _README/TODO sync: **2026-04-25**._ _FTB Quests / ProgressiveStages baseline + void-rescue center preference: **2026-04-25**._ _Rope surf + ore/island tuning docs: **2026-04-30**._
+_Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24**._ _README/TODO sync: **2026-04-25**._ _FTB Quests / ProgressiveStages baseline + void-rescue center preference: **2026-04-25**._ _Rope surf + ore/island tuning docs: **2026-04-30**._ _Denser islands + spawn/resource tuning defaults: **2026-04-30**._
+
+### Fixed
+
+- **Vanilla villages:** settlement trim / void-footprint logic now recognizes **`minecraft:village_plains`** (and siblings **`village_*`**) instead of the nonexistent **`minecraft:village`** id; **`removeStructureStartsWithNoIslandContact`** also skips those so footprint sampling cannot discard valid villages.
+
+### Changed
+
+- **Mineshafts in void:** **`floatingIslandsMineshaftStrictIslandOverlap`** (default **true**) and **`floatingIslandsMineshaftMinIslandColumnFraction`** — **`minecraft:mineshaft`** structure starts are discarded unless the bounding-box center sits on procedural island **and** a fraction of footprint samples hit land (legacy **any-corner** touch let huge boxes “count” while corridors/chains filled empty sky).
+- **Starter / void rescue feet:** **`FloatingIslandStarterPlacement`** searches outward from the procedural island center until it finds a column where **feet and head** blocks are **air** (avoids spawning inside tree canopies). **`FloatingIslandVoidRescue`** chunk fallback and **`findNearestIslandFeet`** use the same helper.
+- **Surface water pools:** defaults are **`floatingIslandsSurfaceWaterPoolChunkChance`** **~0.25**, **`floatingIslandsSurfaceWaterPoolsPerChunk`** **1**, and slightly smaller carved radii — roughly **~80%** fewer pools than the earlier **4**/chunk behavior.
+- **Floating islands worldgen:** per-region island chance is **`floatingIslandRegionSpawnChance`** (default ~**0.34**, was fixed ~**0.17**). Horizontal radius base is **28 + random(36) + `floatingIslandHorizontalRadiusBonus`** (bonus default **18**, max **48**). **`floatingIslandsRareStructureKeepChance`** defaults to **`0`** so floating **monster_room** / **trial_chambers** pieces are removed unless raised. **`islandBiomeWeightPlains`** default raised slightly (village-friendly surfaces). **`floatingIslandsNaturalCreeperSpawnKeepChance`** default lowered (**0.08**).
+- **Floating overworld mob tuning:** explicit **`floatingIslandsNaturalCreatureSpawnKeepChance`**, optional **`floatingIslandsNaturalCreatureSpawnMultiplier`** (extra land-animal duplicate on some natural spawns), and **`floatingIslandsNaturalVillagerSpawnKeepChance`**; README overworld tuning bullet updated.
+- **Island HUD:** when **`islandOwningSurface`** returns a region for the player’s column, **`IslandHudServerSync`** sends **only that** beacon (replacing the 3×3 neighbor heuristic so merged islands two+ cells apart no longer show duplicate titles).
+- **Villages on islands:** **`FloatingIslandsChunkGenerator#trimFloatingStructureBlocks`** skips vertical stripping for **`minecraft:village_*`** jigsaw ids (e.g. **`village_plains`**) and **`pillager_outpost`** — vanilla **1.21** does not register **`minecraft:village`**, so an earlier mistake matching only that id meant settlements were still trimmed and villagers rarely worked.
+- **Structure alignment / modded void junk:** configurable **`floatingIslandsChunkGeneratorSeaLevel`** (replaces hardcoded **−63** for **`ChunkGenerator#getSeaLevel()`** only; default **~100** to sit near typical island surface Y). Optional **`floatingIslandsRemoveStructuresWithNoLandContact`** (default **true**) invalidates structure starts whose horizontal footprint does not touch any island column, with per-chunk block cleanup.
 
 ### Added
 
+- **Island surface water pools:** **`floatingIslandsChunkGenerator`** carves shallow water disks on grass/sand/mycelium tops after **`applyBiomeDecoration`** (before extra trees). Tunable via **`floatingIslandsSurfaceWaterPoolChunkChance`** and **`floatingIslandsSurfaceWaterPoolsPerChunk`**.
+
 - **Rope surfing:** server **`RopeSurfingState`** + **`RopeCurveUtil`** (shared sag / attachment math); empty-hand use on a linked anchor (non-sneak) travels along the rope curve; config **`ropeTraversalSurf*`** (speed, min health, cooldown, max duration); **`RopeTraversalEvents`** (tick, dimension/login/out, damage cancel); **`FloatingIslandVoidRescue`** skips per-tick rescue while surfing.
 - **Linked anchor mining:** **`RopeAnchorMining`** — survival breaks on linked **`ROPE_ANCHOR`** damage **`RopeLink`** HP until severed; **`ropeAnchorLinkDamagePerDigTick`** (`0` = vanilla break); **`RopeLinkServerSync.sendRopeLinkSyncForLevel`** pushes rope HUD after damage.
-- **Larger islands:** **`floatingIslandHorizontalRadiusBonus`** in **`FloatingIslandLayout`** (horizontal **`hr`** = **24 + random(24) + bonus**).
+- **Larger islands:** **`floatingIslandHorizontalRadiusBonus`** in **`FloatingIslandLayout`** (horizontal **`hr`** = **28 + random(36) + bonus**; see **`floatingIslandRegionSpawnChance`**).
 - **Ore thinning:** **`FloatingIslandsOreThinning`** after **`applyBiomeDecoration`**; per-tag **`floatingIslandsOreMultiplier*`** (coal … emerald) as **keep probability** `0..1`.
 - **Documentation:** README subsection **“Rope links, surfing & island resources”**; TODO checklist rows for surf/mining/ore/radius/renderer.
 - **Dev progression (modpack-style):** **`examples/dev-progression/`** — **FTB Quests** `data.snbt` + chapter **`project_island.snbt`** (welcome → harpoon → rope-tier advancements → manual “Expand” + **gamestage** reward), **ProgressiveStages** **`pi_*.toml`** stages and **`triggers.toml`** entries (harpoon item + **`projectisland:progression/rope_reinforced` / `rope_steel`** advancements). Gradle **`run-client`** / **`run-server`** copy these into **`config/ftbquests/quests/`** and **`config/ProgressiveStages/`** for local dev.

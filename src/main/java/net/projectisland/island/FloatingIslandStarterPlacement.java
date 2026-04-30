@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -137,20 +138,56 @@ public final class FloatingIslandStarterPlacement {
         }
     }
 
-    /** Feet position (center XZ, one above surface) for {@code key}, or empty if layout has no solid column there. */
+    /**
+     * Spiral search from {@code (originWx, originWz)} for a column whose feet Y is one above procedural island surface and
+     * whose feet + head blocks are clear air (avoids spawning inside tree foliage).
+     */
+    public static Optional<Vec3> findOpenFeetNear(
+            ServerLevel level,
+            ChunkGenerator gen,
+            int originWx,
+            int originWz,
+            int minY,
+            int maxY,
+            int maxRing) {
+        IslandChunkLoader.ensureChunksAroundWorldBlock(level, originWx, originWz, 3);
+        int cap = Math.max(0, maxRing);
+        for (int ring = 0; ring <= cap; ring++) {
+            for (int dx = -ring; dx <= ring; dx++) {
+                for (int dz = -ring; dz <= ring; dz++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dz)) != ring) {
+                        continue;
+                    }
+                    int wx = originWx + dx;
+                    int wz = originWz + dz;
+                    int top = FloatingIslandsChunkGenerator.islandSurfaceBlockY(gen, wx, wz, minY, maxY);
+                    if (top == Integer.MIN_VALUE) {
+                        continue;
+                    }
+                    BlockPos feet = new BlockPos(wx, top + 1, wz);
+                    if (columnTwoBlocksAir(level, feet)) {
+                        return Optional.of(new Vec3(wx + 0.5d, feet.getY(), wz + 0.5d));
+                    }
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static boolean columnTwoBlocksAir(ServerLevel level, BlockPos feetBlock) {
+        BlockState f = level.getBlockState(feetBlock);
+        BlockState h = level.getBlockState(feetBlock.above());
+        return f.isAir() && h.isAir();
+    }
+
+    /** Feet position near procedural island center for {@code key}, or empty if no clear two-block column was found. */
     public static Optional<Vec3> optionalFeetAtIslandCenter(ServerLevel level, FloatingIslandKey key) {
         ChunkGenerator gen = level.getChunkSource().getGenerator();
         int minY = level.getMinBuildHeight();
         int maxY = level.getMaxBuildHeight();
         FloatingIslandLayout.IslandParams params = new FloatingIslandLayout.IslandParams();
         FloatingIslandLayout.regionIsland(key.regionX(), key.regionZ(), params);
-        int wx = params.centerX;
-        int wz = params.centerZ;
-        int top = FloatingIslandsChunkGenerator.islandSurfaceBlockY(gen, wx, wz, minY, maxY);
-        if (top == Integer.MIN_VALUE) {
-            return Optional.empty();
-        }
-        return Optional.of(new Vec3(wx + 0.5d, top + 1.0d, wz + 0.5d));
+        return findOpenFeetNear(level, gen, params.centerX, params.centerZ, minY, maxY, 64);
     }
 
     /**

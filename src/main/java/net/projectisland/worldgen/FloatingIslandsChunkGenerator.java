@@ -55,8 +55,10 @@ import net.projectisland.island.FloatingIslandKey;
  * Void sky islands: asymmetric vertical profile (flat-ish dome top, deeper underside).
  * Horizontal scale uses smooth analytic wobble (no block-sized discontinuities).
  * Vanilla structures still generate, then {@link #trimFloatingStructureBlocks} removes
- * pieces in void columns or floating above the island surface so mineshafts / ruined portals
- * tend to hug terrain where they overlap land.
+ * pieces in void columns or floating above the island surface so ruins tend to hug terrain where they overlap land.
+ * {@link #removeStructureStartsWithNoIslandContact} drops **mineshaft** starts unless the bounding box is **centered**
+ * on island mass with enough horizontal overlap (configurable), because vanilla’s loose footprint otherwise left corridors
+ * and chains in open void.
  */
 public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(ProjectIsland.MOD_ID, "floating_islands");
@@ -159,6 +161,25 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
             ResourceLocation.withDefaultNamespace("monster_room"),
             ResourceLocation.withDefaultNamespace("trial_chambers"));
 
+    private static final ResourceLocation PILLAGER_OUTPOST =
+            ResourceLocation.withDefaultNamespace("pillager_outpost");
+
+    private static final ResourceLocation MINESHAFT = ResourceLocation.withDefaultNamespace("mineshaft");
+
+    /**
+     * Vanilla jigsaw villages register as {@code minecraft:village_plains}, {@code village_desert}, … — there is no
+     * {@code minecraft:village} structure id in 1.21. Skip aggressive trim / void-only removal for those and outposts.
+     */
+    private static boolean isSettlementStructure(ResourceLocation id) {
+        if (id == null) {
+            return false;
+        }
+        if (PILLAGER_OUTPOST.equals(id)) {
+            return true;
+        }
+        return "minecraft".equals(id.getNamespace()) && id.getPath().startsWith("village_");
+    }
+
     @Override
     public void createStructures(
             RegistryAccess registryAccess,
@@ -167,9 +188,114 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
             ChunkAccess chunk,
             StructureTemplateManager structureTemplateManager) {
         super.createStructures(registryAccess, structureState, structureManager, chunk, structureTemplateManager);
-        trimFloatingStructureBlocks(chunk);
+        removeStructureStartsWithNoIslandContact(registryAccess, chunk);
+        trimFloatingStructureBlocks(registryAccess, chunk);
         thinRareAmbushStructures(registryAccess, chunk, structureState);
         Heightmap.primeHeightmaps(chunk, EnumSet.of(Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.WORLD_SURFACE_WG));
+    }
+
+    /**
+     * Drops structure starts that never intersect floating terrain so modded/vanilla pieces are not left as pure void
+     * artifacts (see {@link Config#FLOATING_ISLANDS_REMOVE_STRUCTURES_WITH_NO_LAND_CONTACT}).
+     */
+    private static void removeStructureStartsWithNoIslandContact(RegistryAccess registryAccess, ChunkAccess chunk) {
+        if (!Config.FLOATING_ISLANDS_REMOVE_STRUCTURES_WITH_NO_LAND_CONTACT.getAsBoolean()) {
+            return;
+        }
+        var structureRegistry = registryAccess.registryOrThrow(Registries.STRUCTURE);
+        int minY = chunk.getMinBuildHeight();
+        int maxY = chunk.getMaxBuildHeight();
+        for (var entry : new ArrayList<>(chunk.getAllStarts().entrySet())) {
+            Structure structure = entry.getKey();
+            StructureStart start = entry.getValue();
+            if (!start.isValid()) {
+                continue;
+            }
+            ResourceLocation sid = structureRegistry.getKey(structure);
+            if (isSettlementStructure(sid)) {
+                continue;
+            }
+            BoundingBox bb = start.getBoundingBox();
+            if (structureStartAnchoredOnIsland(sid, bb, minY, maxY)) {
+                continue;
+            }
+            wipeStructureBlocksInChunk(chunk, bb);
+            chunk.setStartForStructure(structure, StructureStart.INVALID_START);
+        }
+    }
+
+    /**
+     * Whether this structure start should be kept for floating-island collision policy. Mineshafts default to a **stricter**
+     * rule so a corner graze does not preserve huge void-spanning corridors + chains (see config).
+     */
+    private static boolean structureStartAnchoredOnIsland(ResourceLocation sid, BoundingBox bb, int minY, int maxY) {
+        if (MINESHAFT.equals(sid) && Config.FLOATING_ISLANDS_MINESHAFT_STRICT_ISLAND_OVERLAP.getAsBoolean()) {
+            return mineshaftBoundingBoxAnchoredOnIsland(bb, minY, maxY);
+        }
+        return boundingBoxTouchesProceduralIsland(bb, minY, maxY);
+    }
+
+    /**
+     * Requires BB center on island plus (unless fraction is 0) a minimum share of footprint samples with island columns.
+     */
+    private static boolean mineshaftBoundingBoxAnchoredOnIsland(BoundingBox bb, int minY, int maxY) {
+        int midX = (bb.minX() + bb.maxX()) >> 1;
+        int midZ = (bb.minZ() + bb.maxZ()) >> 1;
+        if (FloatingIslandLayout.columnTopY(midX, midZ, minY, maxY) <= minY) {
+            return false;
+        }
+        double minFrac = Config.FLOATING_ISLANDS_MINESHAFT_MIN_ISLAND_COLUMN_FRACTION.getAsDouble();
+        if (minFrac <= 0.0d) {
+            return true;
+        }
+        int x0 = bb.minX();
+        int x1 = bb.maxX();
+        int z0 = bb.minZ();
+        int z1 = bb.maxZ();
+        int dx = x1 - x0 + 1;
+        int dz = z1 - z0 + 1;
+        int step = Mth.clamp(Math.min(dx, dz) / 12, 3, 11);
+        int total = 0;
+        int hits = 0;
+        for (int wx = x0; wx <= x1; wx += step) {
+            for (int wz = z0; wz <= z1; wz += step) {
+                total++;
+                if (FloatingIslandLayout.columnTopY(wx, wz, minY, maxY) > minY) {
+                    hits++;
+                }
+            }
+        }
+        if (total == 0) {
+            return false;
+        }
+        return (double) hits / (double) total >= minFrac;
+    }
+
+    private static boolean boundingBoxTouchesProceduralIsland(BoundingBox bb, int minY, int maxY) {
+        int x0 = bb.minX();
+        int x1 = bb.maxX();
+        int z0 = bb.minZ();
+        int z1 = bb.maxZ();
+        int dx = x1 - x0 + 1;
+        int dz = z1 - z0 + 1;
+        int step = Mth.clamp(Math.min(dx, dz) / 16, 2, 20);
+
+        for (int wx = x0; wx <= x1; wx += step) {
+            for (int wz = z0; wz <= z1; wz += step) {
+                if (FloatingIslandLayout.columnTopY(wx, wz, minY, maxY) > minY) {
+                    return true;
+                }
+            }
+        }
+        int midX = (x0 + x1) >> 1;
+        int midZ = (z0 + z1) >> 1;
+        int[][] pts = {{x0, z0}, {x1, z0}, {x0, z1}, {x1, z1}, {midX, midZ}};
+        for (int[] p : pts) {
+            if (FloatingIslandLayout.columnTopY(p[0], p[1], minY, maxY) > minY) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -237,7 +363,120 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
     public void applyBiomeDecoration(WorldGenLevel level, ChunkAccess chunk, StructureManager structureManager) {
         super.applyBiomeDecoration(level, chunk, structureManager);
         FloatingIslandsOreThinning.applyAfterDecoration(level, chunk);
+        sprinkleSurfaceWaterPools(level, chunk);
         sprinkleExtraSurfaceTrees(level, chunk);
+    }
+
+    /**
+     * Shallow water bowls on grass / sand / mycelium tops (vanilla biome decoration rarely produces surface lakes on
+     * small custom terrain). Pools stay within this chunk and respect {@link FloatingIslandLayout#columnContains}.
+     */
+    private static void sprinkleSurfaceWaterPools(WorldGenLevel level, ChunkAccess chunk) {
+        int maxPools = Config.FLOATING_ISLANDS_SURFACE_WATER_POOLS_PER_CHUNK.getAsInt();
+        if (maxPools <= 0) {
+            return;
+        }
+        ChunkPos cpos = chunk.getPos();
+        int minY = level.getMinBuildHeight();
+        int maxY = level.getMaxBuildHeight();
+        int minWX = cpos.getMinBlockX();
+        int minWZ = cpos.getMinBlockZ();
+        RandomSource rnd = RandomSource.create(cpos.toLong() ^ level.getSeed() ^ 0xB166E770L);
+        if (rnd.nextDouble() >= Config.FLOATING_ISLANDS_SURFACE_WATER_POOL_CHUNK_CHANCE.getAsDouble()) {
+            return;
+        }
+
+        List<BlockPos> candidates = new ArrayList<>();
+        for (int lz = 0; lz < 16; lz++) {
+            for (int lx = 0; lx < 16; lx++) {
+                int wx = minWX + lx;
+                int wz = minWZ + lz;
+                int topY = FloatingIslandLayout.columnTopY(wx, wz, minY, maxY);
+                if (topY <= minY) {
+                    continue;
+                }
+                BlockState surf = chunk.getBlockState(new BlockPos(lx, topY, lz));
+                if (surf.is(Blocks.GRASS_BLOCK) || surf.is(Blocks.SAND) || surf.is(Blocks.MYCELIUM)) {
+                    candidates.add(new BlockPos(wx, topY, wz));
+                }
+            }
+        }
+        if (candidates.isEmpty()) {
+            return;
+        }
+
+        int placed = 0;
+        int tries = 0;
+        int maxTries = maxPools * 14;
+        while (placed < maxPools && tries < maxTries) {
+            tries++;
+            BlockPos center = candidates.get(rnd.nextInt(candidates.size()));
+            int radius = 1 + rnd.nextInt(2);
+            int depth = 1 + rnd.nextInt(2);
+            if (tryCarveSurfaceWaterPool(chunk, minY, maxY, minWX, minWZ, center, radius, depth)) {
+                placed++;
+            }
+        }
+    }
+
+    private static boolean tryCarveSurfaceWaterPool(
+            ChunkAccess chunk,
+            int minY,
+            int maxY,
+            int chunkMinWX,
+            int chunkMinWZ,
+            BlockPos centerWorldTop,
+            int radius,
+            int depth) {
+        int cx = centerWorldTop.getX();
+        int cz = centerWorldTop.getZ();
+        int refTop = centerWorldTop.getY();
+
+        List<int[]> columns = new ArrayList<>();
+        int r2 = radius * radius;
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                if (dx * dx + dz * dz > r2) {
+                    continue;
+                }
+                int wx = cx + dx;
+                int wz = cz + dz;
+                int lx = wx - chunkMinWX;
+                int lzCol = wz - chunkMinWZ;
+                if (lx < 0 || lx >= 16 || lzCol < 0 || lzCol >= 16) {
+                    return false;
+                }
+                int top2 = FloatingIslandLayout.columnTopY(wx, wz, minY, maxY);
+                if (top2 <= minY || Mth.abs(top2 - refTop) > 2) {
+                    return false;
+                }
+                BlockState surf = chunk.getBlockState(new BlockPos(lx, top2, lzCol));
+                if (!surf.is(Blocks.GRASS_BLOCK) && !surf.is(Blocks.SAND) && !surf.is(Blocks.MYCELIUM)) {
+                    return false;
+                }
+                for (int i = 0; i < depth; i++) {
+                    int y = top2 - i;
+                    if (y < minY || !FloatingIslandLayout.columnContains(wx, wz, y, minY, maxY)) {
+                        return false;
+                    }
+                }
+                columns.add(new int[] {lx, lzCol, top2});
+            }
+        }
+        if (columns.isEmpty()) {
+            return false;
+        }
+
+        BlockState water = Blocks.WATER.defaultBlockState();
+        for (int[] col : columns) {
+            int lx = col[0];
+            int lzCol = col[1];
+            int top2 = col[2];
+            for (int i = 0; i < depth; i++) {
+                chunk.setBlockState(new BlockPos(lx, top2 - i, lzCol), water, false);
+            }
+        }
+        return true;
     }
 
     private void sprinkleExtraSurfaceTrees(WorldGenLevel level, ChunkAccess chunk) {
@@ -350,9 +589,11 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
 
     /**
      * Removes structure blocks that sit in columns with no island, or hang in open air above
-     * the island top. Overlap with solid terrain is kept so mineshafts / portals can embed.
+     * the island top (unless {@link #isSettlementStructure(ResourceLocation)} — vanilla villages use ids like
+     * {@code minecraft:village_plains}). Overlap with solid terrain is kept so mineshafts / portals can embed.
      */
-    private static void trimFloatingStructureBlocks(ChunkAccess chunk) {
+    private static void trimFloatingStructureBlocks(RegistryAccess registryAccess, ChunkAccess chunk) {
+        var structureRegistry = registryAccess.registryOrThrow(Registries.STRUCTURE);
         int minY = chunk.getMinBuildHeight();
         int maxY = chunk.getMaxBuildHeight();
         ChunkPos cp = chunk.getPos();
@@ -361,10 +602,15 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
         int minWZ = cp.getMinBlockZ();
         int maxWZ = cp.getMaxBlockZ();
 
-        for (StructureStart start : chunk.getAllStarts().values()) {
+        for (var entry : chunk.getAllStarts().entrySet()) {
+            Structure structure = entry.getKey();
+            StructureStart start = entry.getValue();
             if (!start.isValid()) {
                 continue;
             }
+            ResourceLocation sid = structureRegistry.getKey(structure);
+            boolean trimAboveSurface = sid == null || !isSettlementStructure(sid);
+
             BoundingBox bb = start.getBoundingBox();
             int x0 = Math.max(bb.minX(), minWX);
             int x1 = Math.min(bb.maxX(), maxWX);
@@ -388,7 +634,7 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
                         }
                         if (!hasIslandColumn) {
                             chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
-                        } else if (y > top + STRUCTURE_CLEARANCE_ABOVE_TOP) {
+                        } else if (trimAboveSurface && y > top + STRUCTURE_CLEARANCE_ABOVE_TOP) {
                             chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
                         }
                     }
@@ -473,7 +719,7 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
 
     @Override
     public int getSeaLevel() {
-        return -63;
+        return Config.FLOATING_ISLANDS_CHUNK_GENERATOR_SEA_LEVEL.getAsInt();
     }
 
     @Override

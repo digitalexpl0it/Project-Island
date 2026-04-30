@@ -2,6 +2,7 @@ package net.projectisland.island;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import com.mojang.authlib.GameProfile;
@@ -51,20 +52,41 @@ public final class IslandHudServerSync {
         }
     }
 
+    /**
+     * When the player's column has procedural surface ({@link FloatingIslandLayout#islandOwningSurface}), only the
+     * **winning** region's beacon is sent — wide merges can span several grid cells, so neighbor-suppression alone
+     * still doubled HUDs. In open void ({@code islandOwningSurface} empty), all islands out to the scan radius are listed
+     * for navigation.
+     */
     private static List<IslandHudBeacon> buildBeacons(ServerPlayer player, ServerLevel level) {
         MinecraftServer server = player.getServer();
         BlockPos feet = player.blockPosition();
-        int pcx = feet.getX() >> 4;
-        int pcz = feet.getZ() >> 4;
+        int pcx = Mth.floorDiv(feet.getX(), 16);
+        int pcz = Mth.floorDiv(feet.getZ(), 16);
         int rcx = Mth.floorDiv(pcx, FloatingIslandLayout.REGION_CHUNKS);
         int rcz = Mth.floorDiv(pcz, FloatingIslandLayout.REGION_CHUNKS);
 
+        int minY = level.getMinBuildHeight();
+        int maxY = level.getMaxBuildHeight();
+        Optional<FloatingIslandKey> surfaceOwner =
+                FloatingIslandLayout.islandOwningSurface(feet.getX(), feet.getZ(), minY, maxY);
+
         FloatingIslandSavedData data = IslandWorld.get(level);
         FloatingIslandLayout.IslandParams params = new FloatingIslandLayout.IslandParams();
-        List<IslandHudBeacon> out = new ArrayList<>();
-        int radius = Config.ISLAND_HUD_REGION_SCAN_RADIUS.getAsInt();
         int heightAbovePeak = Config.ISLAND_HUD_HEIGHT_ABOVE_PEAK_BLOCKS.getAsInt();
 
+        if (surfaceOwner.isPresent()) {
+            FloatingIslandKey owner = surfaceOwner.get();
+            int rx = owner.regionX();
+            int rz = owner.regionZ();
+            if (!FloatingIslandLayout.regionHasIsland(rx, rz)) {
+                return List.of();
+            }
+            return List.of(createBeacon(server, data, params, rx, rz, heightAbovePeak));
+        }
+
+        List<IslandHudBeacon> out = new ArrayList<>();
+        int radius = Config.ISLAND_HUD_REGION_SCAN_RADIUS.getAsInt();
         for (int drx = -radius; drx <= radius; drx++) {
             for (int drz = -radius; drz <= radius; drz++) {
                 int rx = rcx + drx;
@@ -72,55 +94,65 @@ public final class IslandHudServerSync {
                 if (!FloatingIslandLayout.regionHasIsland(rx, rz)) {
                     continue;
                 }
-                FloatingIslandKey key = new FloatingIslandKey(rx, rz);
-                IslandRecord rec = data.peek(key).orElse(null);
-                IslandState state = rec == null ? IslandState.AVAILABLE : rec.state();
-                FloatingIslandLayout.regionIsland(rx, rz, params);
-                float x = params.centerX + 0.5f;
-                float z = params.centerZ + 0.5f;
-                int peak = FloatingIslandLayout.peakSurfaceYAtIslandCenter(params);
-                float y = peak + heightAbovePeak;
-
-                String title = FloatingIslandDisplayName.forRegion(rx, rz);
-                String idKey = key.toStorageKey();
-                String status;
-                int titleColor;
-                int statusColor;
-                int stateKind = state.ordinal();
-                switch (state) {
-                    case AVAILABLE:
-                        status = "Available";
-                        titleColor = 0xFFB8FFC8;
-                        statusColor = 0xFFE8FFF0;
-                        break;
-                    case CLAIMED:
-                        UUID owner = rec != null ? rec.owner() : null;
-                        if (owner != null && server != null) {
-                            String name = server.getProfileCache()
-                                    .get(owner)
-                                    .map(GameProfile::getName)
-                                    .orElseGet(() -> owner.toString().substring(0, 8) + "…");
-                            status = "Claimed · " + name;
-                        } else {
-                            status = "Claimed";
-                        }
-                        titleColor = 0xFFFFE8A0;
-                        statusColor = 0xFFFFF4D8;
-                        break;
-                    case CONTESTED:
-                        status = "Contested";
-                        titleColor = 0xFFFF9A9A;
-                        statusColor = 0xFFFFE0E0;
-                        break;
-                    default:
-                        status = "?";
-                        titleColor = 0xFFFFFFFF;
-                        statusColor = 0xFFE0E0E0;
-                        break;
-                }
-                out.add(new IslandHudBeacon(x, y, z, title, status, idKey, titleColor, statusColor, stateKind));
+                out.add(createBeacon(server, data, params, rx, rz, heightAbovePeak));
             }
         }
         return out;
+    }
+
+    private static IslandHudBeacon createBeacon(
+            MinecraftServer server,
+            FloatingIslandSavedData data,
+            FloatingIslandLayout.IslandParams params,
+            int rx,
+            int rz,
+            int heightAbovePeak) {
+        FloatingIslandKey key = new FloatingIslandKey(rx, rz);
+        IslandRecord rec = data.peek(key).orElse(null);
+        IslandState state = rec == null ? IslandState.AVAILABLE : rec.state();
+        FloatingIslandLayout.regionIsland(rx, rz, params);
+        float x = params.centerX + 0.5f;
+        float z = params.centerZ + 0.5f;
+        int peak = FloatingIslandLayout.peakSurfaceYAtIslandCenter(params);
+        float y = peak + heightAbovePeak;
+
+        String title = FloatingIslandDisplayName.forRegion(rx, rz);
+        String idKey = key.toStorageKey();
+        String status;
+        int titleColor;
+        int statusColor;
+        int stateKind = state.ordinal();
+        switch (state) {
+            case AVAILABLE:
+                status = "Available";
+                titleColor = 0xFFB8FFC8;
+                statusColor = 0xFFE8FFF0;
+                break;
+            case CLAIMED:
+                UUID owner = rec != null ? rec.owner() : null;
+                if (owner != null && server != null) {
+                    String name = server.getProfileCache()
+                            .get(owner)
+                            .map(GameProfile::getName)
+                            .orElseGet(() -> owner.toString().substring(0, 8) + "…");
+                    status = "Claimed · " + name;
+                } else {
+                    status = "Claimed";
+                }
+                titleColor = 0xFFFFE8A0;
+                statusColor = 0xFFFFF4D8;
+                break;
+            case CONTESTED:
+                status = "Contested";
+                titleColor = 0xFFFF9A9A;
+                statusColor = 0xFFFFE0E0;
+                break;
+            default:
+                status = "?";
+                titleColor = 0xFFFFFFFF;
+                statusColor = 0xFFE0E0E0;
+                break;
+        }
+        return new IslandHudBeacon(x, y, z, title, status, idKey, titleColor, statusColor, stateKind);
     }
 }
