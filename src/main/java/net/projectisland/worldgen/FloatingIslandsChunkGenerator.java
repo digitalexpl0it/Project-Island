@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import com.mojang.serialization.MapCodec;
@@ -153,18 +152,19 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
         return CompletableFuture.completedFuture(chunk);
     }
 
-    /**
-     * Small vanilla structures that often read as “dungeons” in the void; frequency is thinned via
-     * {@link Config#FLOATING_ISLANDS_RARE_STRUCTURE_KEEP_CHANCE} after {@link #trimFloatingStructureBlocks}.
-     */
-    private static final Set<ResourceLocation> RARE_AMBUSH_STRUCTURE_IDS = Set.of(
-            ResourceLocation.withDefaultNamespace("monster_room"),
-            ResourceLocation.withDefaultNamespace("trial_chambers"));
+    private static final int SALT_REGION_RARE_STRUCTURE_ROLL = 771_977;
+    private static final int SALT_REGION_SETTLEMENT_ROLL = 991_871;
 
     private static final ResourceLocation PILLAGER_OUTPOST =
             ResourceLocation.withDefaultNamespace("pillager_outpost");
 
     private static final ResourceLocation MINESHAFT = ResourceLocation.withDefaultNamespace("mineshaft");
+
+    private static final ResourceLocation STRONGHOLD = ResourceLocation.withDefaultNamespace("stronghold");
+
+    private static final ResourceLocation MONSTER_ROOM = ResourceLocation.withDefaultNamespace("monster_room");
+
+    private static final ResourceLocation TRIAL_CHAMBERS = ResourceLocation.withDefaultNamespace("trial_chambers");
 
     /**
      * Vanilla jigsaw villages register as {@code minecraft:village_plains}, {@code village_desert}, … — there is no
@@ -190,7 +190,6 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
         super.createStructures(registryAccess, structureState, structureManager, chunk, structureTemplateManager);
         removeStructureStartsWithNoIslandContact(registryAccess, chunk);
         trimFloatingStructureBlocks(registryAccess, chunk);
-        thinRareAmbushStructures(registryAccess, chunk, structureState);
         Heightmap.primeHeightmaps(chunk, EnumSet.of(Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.WORLD_SURFACE_WG));
     }
 
@@ -225,12 +224,23 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
     }
 
     /**
-     * Whether this structure start should be kept for floating-island collision policy. Mineshafts default to a **stricter**
-     * rule so a corner graze does not preserve huge void-spanning corridors + chains (see config).
+     * Whether this structure start should be kept for floating-island collision policy. Mineshafts and strongholds can use a
+     * **stricter** rule so a corner graze does not preserve huge void-spanning volumes (see config).
      */
     private static boolean structureStartAnchoredOnIsland(ResourceLocation sid, BoundingBox bb, int minY, int maxY) {
         if (MINESHAFT.equals(sid) && Config.FLOATING_ISLANDS_MINESHAFT_STRICT_ISLAND_OVERLAP.getAsBoolean()) {
-            return mineshaftBoundingBoxAnchoredOnIsland(bb, minY, maxY);
+            return boundingBoxStrongIslandOverlap(
+                    bb,
+                    minY,
+                    maxY,
+                    Config.FLOATING_ISLANDS_MINESHAFT_MIN_ISLAND_COLUMN_FRACTION.getAsDouble());
+        }
+        if (STRONGHOLD.equals(sid) && Config.FLOATING_ISLANDS_STRONGHOLD_STRICT_ISLAND_OVERLAP.getAsBoolean()) {
+            return boundingBoxStrongIslandOverlap(
+                    bb,
+                    minY,
+                    maxY,
+                    Config.FLOATING_ISLANDS_STRONGHOLD_MIN_ISLAND_COLUMN_FRACTION.getAsDouble());
         }
         return boundingBoxTouchesProceduralIsland(bb, minY, maxY);
     }
@@ -238,13 +248,12 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
     /**
      * Requires BB center on island plus (unless fraction is 0) a minimum share of footprint samples with island columns.
      */
-    private static boolean mineshaftBoundingBoxAnchoredOnIsland(BoundingBox bb, int minY, int maxY) {
+    private static boolean boundingBoxStrongIslandOverlap(BoundingBox bb, int minY, int maxY, double minFrac) {
         int midX = (bb.minX() + bb.maxX()) >> 1;
         int midZ = (bb.minZ() + bb.maxZ()) >> 1;
         if (FloatingIslandLayout.columnTopY(midX, midZ, minY, maxY) <= minY) {
             return false;
         }
-        double minFrac = Config.FLOATING_ISLANDS_MINESHAFT_MIN_ISLAND_COLUMN_FRACTION.getAsDouble();
         if (minFrac <= 0.0d) {
             return true;
         }
@@ -299,36 +308,93 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
     }
 
     /**
-     * Randomly removes monster rooms and trial chambers so fewer isolated ruins remain (see common config).
-     * Multi-chunk structures may be partially cleared until neighboring chunks generate.
+     * Per {@link FloatingIslandLayout} island region (aligned with {@link IslandRegionBiomePicker}), deterministically
+     * decides whether to keep monster rooms, trial chambers, pyramids, and settlements — same weighted pattern as island
+     * biomes. Samples chunk noise biome at the structure bounding-box center so temple/village ids match the island biome.
+     * <p>
+     * Must run during {@link #applyBiomeDecoration} (not {@link #createStructures}): at {@code STRUCTURE_STARTS} the
+     * {@link ChunkAccess} has no biome data yet and {@link ProtoChunk#getNoiseBiome} throws.
      */
-    private static void thinRareAmbushStructures(
-            RegistryAccess registryAccess, ChunkAccess chunk, ChunkGeneratorStructureState structureState) {
-        double keepChance = Config.FLOATING_ISLANDS_RARE_STRUCTURE_KEEP_CHANCE.getAsDouble();
-        if (keepChance >= 1.0d) {
-            return;
-        }
+    private static void applyIslandRegionStructureGating(RegistryAccess registryAccess, ChunkAccess chunk, long levelSeed) {
         var structureRegistry = registryAccess.registryOrThrow(Registries.STRUCTURE);
-        long levelSeed = structureState.getLevelSeed();
-        ChunkPos cpos = chunk.getPos();
+        int minY = chunk.getMinBuildHeight();
+        int maxY = chunk.getMaxBuildHeight();
+
         for (var entry : new ArrayList<>(chunk.getAllStarts().entrySet())) {
             Structure structure = entry.getKey();
-            ResourceLocation id = structureRegistry.getKey(structure);
-            if (id == null || !RARE_AMBUSH_STRUCTURE_IDS.contains(id)) {
-                continue;
-            }
             StructureStart start = entry.getValue();
             if (!start.isValid()) {
                 continue;
             }
-            RandomSource roll = RandomSource.create(
-                    cpos.toLong() ^ levelSeed ^ id.hashCode());
-            if (roll.nextDouble() < keepChance) {
+            ResourceLocation id = structureRegistry.getKey(structure);
+            if (id == null || !IslandRegionStructurePicker.isGatedStructureType(id)) {
                 continue;
             }
-            wipeStructureBlocksInChunk(chunk, start.getBoundingBox());
-            chunk.setStartForStructure(structure, StructureStart.INVALID_START);
+            BoundingBox bb = start.getBoundingBox();
+            int cx = (bb.minX() + bb.maxX()) >> 1;
+            int cz = (bb.minZ() + bb.maxZ()) >> 1;
+
+            Optional<FloatingIslandKey> owner = FloatingIslandLayout.islandOwningSurface(cx, cz, minY, maxY);
+            int rcx;
+            int rcz;
+            if (owner.isPresent()) {
+                rcx = owner.get().regionX();
+                rcz = owner.get().regionZ();
+            } else {
+                rcx = Mth.floorDiv(cx >> 4, FloatingIslandLayout.REGION_CHUNKS);
+                rcz = Mth.floorDiv(cz >> 4, FloatingIslandLayout.REGION_CHUNKS);
+            }
+            if (!FloatingIslandLayout.regionHasIsland(rcx, rcz)) {
+                continue;
+            }
+
+            RandomSource rareRnd = regionStructureRandom(levelSeed, rcx, rcz, SALT_REGION_RARE_STRUCTURE_ROLL);
+            RandomSource settleRnd = regionStructureRandom(levelSeed, rcx, rcz, SALT_REGION_SETTLEMENT_ROLL);
+            IslandRegionRareStructureSlot rare = IslandRegionStructurePicker.rollRare(rareRnd);
+            boolean settlementOk = IslandRegionStructurePicker.rollSettlementAllowed(settleRnd);
+            Holder<Biome> biome = sampleBiomeAt(chunk, cx, cz, minY, maxY);
+
+            boolean remove = IslandRegionStructurePicker.shouldRemoveStructure(id, rare, settlementOk, biome);
+            if (!remove
+                    && Config.FLOATING_ISLANDS_CAVE_STRUCTURE_REQUIRE_STONE_Y_OVERLAP.getAsBoolean()
+                    && (MONSTER_ROOM.equals(id) || TRIAL_CHAMBERS.equals(id))
+                    && !caveStructureBoundingIntersectsIslandStoneColumn(cx, cz, bb, minY, maxY)) {
+                remove = true;
+            }
+            if (remove) {
+                wipeStructureBlocksInChunk(chunk, bb);
+                chunk.setStartForStructure(structure, StructureStart.INVALID_START);
+            }
         }
+    }
+
+    /**
+     * {@code true} when the structure’s Y span intersects the procedural island stone span at the bounding-box center
+     * (same column math as {@link FloatingIslandLayout#columnContains}).
+     */
+    private static boolean caveStructureBoundingIntersectsIslandStoneColumn(
+            int cx, int cz, BoundingBox bb, int minY, int maxY) {
+        int top = FloatingIslandLayout.columnTopY(cx, cz, minY, maxY);
+        if (top <= minY) {
+            return false;
+        }
+        int bottom = FloatingIslandLayout.columnBottomY(cx, cz, minY, maxY);
+        int lo = bb.minY();
+        int hi = bb.maxY();
+        return hi >= bottom && lo <= top;
+    }
+
+    private static RandomSource regionStructureRandom(long levelSeed, int rcx, int rcz, int salt) {
+        return RandomSource.create(Mth.getSeed(rcx, salt, rcz) ^ levelSeed ^ (levelSeed >>> 32));
+    }
+
+    private static Holder<Biome> sampleBiomeAt(ChunkAccess chunk, int wx, int wz, int minY, int maxY) {
+        int top = FloatingIslandLayout.columnTopY(wx, wz, minY, maxY);
+        int y = top > minY ? top + 2 : minY + 80;
+        int qx = QuartPos.fromBlock(wx);
+        int qy = QuartPos.fromBlock(y);
+        int qz = QuartPos.fromBlock(wz);
+        return chunk.getNoiseBiome(qx, qy, qz);
     }
 
     private static void wipeStructureBlocksInChunk(ChunkAccess chunk, BoundingBox bb) {
@@ -361,6 +427,7 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
 
     @Override
     public void applyBiomeDecoration(WorldGenLevel level, ChunkAccess chunk, StructureManager structureManager) {
+        applyIslandRegionStructureGating(level.registryAccess(), chunk, level.getSeed());
         super.applyBiomeDecoration(level, chunk, structureManager);
         FloatingIslandsOreThinning.applyAfterDecoration(level, chunk);
         sprinkleSurfaceWaterPools(level, chunk);

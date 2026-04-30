@@ -9,11 +9,39 @@ public final class Config {
             .comment("Log extra diagnostics during client and common setup (off by default for quieter logs).")
             .define("debugLogging", false);
 
-    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_RARE_STRUCTURE_KEEP_CHANCE = BUILDER
+    public static final ModConfigSpec.IntValue ISLAND_REGION_RARE_STRUCTURE_WEIGHT_NONE = BUILDER
             .comment(
-                    "In the floating-islands overworld, each vanilla monster room or trial chamber that generates in a chunk is kept with this probability (0 = remove all, 1 = keep all).",
-                    "Default **0** removes isolated floating dungeons in the void; raise toward **1** if you want those structures back.")
-            .defineInRange("floatingIslandsRareStructureKeepChance", 0.0d, 0.0d, 1.0d);
+                    "Weighted roll **together with** islandRegionRareStructureWeightMonsterRoom/TrialChambers/DesertPyramid/JunglePyramid:",
+                    "exclusive **one** outcome per **8×8-chunk island region** (same grid as island biomes). When rolled, monster rooms, trial chambers, and pyramids placed in that region are stripped.",
+                    "Raising **monster room** / **trial** / pyramid weights gives more regions a matching dungeon or temple slot (vanilla must still attempt placement).")
+            .defineInRange("islandRegionRareStructureWeightNone", 380, 0, 1_000_000);
+
+    public static final ModConfigSpec.IntValue ISLAND_REGION_RARE_STRUCTURE_WEIGHT_MONSTER_ROOM = BUILDER
+            .comment("Relative weight for {@code minecraft:monster_room} as this region’s rare-structure slot.")
+            .defineInRange("islandRegionRareStructureWeightMonsterRoom", 55, 0, 1_000_000);
+
+    public static final ModConfigSpec.IntValue ISLAND_REGION_RARE_STRUCTURE_WEIGHT_TRIAL_CHAMBERS = BUILDER
+            .comment("Relative weight for {@code minecraft:trial_chambers}.")
+            .defineInRange("islandRegionRareStructureWeightTrialChambers", 45, 0, 1_000_000);
+
+    public static final ModConfigSpec.IntValue ISLAND_REGION_RARE_STRUCTURE_WEIGHT_DESERT_PYRAMID = BUILDER
+            .comment("Relative weight for {@code minecraft:desert_pyramid} (also requires desert/badlands island biome).")
+            .defineInRange("islandRegionRareStructureWeightDesertPyramid", 35, 0, 1_000_000);
+
+    public static final ModConfigSpec.IntValue ISLAND_REGION_RARE_STRUCTURE_WEIGHT_JUNGLE_PYRAMID = BUILDER
+            .comment("Relative weight for {@code minecraft:jungle_pyramid} (also requires jungle-family island biome).")
+            .defineInRange("islandRegionRareStructureWeightJunglePyramid", 30, 0, 1_000_000);
+
+    public static final ModConfigSpec.IntValue ISLAND_REGION_SETTLEMENT_STRUCTURE_WEIGHT_ALLOW = BUILDER
+            .comment(
+                    "Second roll per island region, independent of rare slot: relative weight to **allow** {@code village_*} and {@code pillager_outpost}",
+                    "starts that survive land-contact checks. When denied, those starts are removed like wrong-slot dungeons.",
+                    "Biome must still match the village type (e.g. plains village on plains island).")
+            .defineInRange("islandRegionSettlementStructureWeightAllow", 85, 0, 1_000_000);
+
+    public static final ModConfigSpec.IntValue ISLAND_REGION_SETTLEMENT_STRUCTURE_WEIGHT_DENY = BUILDER
+            .comment("Paired with islandRegionSettlementStructureWeightAllow — relative weight to skip settlements in this region.")
+            .defineInRange("islandRegionSettlementStructureWeightDeny", 15, 0, 1_000_000);
 
     public static final ModConfigSpec.DoubleValue FLOATING_ISLAND_REGION_SPAWN_CHANCE = BUILDER
             .comment(
@@ -98,6 +126,23 @@ public final class Config {
                     "Used only when **floatingIslandsMineshaftStrictIslandOverlap** is **true**: minimum fraction (0–1) of horizontal BB samples that must have procedural island stone beneath.",
                     "**0** = center-column check only; **~0.12** rejects skinny edge grazing.")
             .defineInRange("floatingIslandsMineshaftMinIslandColumnFraction", 0.12d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_STRONGHOLD_STRICT_ISLAND_OVERLAP = BUILDER
+            .comment(
+                    "For **minecraft:stronghold** only: same idea as mineshafts — vanilla’s huge ring-spread box often touches one island column while most of the fortress floats in void.",
+                    "When **true**, require BB **center** on island and **floatingIslandsStrongholdMinIslandColumnFraction** horizontal overlap. Does **not** re-place the stronghold inside stone (that would need custom placement); it **removes** bad starts. Set **false** for legacy loose touch tests.")
+            .define("floatingIslandsStrongholdStrictIslandOverlap", true);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_STRONGHOLD_MIN_ISLAND_COLUMN_FRACTION = BUILDER
+            .comment(
+                    "Used when **floatingIslandsStrongholdStrictIslandOverlap** is **true** — often slightly **higher** than the mineshaft fraction because stronghold footprints are enormous.")
+            .defineInRange("floatingIslandsStrongholdMinIslandColumnFraction", 0.18d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_CAVE_STRUCTURE_REQUIRE_STONE_Y_OVERLAP = BUILDER
+            .comment(
+                    "For **minecraft:monster_room** and **minecraft:trial_chambers**: remove the start if its bounding box does not intersect the procedural island **stone column** (by Y) at the box center.",
+                    "Vanilla often anchors Y near **sea level** (`floatingIslandsChunkGeneratorSeaLevel`), so small dungeons appear **floating above** island tops. This does **not** custom-reposition structures — it only strips bad placements.")
+            .define("floatingIslandsCaveStructureRequireStoneYOverlap", true);
 
     public static final ModConfigSpec.IntValue FLOATING_ISLANDS_EXTRA_SURFACE_TREES_PER_CHUNK = BUILDER
             .comment(
