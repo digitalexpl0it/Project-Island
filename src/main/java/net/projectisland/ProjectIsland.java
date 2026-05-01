@@ -22,6 +22,7 @@ import net.projectisland.island.RopeAnchorMining;
 import net.projectisland.island.RopeLinkServerSync;
 import net.projectisland.island.RopeTraversalEvents;
 import net.projectisland.network.ProjectIslandNetworking;
+import net.projectisland.compat.IslandBiomeModDiagnostics;
 import net.projectisland.worldgen.FloatingIslandsSpawnPregen;
 import net.projectisland.worldgen.ProjectIslandWorldgen;
 
@@ -59,6 +60,7 @@ public final class ProjectIsland {
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         LOGGER.info("Project Island dedicated server starting");
+        IslandBiomeModDiagnostics.logOnServerStart(event.getServer());
     }
 
     @SubscribeEvent

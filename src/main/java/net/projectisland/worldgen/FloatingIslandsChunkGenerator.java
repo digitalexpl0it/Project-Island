@@ -15,6 +15,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.RegistryAccess;
@@ -53,6 +54,7 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.projectisland.Config;
 import net.projectisland.ProjectIsland;
+import net.projectisland.compat.BiomeModIntegration;
 import net.projectisland.island.FloatingIslandKey;
 import org.jetbrains.annotations.Nullable;
 
@@ -79,6 +81,20 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
     private static final ResourceKey<Biome> VOID_COLUMN_BIOME = Biomes.PLAINS;
 
     private final Map<ResourceKey<Biome>, Holder<Biome>> biomeHolderCache = new HashMap<>();
+
+    /**
+     * Biome registry view taken from any {@link Holder.Reference} in this dimension’s {@link BiomeSource}, so mod
+     * biomes (e.g. Biomes O’ Plenty) can be resolved even when they are not listed in
+     * {@link BiomeSource#possibleBiomes()} (common with TerraBlender).
+     */
+    @Nullable
+    private HolderLookup<Biome> biomeRegistryLookup;
+
+    private boolean biomeRegistryLookupResolved;
+
+    /** Cached {@code biomesoplenty:*} keys from {@link BiomeModIntegration#listRegisteredBiomeKeys} when discovery is on. */
+    @Nullable
+    private List<ResourceKey<Biome>> cachedRegisteredBopBiomeKeys;
 
     /** Delegate for vanilla carving context only (masked by {@link FloatingIslandMaskedCarvers}). */
     private NoiseBasedChunkGenerator islandCarvingNoiseDelegate;
@@ -116,21 +132,60 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
     /** How far above the noise island top we allow structure blocks to remain (surface features). */
     private static final int STRUCTURE_CLEARANCE_ABOVE_TOP = 2;
 
-    /**
-     * Resolves a vanilla overworld {@link ResourceKey} to the live {@link Holder} from this level's
-     * {@link BiomeSource} (same registry the dimension was built with).
-     */
-    private Holder<Biome> holderForBiome(ResourceKey<Biome> key) {
-        return biomeHolderCache.computeIfAbsent(key, k -> {
+    private Optional<HolderLookup<Biome>> biomeRegistryLookup() {
+        if (!biomeRegistryLookupResolved) {
+            biomeRegistryLookupResolved = true;
             for (Holder<Biome> h : getBiomeSource().possibleBiomes()) {
-                if (h.is(k)) {
-                    return h;
+                if (h instanceof Holder.Reference<Biome> ref) {
+                    biomeRegistryLookup = ref.unwrapLookup();
+                    break;
                 }
             }
-            throw new IllegalStateException(
-                    "Biome " + k.location()
-                            + " is not in this dimension's biome_source; adjust island biome weights or overworld preset.");
-        });
+        }
+        return Optional.ofNullable(biomeRegistryLookup);
+    }
+
+    /**
+     * Prefers the live holder from {@link BiomeSource#possibleBiomes()}, then the dimension’s biome registry (needed
+     * for mod biomes omitted from {@code possibleBiomes}).
+     */
+    private Optional<Holder<Biome>> resolveBiomeHolder(ResourceKey<Biome> key) {
+        for (Holder<Biome> h : getBiomeSource().possibleBiomes()) {
+            if (h.is(key)) {
+                return Optional.of(h);
+            }
+        }
+        return biomeRegistryLookup().flatMap(lookup -> lookup.get(key).map(ref -> ref));
+    }
+
+    private Holder<Biome> holderForBiome(ResourceKey<Biome> key) {
+        return biomeHolderCache.computeIfAbsent(
+                key,
+                k -> resolveBiomeHolder(k)
+                        .orElseThrow(
+                                () -> new IllegalStateException(
+                                        "Biome " + k.location()
+                                                + " is not in this world’s biome registry; check id spelling and that the mod is loaded.")));
+    }
+
+    /** Whether a configured mod biome id can be rolled (present in the same registry as this dimension’s biomes). */
+    private boolean isModIslandBiomeAllowed(ResourceKey<Biome> key) {
+        return resolveBiomeHolder(key).isPresent();
+    }
+
+    /**
+     * All BOP biome ids listed in the dimension biome lookup when {@link Config#ISLAND_BIOME_MOD_DISCOVER_ALL_REGISTERED}
+     * is {@code true}; otherwise empty (picker uses explicit config list only).
+     */
+    private List<ResourceKey<Biome>> registeredBopBiomeKeysForPicker() {
+        if (!BiomeModIntegration.biomesOPlentyLoaded() || !Config.ISLAND_BIOME_MOD_DISCOVER_ALL_REGISTERED.getAsBoolean()) {
+            return List.of();
+        }
+        if (cachedRegisteredBopBiomeKeys == null) {
+            cachedRegisteredBopBiomeKeys =
+                    biomeRegistryLookup().map(BiomeModIntegration::listRegisteredBiomeKeys).orElse(List.of());
+        }
+        return cachedRegisteredBopBiomeKeys;
     }
 
     /**
@@ -150,7 +205,8 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
         RandomSource rnd = randomState
                 .getOrCreateRandomFactory(ISLAND_REGION_BIOME_RANDOM)
                 .at(key.regionX(), key.regionZ(), 0);
-        ResourceKey<Biome> chosen = IslandRegionBiomePicker.roll(rnd);
+        ResourceKey<Biome> chosen =
+                IslandRegionBiomePicker.roll(rnd, this::isModIslandBiomeAllowed, this.registeredBopBiomeKeysForPicker());
         return holderForBiome(chosen);
     }
 

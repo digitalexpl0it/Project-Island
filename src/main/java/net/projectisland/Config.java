@@ -1,9 +1,25 @@
 package net.projectisland;
 
+import java.util.List;
+import java.util.regex.Pattern;
+
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 public final class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+
+    /**
+     * Optional per-id weight overrides when {@link #ISLAND_BIOME_MOD_DISCOVER_ALL_REGISTERED} lists every BOP biome;
+     * leave empty to weight them all equally ({@link #ISLAND_BIOME_MOD_DISCOVERED_DEFAULT_WEIGHT}).
+     */
+    private static final List<String> DEFAULT_ISLAND_BIOME_MOD_WEIGHTED_ENTRIES = List.of();
+
+    private static final Pattern ISLAND_BIOME_MOD_WEIGHTED_ENTRY =
+            Pattern.compile("^[a-z0-9_.-]+:[a-z0-9_.-]+=[1-9][0-9]{0,6}$");
+
+    private static boolean validateIslandBiomeModWeightedEntry(Object o) {
+        return o instanceof String s && ISLAND_BIOME_MOD_WEIGHTED_ENTRY.matcher(s).matches();
+    }
 
     public static final ModConfigSpec.BooleanValue DEBUG_LOGGING = BUILDER
             .comment("Log extra diagnostics during client and common setup (off by default for quieter logs).")
@@ -226,6 +242,45 @@ public final class Config {
             .comment(
                     "Weight for minecraft:snowy_taiga (0 = exclude). Improves **minecraft:igloo** eligibility alongside snowy_plains.")
             .defineInRange("islandBiomeWeightSnowyTaiga", 6, 0, 1000);
+
+    public static final ModConfigSpec.BooleanValue ISLAND_BIOME_MOD_INTEGRATION_ENABLED = BUILDER
+            .comment(
+                    "When **true** and **Biomes O' Plenty** is installed ({@code biomesoplenty}), merge **islandBiomeModWeightedEntries** into the",
+                    "per-island biome pool next to **islandBiomeWeight***. When BOP is absent, those entries are ignored and behavior matches vanilla-only pools.",
+                    "Entries that do not resolve in the biome registry are skipped at runtime.")
+            .define("islandBiomeModIntegrationEnabled", true);
+
+    public static final ModConfigSpec.DoubleValue ISLAND_BIOME_MOD_PREFERRED_ROLL_FRACTION = BUILDER
+            .comment(
+                    "Used only when **Biomes O' Plenty** is loaded, **islandBiomeModIntegrationEnabled**, and the mod biome pool is non-empty.",
+                    "**Default 0.7** — **70%** of island regions roll **only** among mod biomes; **30%** roll **only** among **islandBiomeWeight*** (vanilla).",
+                    "**0** — single combined pool (legacy): vanilla and mod weights compete by raw totals.",
+                    "**1** — always mod subset when it is non-empty (no vanilla-only regions).")
+            .defineInRange("islandBiomeModPreferredRollFraction", 0.7d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.BooleanValue ISLAND_BIOME_MOD_DISCOVER_ALL_REGISTERED = BUILDER
+            .comment(
+                    "When **true** (default) and BOP is loaded: every **`biomesoplenty:*`** biome in the biome registry is eligible on the mod branch",
+                    "(overworld / nether / end ids BOP registers — disabled BOP biomes are usually absent from the registry).",
+                    "**islandBiomeModWeightedEntries** then acts as **per-id weight overrides**; ids not listed use **islandBiomeModDiscoveredDefaultWeight**.",
+                    "When **false**: only lines in **islandBiomeModWeightedEntries** are used (pack-maker curated list).")
+            .define("islandBiomeModDiscoverAllRegistered", true);
+
+    public static final ModConfigSpec.IntValue ISLAND_BIOME_MOD_DISCOVERED_DEFAULT_WEIGHT = BUILDER
+            .comment(
+                    "Used when **islandBiomeModDiscoverAllRegistered** is **true**: relative weight for each discovered **biomesoplenty:*** biome",
+                    "that does not appear in **islandBiomeModWeightedEntries**.")
+            .defineInRange("islandBiomeModDiscoveredDefaultWeight", 5, 1, 1000);
+
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> ISLAND_BIOME_MOD_WEIGHTED_ENTRIES = BUILDER
+            .comment(
+                    "When **islandBiomeModDiscoverAllRegistered** is **true**: optional **`biomesoplenty:path=weight`** overrides (empty = equal weights via **islandBiomeModDiscoveredDefaultWeight**).",
+                    "When **false**: required explicit list of **`namespace:path=weight`** lines for mod island biomes (**empty** = no mod biomes).",
+                    "Format: weight **1**–**9999999**. Unresolved ids are skipped.")
+            .defineListAllowEmpty(
+                    "islandBiomeModWeightedEntries",
+                    () -> List.copyOf(DEFAULT_ISLAND_BIOME_MOD_WEIGHTED_ENTRIES),
+                    Config::validateIslandBiomeModWeightedEntry);
 
     /**
      * Added to each island’s horizontal ellipsoid radius ({@link net.projectisland.worldgen.FloatingIslandLayout}).
