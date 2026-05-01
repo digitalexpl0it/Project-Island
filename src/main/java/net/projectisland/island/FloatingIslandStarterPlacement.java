@@ -101,12 +101,15 @@ public final class FloatingIslandStarterPlacement {
                     }
                     Optional<FloatingIslandKey> claimed = data.tryClaimStarterIsland(key, owner, gameTime);
                     if (claimed.isPresent()) {
-                        teleportToIslandCenter(player, level, claimed.get());
-                        if (Config.DEBUG_LOGGING.getAsBoolean()) {
-                            ProjectIsland.LOGGER.debug(
-                                    "Assigned starter island {} to {}", claimed.get(), player.getGameProfile().getName());
+                        FloatingIslandKey home = claimed.get();
+                        if (teleportToIslandCenter(player, level, home)) {
+                            if (Config.DEBUG_LOGGING.getAsBoolean()) {
+                                ProjectIsland.LOGGER.debug(
+                                        "Assigned starter island {} to {}", home, player.getGameProfile().getName());
+                            }
+                            return true;
                         }
-                        return true;
+                        data.revertStarterIslandClaim(owner, home);
                     }
                 }
             }
@@ -191,19 +194,41 @@ public final class FloatingIslandStarterPlacement {
     }
 
     /**
-     * @return {@code true} if a surface was found and the player was teleported.
+     * @return {@code true} if the player was moved and {@link FloatingIslandVoidRescue#isSupportedOnIslandSurface}
+     *         reports safe footing (same rules as void rescue).
      */
     public static boolean teleportToIslandCenter(ServerPlayer player, ServerLevel level, FloatingIslandKey key) {
+        FloatingIslandLayout.IslandParams params = new FloatingIslandLayout.IslandParams();
+        FloatingIslandLayout.regionIsland(key.regionX(), key.regionZ(), params);
+
         Optional<Vec3> vecOpt = optionalFeetAtIslandCenter(level, key);
         if (vecOpt.isEmpty()) {
+            vecOpt = FloatingIslandVoidRescue.findNearestIslandFeet(level, params.centerX + 0.5d, params.centerZ + 0.5d);
+        }
+        if (vecOpt.isEmpty()) {
             ProjectIsland.LOGGER.warn(
-                    "FloatingIslandStarterPlacement: layout had no surface at center for starter island {}",
-                    key);
+                    "FloatingIslandStarterPlacement: no open feet column for starter island {} (center {}, {})",
+                    key,
+                    params.centerX,
+                    params.centerZ);
             return false;
         }
+
         Vec3 vec = vecOpt.get();
-        IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(vec.x), Mth.floor(vec.z));
-        player.teleportTo(level, vec.x, vec.y, vec.z, player.getYRot(), player.getXRot());
+        if (!applyIslandTeleport(player, level, vec)) {
+            Optional<Vec3> alt = FloatingIslandVoidRescue.findNearestIslandFeet(level, vec.x, vec.z);
+            if (alt.isEmpty() || alt.get().distanceToSqr(vec) < 1.0E-4d) {
+                return false;
+            }
+            return applyIslandTeleport(player, level, alt.get());
+        }
         return true;
+    }
+
+    private static boolean applyIslandTeleport(ServerPlayer player, ServerLevel level, Vec3 feet) {
+        IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(feet.x), Mth.floor(feet.z), 3);
+        player.teleportTo(level, feet.x, feet.y, feet.z, player.getYRot(), player.getXRot());
+        FloatingIslandVoidRescue.stabilizeAfterIslandTeleport(player);
+        return FloatingIslandVoidRescue.isSupportedOnIslandSurface(player, level);
     }
 }

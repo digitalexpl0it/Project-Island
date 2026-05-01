@@ -57,6 +57,12 @@ public final class FloatingIslandVoidRescue {
         ActionBarToastPayload.send(player, key);
     }
 
+    /** Clears downward velocity after a rescue/starter teleport so join momentum does not carry through open sky. */
+    public static void stabilizeAfterIslandTeleport(ServerPlayer player) {
+        player.setDeltaMovement(Vec3.ZERO);
+        player.resetFallDistance();
+    }
+
     /** Clears saved last-safe feet (e.g. dimension change / respawn). */
     public static void clearLastSafeFeet(ServerPlayer player) {
         CompoundTag data = player.getPersistentData();
@@ -100,8 +106,9 @@ public final class FloatingIslandVoidRescue {
         Optional<Vec3> bed = FloatingIslandSurfaceSupport.findRespawnStandUp(level, player);
         if (bed.isPresent()) {
             Vec3 p = bed.get();
-            IslandChunkLoader.ensureChunksAroundWorldBlock(level, (int) Mth.floor(p.x), (int) Mth.floor(p.z));
+            IslandChunkLoader.ensureChunksAroundWorldBlock(level, (int) Mth.floor(p.x), (int) Mth.floor(p.z), 3);
             player.teleportTo(level, p.x, p.y, p.z, player.getYRot(), player.getXRot());
+            stabilizeAfterIslandTeleport(player);
             if (isSupportedOnIslandSurface(player, level)) {
                 data.remove(TAG_VOID_FALLING);
                 showVoidRescueActionBar(player);
@@ -110,8 +117,7 @@ public final class FloatingIslandVoidRescue {
         }
         Optional<FloatingIslandKey> home = IslandWorld.get(level).getStarterHome(player.getUUID());
         if (home.isPresent()) {
-            if (FloatingIslandStarterPlacement.teleportToIslandCenter(player, level, home.get())
-                    && isSupportedOnIslandSurface(player, level)) {
+            if (FloatingIslandStarterPlacement.teleportToIslandCenter(player, level, home.get())) {
                 data.remove(TAG_VOID_FALLING);
                 showVoidRescueActionBar(player);
                 return;
@@ -163,9 +169,9 @@ public final class FloatingIslandVoidRescue {
         if (player.getDeltaMovement().y > 0.15d) {
             return false;
         }
-        IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(sx), Mth.floor(sz));
+        IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(sx), Mth.floor(sz), 3);
         player.teleportTo(level, sx, sy, sz, yr, player.getXRot());
-        player.resetFallDistance();
+        stabilizeAfterIslandTeleport(player);
         int cooldown = Config.VOID_RESCUE_SNAP_TO_LAST_SAFE_COOLDOWN_TICKS.getAsInt();
         if (cooldown > 0) {
             data.putInt(TAG_LAST_SAFE_SNAP_COOLDOWN, cooldown);
@@ -265,8 +271,9 @@ public final class FloatingIslandVoidRescue {
             return false;
         }
         Vec3 f = feet.get();
-        IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(f.x), Mth.floor(f.z));
+        IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(f.x), Mth.floor(f.z), 3);
         player.teleportTo(level, f.x, f.y, f.z, player.getYRot(), player.getXRot());
+        stabilizeAfterIslandTeleport(player);
         if (isSupportedOnIslandSurface(player, level)) {
             showVoidRescueActionBar(player);
             return true;
@@ -302,8 +309,9 @@ public final class FloatingIslandVoidRescue {
                             continue;
                         }
                         Vec3 p = clear.get();
-                        IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(p.x), Mth.floor(p.z));
+                        IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(p.x), Mth.floor(p.z), 3);
                         player.teleportTo(level, p.x, p.y, p.z, player.getYRot(), player.getXRot());
+                        stabilizeAfterIslandTeleport(player);
                         if (isSupportedOnIslandSurface(player, level)) {
                             showVoidRescueActionBar(player);
                             return;

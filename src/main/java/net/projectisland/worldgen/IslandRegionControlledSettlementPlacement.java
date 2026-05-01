@@ -41,6 +41,7 @@ public final class IslandRegionControlledSettlementPlacement {
 
     private static final int SALT_CONTROLLED_SETTLEMENT_TYPE = 338_011;
     private static final int SALT_CONTROLLED_ANCHOR = 402_113;
+    private static final int SALT_CONTROLLED_PLACE_TRY = 551_903;
 
     private IslandRegionControlledSettlementPlacement() {}
 
@@ -150,6 +151,17 @@ public final class IslandRegionControlledSettlementPlacement {
                     .value();
         } else {
             return;
+        }
+
+        double placeChance = Config.CONTROLLED_SETTLEMENT_PLACE_TRY_CHANCE.getAsDouble();
+        if (placeChance <= 0.0d) {
+            return;
+        }
+        if (placeChance < 1.0d) {
+            RandomSource placeTryRnd = regionRandom(levelSeed, rcx, rcz, SALT_CONTROLLED_PLACE_TRY);
+            if (placeTryRnd.nextDouble() > placeChance) {
+                return;
+            }
         }
 
         if (!(structure instanceof JigsawStructure jig)) {

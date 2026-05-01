@@ -11,5 +11,7 @@ public enum IslandRegionRareStructureSlot {
     MONSTER_ROOM,
     TRIAL_CHAMBERS,
     DESERT_PYRAMID,
-    JUNGLE_PYRAMID
+    JUNGLE_PYRAMID,
+    /** {@code minecraft:mineshaft} — optional; weight {@code 0} disables this slot outcome. */
+    MINESHAFT
 }

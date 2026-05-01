@@ -11,7 +11,7 @@ public final class Config {
 
     public static final ModConfigSpec.IntValue ISLAND_REGION_RARE_STRUCTURE_WEIGHT_NONE = BUILDER
             .comment(
-                    "Weighted roll **together with** islandRegionRareStructureWeightMonsterRoom/TrialChambers/DesertPyramid/JunglePyramid:",
+                    "Weighted roll **together with** islandRegionRareStructureWeightMonsterRoom/TrialChambers/DesertPyramid/JunglePyramid/Mineshaft:",
                     "exclusive **one** outcome per **8×8-chunk island region** (same grid as island biomes). When rolled, monster rooms, trial chambers, and pyramids placed in that region are stripped.",
                     "Raising **monster room** / **trial** / pyramid weights gives more regions a matching dungeon or temple slot (vanilla must still attempt placement).")
             .defineInRange("islandRegionRareStructureWeightNone", 380, 0, 1_000_000);
@@ -78,6 +78,94 @@ public final class Config {
             .comment("How many random jitter samples to try before giving up on placing a controlled settlement in this region.")
             .defineInRange("controlledSettlementAnchorTries", 18, 1, 64);
 
+    public static final ModConfigSpec.DoubleValue CONTROLLED_SETTLEMENT_PLACE_TRY_CHANCE = BUILDER
+            .comment(
+                    "After the village/outpost/none weight roll **chose** a village or outpost (not **none**): probability to **actually** generate that controlled settlement (**0–1**).",
+                    "**1** = always place when chosen; **0.5** ≈ halves settlement density; **0** never places (strip-only until you turn off **floatingIslandsControlledSettlementPlacement**).")
+            .defineInRange("controlledSettlementPlaceTryChance", 0.5d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_SNAP_RARE_STRUCTURES_TO_ISLAND_COLUMN = BUILDER
+            .comment(
+                    "When **true**, after vanilla places **minecraft:monster_room**, **minecraft:trial_chambers**, or **minecraft:mineshaft**, vertically shift **all** pieces of that start so the bounding-box **top** sits at **columnBottomY − 1** at the box center (hang under procedural island stone).",
+                    "Skips starts that already intersect island stone in that column, void columns, or when the shift would exceed **floatingIslandsSnapRareStructureMaxVerticalBlocks**.")
+            .define("floatingIslandsSnapRareStructuresToIslandColumn", true);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_SNAP_RARE_STRUCTURE_MAX_VERTICAL_BLOCKS = BUILDER
+            .comment("Max absolute vertical shift (blocks) for **floatingIslandsSnapRareStructuresToIslandColumn**; larger moves are skipped.")
+            .defineInRange("floatingIslandsSnapRareStructureMaxVerticalBlocks", 96, 8, 256);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_SNAP_RARE_STRUCTURE_INVALIDATE_ON_FAIL = BUILDER
+            .comment(
+                    "When **true**, **minecraft:monster_room**, **trial_chambers**, or **minecraft:mineshaft** starts that cannot be snapped (no land column in the footprint search, horizontal shift over cap, vertical move over cap, or interior fit failure) are **removed** and overlapping blocks in this chunk cleared.",
+                    "When **false**, failed snaps are left unchanged (may leave floating void junk).")
+            .define("floatingIslandsSnapRareStructureInvalidateOnFail", true);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_SNAP_RARE_STRUCTURE_MAX_HORIZONTAL_MANHATTAN_BLOCKS = BUILDER
+            .comment(
+                    "Max **Manhattan** horizontal shift (|dx|+|dz| in blocks) when snapping rare structures to a chosen anchor column; **0** disables lateral correction.")
+            .defineInRange("floatingIslandsSnapRareStructureMaxHorizontalManhattanBlocks", 24, 0, 64);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_SNAP_RARE_STRUCTURE_ANCHOR_GRID_STEP_BLOCKS = BUILDER
+            .comment("Footprint sampling step (blocks) when searching for a valid island column under a rare structure bounding box (corners/center always included).")
+            .defineInRange("floatingIslandsSnapRareStructureAnchorGridStepBlocks", 6, 2, 16);
+
+    public static final ModConfigSpec.ConfigValue<String> FLOATING_ISLANDS_RARE_STRUCTURE_PLACEMENT_MODE = BUILDER
+            .comment(
+                    "Rare-structure vertical placement after horizontal anchoring: **under_bottom** = hang with BB top at columnBottomY−1 (legacy); **interior** = align BB vertical center near island stone mid-depth (falls back to under_bottom if fit sampling fails).")
+            .define("floatingIslandsRareStructurePlacementMode", "under_bottom");
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_RARE_STRUCTURE_INTERIOR_MIN_COLUMN_FIT_FRACTION = BUILDER
+            .comment(
+                    "Minimum fraction of footprint / vertical probe samples that must lie inside procedural island stone for **interior** placement and BB fit checks (0–1).")
+            .defineInRange("floatingIslandsRareStructureInteriorMinColumnFitFraction", 0.35d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_ENABLE_MASKED_OVERWORLD_CARVERS = BUILDER
+            .comment(
+                    "When **true**, **FloatingIslandsChunkGenerator** runs overworld-style noise carvers **masked** to procedural island columns so caves pocket inside islands instead of carving open void.",
+                    "Uses **minecraft:overworld** noise settings only for carving context (aquifer / surface sampling); terrain fill stays procedural.")
+            .define("floatingIslandsEnableMaskedOverworldCarvers", true);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_MASKED_CARVER_NEIGHBOR_CHUNK_RADIUS = BUILDER
+            .comment(
+                    "Chebyshev radius (chunks) around each chunk when running masked carvers. Vanilla overworld uses **8** (a **17×17** area).",
+                    "Lower values reduce worldgen CPU; **5** is a practical default (**11×11**). **8** matches vanilla cave reach at chunk seams.")
+            .defineInRange("floatingIslandsMaskedCarverNeighborChunkRadius", 5, 2, 8);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_LOCATE_STRUCTURE_MAX_RING_RADIUS = BUILDER
+            .comment(
+                    "Caps **`/locate structure`** search rings on the floating-islands generator (vanilla passes **100**). Each candidate ring can synchronously force chunk generation and may watchdog-kill the server on heavy jigsaw structures (e.g. trial chambers).",
+                    "Sparse structures (**minecraft:mansion**, ocean monuments, …) may need a **higher** cap or several locate attempts. Raise toward **100** only if you accept longer locate stalls.")
+            .defineInRange("floatingIslandsLocateStructureMaxRingRadius", 32, 4, 100);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_MASKED_CARVERS_DEBUG_LOGGING = BUILDER
+            .comment("When **true** with **debugLogging**, log when masked carving is skipped or fails (normally silent).")
+            .define("floatingIslandsMaskedCarversDebugLogging", false);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_CONTROLLED_RARE_DUNGEON_PLACEMENT = BUILDER
+            .comment(
+                    "When **true**, strips vanilla **minecraft:monster_room** and **minecraft:trial_chambers** starts in each chunk, then (on the region owner chunk only) regenerates **at most one** matching structure per inhabited island region when the rare-structure slot roll matches **controlledRareDungeonPlaceTryChance**.",
+                    "Runs before vertical snap; turn **false** for vanilla dungeon placement only.")
+            .define("floatingIslandsControlledRareDungeonPlacement", false);
+
+    public static final ModConfigSpec.DoubleValue CONTROLLED_RARE_DUNGEON_PLACE_TRY_CHANCE = BUILDER
+            .comment(
+                    "After **floatingIslandsControlledRareDungeonPlacement** and the region rare slot is monster room or trial chambers: probability **0–1** to actually generate the controlled dungeon (**0** = strip-only).")
+            .defineInRange("controlledRareDungeonPlaceTryChance", 0.55d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.IntValue ISLAND_REGION_RARE_STRUCTURE_WEIGHT_MINESHAFT = BUILDER
+            .comment(
+                    "Relative weight for **minecraft:mineshaft** in the same exclusive island-region rare slot as dungeons/trials/pyramids (**0** = never selected — vanilla mineshafts still generate unless removed by other rules).")
+            .defineInRange("islandRegionRareStructureWeightMineshaft", 0, 0, 1_000_000);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_RARE_STRUCTURE_DECORATIVE_CHAINS = BUILDER
+            .comment(
+                    "After biome decoration gating: for **monster_room**, **trial_chambers**, and **minecraft:mineshaft** starts still valid in this chunk, fill a vertical **minecraft:chain** column between structure top and procedural island underside when the gap is small enough.")
+            .define("floatingIslandsRareStructureDecorativeChains", true);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_RARE_STRUCTURE_CHAIN_MAX_GAP_BLOCKS = BUILDER
+            .comment("Max vertical gap (blocks) for decorative chains (**0** disables length limit only by this cap).")
+            .defineInRange("floatingIslandsRareStructureChainMaxGapBlocks", 48, 0, 256);
+
     public static final ModConfigSpec.DoubleValue FLOATING_ISLAND_REGION_SPAWN_CHANCE = BUILDER
             .comment(
                     "Per **8×8-chunk** island region: probability that a procedural floating island exists there.",
@@ -128,6 +216,17 @@ public final class Config {
             .comment("Weight for minecraft:swamp (0 = exclude).")
             .defineInRange("islandBiomeWeightSwamp", 6, 0, 1000);
 
+    public static final ModConfigSpec.IntValue ISLAND_BIOME_WEIGHT_DARK_FOREST = BUILDER
+            .comment(
+                    "Weight for minecraft:dark_forest (0 = exclude). Required for vanilla **minecraft:mansion** placement;",
+                    "mansions stay rare due to vanilla spacing, not this weight alone.")
+            .defineInRange("islandBiomeWeightDarkForest", 5, 0, 1000);
+
+    public static final ModConfigSpec.IntValue ISLAND_BIOME_WEIGHT_SNOWY_TAIGA = BUILDER
+            .comment(
+                    "Weight for minecraft:snowy_taiga (0 = exclude). Improves **minecraft:igloo** eligibility alongside snowy_plains.")
+            .defineInRange("islandBiomeWeightSnowyTaiga", 6, 0, 1000);
+
     /**
      * Added to each island’s horizontal ellipsoid radius ({@link net.projectisland.worldgen.FloatingIslandLayout}).
      * Larger islands leave more flat-ish surface for vanilla villages (paths extend beyond tight stone blobs).
@@ -162,6 +261,12 @@ public final class Config {
                     "**0** = center-column check only; **~0.12** rejects skinny edge grazing.")
             .defineInRange("floatingIslandsMineshaftMinIslandColumnFraction", 0.12d, 0.0d, 1.0d);
 
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_TRIM_STRIP_MINESHAFT_THROUGH_VOID = BUILDER
+            .comment(
+                    "When **true**, void-column structure trimming also removes **minecraft:mineshaft** blocks in open-sky columns (fragments corridors under floating islands).",
+                    "When **false** (default), mineshaft planks/fences/logs spanning void **between** island columns are kept so halls stay connected; floating junk above the surface is still trimmed.")
+            .define("floatingIslandsTrimStripMineshaftThroughVoid", false);
+
     public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_STRONGHOLD_STRICT_ISLAND_OVERLAP = BUILDER
             .comment(
                     "For **minecraft:stronghold** only: same idea as mineshafts — vanilla’s huge ring-spread box often touches one island column while most of the fortress floats in void.",
@@ -172,6 +277,19 @@ public final class Config {
             .comment(
                     "Used when **floatingIslandsStrongholdStrictIslandOverlap** is **true** — often slightly **higher** than the mineshaft fraction because stronghold footprints are enormous.")
             .defineInRange("floatingIslandsStrongholdMinIslandColumnFraction", 0.18d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_RUINED_PORTAL_CHUNK_LOCAL_LAND_ANCHOR = BUILDER
+            .comment(
+                    "For **minecraft:ruined_portal** only: vanilla’s search bounding box can span many chunks while the placed fragment sits in pure void.",
+                    "When **true**, this chunk **keeps** the start only if the **intersection** of the structure BB with this chunk has procedural island land under its horizontal midpoint (not merely “any sample anywhere in the global BB”).",
+                    "Set **false** for the legacy whole-BB touch rule (more void rubble).")
+            .define("floatingIslandsRuinedPortalChunkLocalLandAnchor", true);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_TRIM_STRUCTURE_VOID_BLOCKS_AFTER_FEATURES = BUILDER
+            .comment(
+                    "Run structure void-column trimming again at the **start** of biome decoration so blocks placed **after** the STRUCTURE_STARTS trim pass are cleared from open void.",
+                    "Helps **ruined_portal** fragments and similar late-written pieces. Set **false** only if something must leave structure blocks floating with no island column.")
+            .define("floatingIslandsTrimStructureVoidBlocksAfterFeatures", true);
 
     public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_CAVE_STRUCTURE_REQUIRE_STONE_Y_OVERLAP = BUILDER
             .comment(
@@ -285,7 +403,7 @@ public final class Config {
             .comment(
                     "On server start, pregenerate chunks in an L-infinity (Chebyshev) neighborhood around overworld spawn.",
                     "0 disables. Small values (e.g. 4–8) reduce first-join hitching; large values slow server startup.")
-            .defineInRange("spawnPregenChunkRadius", 0, 0, 128);
+            .defineInRange("spawnPregenChunkRadius", 4, 0, 128);
 
     public static final ModConfigSpec.IntValue SPAWN_PREGEN_CHUNKS_PER_TICK = BUILDER
             .comment("How many FULL chunks to load per server tick while spawn pregeneration is running (minimum 1).")

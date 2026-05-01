@@ -8,18 +8,21 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.QuartPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.worldgen.features.TreeFeatures;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.util.Mth;
@@ -39,6 +42,8 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkGeneratorStructureState;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.blending.Blender;
@@ -49,6 +54,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.projectisland.Config;
 import net.projectisland.ProjectIsland;
 import net.projectisland.island.FloatingIslandKey;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Void sky islands: asymmetric vertical profile (flat-ish dome top, deeper underside).
@@ -56,8 +62,8 @@ import net.projectisland.island.FloatingIslandKey;
  * Vanilla structures still generate, then {@link #trimFloatingStructureBlocks} removes
  * pieces in void columns or floating above the island surface so ruins tend to hug terrain where they overlap land.
  * {@link #removeStructureStartsWithNoIslandContact} drops **mineshaft** starts unless the bounding box is **centered**
- * on island mass with enough horizontal overlap (configurable), because vanilla’s loose footprint otherwise left corridors
- * and chains in open void.
+ * on island mass with enough horizontal overlap (configurable). Void-column trimming preserves mineshaft corridors by
+ * default ({@link Config#FLOATING_ISLANDS_TRIM_STRIP_MINESHAFT_THROUGH_VOID}) so halls stay connected under islands.
  */
 public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
     public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(ProjectIsland.MOD_ID, "floating_islands");
@@ -74,8 +80,20 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
 
     private final Map<ResourceKey<Biome>, Holder<Biome>> biomeHolderCache = new HashMap<>();
 
+    /** Delegate for vanilla carving context only (masked by {@link FloatingIslandMaskedCarvers}). */
+    private NoiseBasedChunkGenerator islandCarvingNoiseDelegate;
+
+    private Holder<NoiseGeneratorSettings> islandCarvingNoiseSettings;
+
     public FloatingIslandsChunkGenerator(BiomeSource biomeSource) {
         super(biomeSource);
+    }
+
+    private void ensureIslandCarvingNoiseDelegate(RegistryAccess registryAccess) {
+        if (islandCarvingNoiseDelegate == null) {
+            islandCarvingNoiseSettings = FloatingIslandMaskedCarvers.resolveOverworldNoiseSettings(registryAccess);
+            islandCarvingNoiseDelegate = new NoiseBasedChunkGenerator(getBiomeSource(), islandCarvingNoiseSettings);
+        }
     }
 
     /**
@@ -172,6 +190,12 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
 
     private static final ResourceLocation TRIAL_CHAMBERS = ResourceLocation.withDefaultNamespace("trial_chambers");
 
+    private static final ResourceLocation RUINED_PORTAL = ResourceLocation.withDefaultNamespace("ruined_portal");
+
+    private static final ResourceLocation WOODLAND_MANSION = ResourceLocation.withDefaultNamespace("mansion");
+
+    private static final ResourceLocation IGLOO = ResourceLocation.withDefaultNamespace("igloo");
+
     /**
      * Vanilla jigsaw villages register as {@code minecraft:village_plains}, {@code village_desert}, … — there is no
      * {@code minecraft:village} structure id in 1.21. Skip aggressive trim / void-only removal for those and outposts.
@@ -187,6 +211,20 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
         return "minecraft".equals(id.getNamespace()) && id.getPath().startsWith("village_");
     }
 
+    /**
+     * Skip “floating above procedural top” stripping — multi-story builds would lose upper floors (see
+     * {@link #trimFloatingStructureBlocks}).
+     */
+    static boolean preservesStructureAboveSurfaceTrim(ResourceLocation id) {
+        if (id == null) {
+            return false;
+        }
+        if (isSettlementStructure(id)) {
+            return true;
+        }
+        return WOODLAND_MANSION.equals(id) || IGLOO.equals(id);
+    }
+
     @Override
     public void createStructures(
             RegistryAccess registryAccess,
@@ -195,6 +233,17 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
             ChunkAccess chunk,
             StructureTemplateManager structureTemplateManager) {
         super.createStructures(registryAccess, structureState, structureManager, chunk, structureTemplateManager);
+        if (Config.FLOATING_ISLANDS_CONTROLLED_RARE_DUNGEON_PLACEMENT.getAsBoolean()) {
+            IslandRegionControlledRareStructurePlacement.stripVanillaRareDungeonStarts(registryAccess, chunk);
+            IslandRegionControlledRareStructurePlacement.tryPlaceControlledRareDungeon(
+                    this,
+                    registryAccess,
+                    structureState,
+                    structureManager,
+                    chunk,
+                    structureTemplateManager);
+        }
+        FloatingIslandRareStructureVerticalSnap.snapRareStructuresVertically(registryAccess, chunk);
         removeStructureStartsWithNoIslandContact(registryAccess, chunk);
         trimFloatingStructureBlocks(registryAccess, chunk);
         Heightmap.primeHeightmaps(chunk, EnumSet.of(Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.WORLD_SURFACE_WG));
@@ -232,7 +281,7 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
                 continue;
             }
             BoundingBox bb = start.getBoundingBox();
-            if (structureStartAnchoredOnIsland(sid, bb, minY, maxY)) {
+            if (structureStartAnchoredOnIsland(sid, bb, chunk, minY, maxY)) {
                 continue;
             }
             wipeStructureBlocksInChunk(chunk, bb);
@@ -244,7 +293,11 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
      * Whether this structure start should be kept for floating-island collision policy. Mineshafts and strongholds can use a
      * **stricter** rule so a corner graze does not preserve huge void-spanning volumes (see config).
      */
-    private static boolean structureStartAnchoredOnIsland(ResourceLocation sid, BoundingBox bb, int minY, int maxY) {
+    private static boolean structureStartAnchoredOnIsland(
+            ResourceLocation sid, BoundingBox bb, ChunkAccess chunk, int minY, int maxY) {
+        if (RUINED_PORTAL.equals(sid) && Config.FLOATING_ISLANDS_RUINED_PORTAL_CHUNK_LOCAL_LAND_ANCHOR.getAsBoolean()) {
+            return chunkBoundingSliceMidpointHasIslandLand(bb, chunk, minY, maxY);
+        }
         if (MINESHAFT.equals(sid) && Config.FLOATING_ISLANDS_MINESHAFT_STRICT_ISLAND_OVERLAP.getAsBoolean()) {
             return boundingBoxStrongIslandOverlap(
                     bb,
@@ -260,6 +313,25 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
                     Config.FLOATING_ISLANDS_STRONGHOLD_MIN_ISLAND_COLUMN_FRACTION.getAsDouble());
         }
         return boundingBoxTouchesProceduralIsland(bb, minY, maxY);
+    }
+
+    /**
+     * True when the horizontal midpoint of (structure BB ∩ this chunk) sits on a column with procedural island surface.
+     * Used for {@link #RUINED_PORTAL}: vanilla’s BB can touch distant land while this chunk’s fragment is void-only.
+     */
+    private static boolean chunkBoundingSliceMidpointHasIslandLand(
+            BoundingBox bb, ChunkAccess chunk, int minY, int maxY) {
+        ChunkPos cp = chunk.getPos();
+        int x0 = Math.max(bb.minX(), cp.getMinBlockX());
+        int x1 = Math.min(bb.maxX(), cp.getMaxBlockX());
+        int z0 = Math.max(bb.minZ(), cp.getMinBlockZ());
+        int z1 = Math.min(bb.maxZ(), cp.getMaxBlockZ());
+        if (x0 > x1 || z0 > z1) {
+            return false;
+        }
+        int mx = (x0 + x1) >> 1;
+        int mz = (z0 + z1) >> 1;
+        return FloatingIslandLayout.columnTopY(mx, mz, minY, maxY) > minY;
     }
 
     /**
@@ -463,6 +535,10 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
     @Override
     public void applyBiomeDecoration(WorldGenLevel level, ChunkAccess chunk, StructureManager structureManager) {
         applyIslandRegionStructureGating(level.registryAccess(), chunk, level.getSeed());
+        if (Config.FLOATING_ISLANDS_TRIM_STRUCTURE_VOID_BLOCKS_AFTER_FEATURES.getAsBoolean()) {
+            trimFloatingStructureBlocks(level.registryAccess(), chunk);
+        }
+        FloatingIslandRareStructureChains.tryPlaceDecorativeChains(level.registryAccess(), chunk);
         super.applyBiomeDecoration(level, chunk, structureManager);
         FloatingIslandsOreThinning.applyAfterDecoration(level, chunk);
         sprinkleSurfaceWaterPools(level, chunk);
@@ -690,9 +766,9 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
     }
 
     /**
-     * Removes structure blocks that sit in columns with no island, or hang in open air above
-     * the island top (unless {@link #isSettlementStructure(ResourceLocation)} — vanilla villages use ids like
-     * {@code minecraft:village_plains}). Overlap with solid terrain is kept so mineshafts / portals can embed.
+     * Removes structure blocks that sit in columns with no island, or hang in open air above the island top (unless
+     * {@link #isSettlementStructure(ResourceLocation)}). {@link Config#FLOATING_ISLANDS_TRIM_STRIP_MINESHAFT_THROUGH_VOID}
+     * gates whether {@code minecraft:mineshaft} pieces in void columns are cleared (default: keep corridors).
      */
     private static void trimFloatingStructureBlocks(RegistryAccess registryAccess, ChunkAccess chunk) {
         var structureRegistry = registryAccess.registryOrThrow(Registries.STRUCTURE);
@@ -711,7 +787,7 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
                 continue;
             }
             ResourceLocation sid = structureRegistry.getKey(structure);
-            boolean trimAboveSurface = sid == null || !isSettlementStructure(sid);
+            boolean trimAboveSurface = sid == null || !preservesStructureAboveSurfaceTrim(sid);
 
             BoundingBox bb = start.getBoundingBox();
             int x0 = Math.max(bb.minX(), minWX);
@@ -735,6 +811,10 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
                             continue;
                         }
                         if (!hasIslandColumn) {
+                            if (MINESHAFT.equals(sid)
+                                    && !Config.FLOATING_ISLANDS_TRIM_STRIP_MINESHAFT_THROUGH_VOID.getAsBoolean()) {
+                                continue;
+                            }
                             chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
                         } else if (trimAboveSurface && y > top + STRUCTURE_CLEARANCE_ABOVE_TOP) {
                             chunk.setBlockState(pos, Blocks.AIR.defaultBlockState(), false);
@@ -795,6 +875,23 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
         return CompletableFuture.completedFuture(chunk);
     }
 
+    /**
+     * Limits {@code /locate structure} ring depth so the server thread does not synchronously generate unbounded chunks
+     * (trial chambers and other jig saw-heavy starts can stall past the watchdog).
+     */
+    @Override
+    @Nullable
+    public Pair<BlockPos, Holder<Structure>> findNearestMapStructure(
+            ServerLevel level,
+            HolderSet<Structure> structure,
+            BlockPos pos,
+            int searchRadius,
+            boolean skipKnownStructures) {
+        int cap = Config.FLOATING_ISLANDS_LOCATE_STRUCTURE_MAX_RING_RADIUS.getAsInt();
+        int clamped = Math.min(searchRadius, cap);
+        return super.findNearestMapStructure(level, structure, pos, clamped, skipKnownStructures);
+    }
+
     @Override
     public void applyCarvers(
             WorldGenRegion level,
@@ -804,6 +901,18 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
             StructureManager structureManager,
             ChunkAccess chunk,
             GenerationStep.Carving step) {
+        ensureIslandCarvingNoiseDelegate(level.registryAccess());
+        FloatingIslandMaskedCarvers.applyMaskedOverworldCarvers(
+                this,
+                level,
+                seed,
+                randomState,
+                biomeManager,
+                structureManager,
+                chunk,
+                step,
+                islandCarvingNoiseDelegate,
+                islandCarvingNoiseSettings);
     }
 
     @Override

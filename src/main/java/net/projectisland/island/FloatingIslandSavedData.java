@@ -127,6 +127,23 @@ public final class FloatingIslandSavedData extends SavedData {
     }
 
     /**
+     * Undo a starter-home row when placement failed (e.g. could not find a supported feet column). Caller must only use
+     * this right after {@link #tryClaimStarterIsland} returned {@code key} for the same {@code owner}.
+     */
+    public synchronized void revertStarterIslandClaim(UUID owner, FloatingIslandKey key) {
+        FloatingIslandKey assigned = starterHomes.get(owner);
+        if (assigned == null || !assigned.equals(key)) {
+            return;
+        }
+        starterHomes.remove(owner);
+        IslandRecord rec = islands.get(key);
+        if (rec != null && rec.state() == IslandState.CLAIMED && owner.equals(rec.owner())) {
+            rec.clearClaim();
+        }
+        setDirty();
+    }
+
+    /**
      * Atomically claim {@code key} for {@code owner} if missing or {@link IslandState#AVAILABLE}. Does not touch
      * {@linkplain #starterHomes starter homes} — for secondary claims (e.g. OP command until dock/link gameplay exists).
      */

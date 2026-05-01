@@ -35,6 +35,8 @@ public final class IslandRegionBiomePicker {
         add(pool, Biomes.BADLANDS, Config.ISLAND_BIOME_WEIGHT_BADLANDS.getAsInt());
         add(pool, Biomes.WINDSWEPT_FOREST, Config.ISLAND_BIOME_WEIGHT_WINDSWEPT_FOREST.getAsInt());
         add(pool, Biomes.SWAMP, Config.ISLAND_BIOME_WEIGHT_SWAMP.getAsInt());
+        add(pool, Biomes.DARK_FOREST, Config.ISLAND_BIOME_WEIGHT_DARK_FOREST.getAsInt());
+        add(pool, Biomes.SNOWY_TAIGA, Config.ISLAND_BIOME_WEIGHT_SNOWY_TAIGA.getAsInt());
         if (pool.isEmpty()) {
             return Biomes.PLAINS;
         }

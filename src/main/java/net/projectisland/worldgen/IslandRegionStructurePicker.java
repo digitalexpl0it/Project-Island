@@ -10,6 +10,9 @@ import net.projectisland.Config;
 /**
  * Per-island-region weighted rolls for which vanilla structures to **keep**, mirroring {@link IslandRegionBiomePicker}.
  * Settlement structures ({@code village_*}, pillager outpost) use a separate allow roll plus biome compatibility.
+ * Other vanilla structures (e.g. {@code minecraft:mansion}, {@code minecraft:igloo}) are **not** gated here — they still
+ * need a suitable island biome and must survive {@link net.projectisland.worldgen.FloatingIslandsChunkGenerator
+ * #trimFloatingStructureBlocks} / land-contact rules.
  */
 public final class IslandRegionStructurePicker {
     private IslandRegionStructurePicker() {}
@@ -22,6 +25,7 @@ public final class IslandRegionStructurePicker {
         String p = id.getPath();
         return "monster_room".equals(p)
                 || "trial_chambers".equals(p)
+                || "mineshaft".equals(p)
                 || "desert_pyramid".equals(p)
                 || "jungle_pyramid".equals(p)
                 || p.startsWith("village_")
@@ -34,17 +38,19 @@ public final class IslandRegionStructurePicker {
         int trial = Config.ISLAND_REGION_RARE_STRUCTURE_WEIGHT_TRIAL_CHAMBERS.getAsInt();
         int desert = Config.ISLAND_REGION_RARE_STRUCTURE_WEIGHT_DESERT_PYRAMID.getAsInt();
         int jungle = Config.ISLAND_REGION_RARE_STRUCTURE_WEIGHT_JUNGLE_PYRAMID.getAsInt();
-        int total = none + mr + trial + desert + jungle;
+        int mine = Config.ISLAND_REGION_RARE_STRUCTURE_WEIGHT_MINESHAFT.getAsInt();
+        int total = none + mr + trial + desert + jungle + mine;
         if (total <= 0) {
             return IslandRegionRareStructureSlot.NONE;
         }
-        int[] w = {none, mr, trial, desert, jungle};
+        int[] w = {none, mr, trial, desert, jungle, mine};
         IslandRegionRareStructureSlot[] slots = {
             IslandRegionRareStructureSlot.NONE,
             IslandRegionRareStructureSlot.MONSTER_ROOM,
             IslandRegionRareStructureSlot.TRIAL_CHAMBERS,
             IslandRegionRareStructureSlot.DESERT_PYRAMID,
-            IslandRegionRareStructureSlot.JUNGLE_PYRAMID
+            IslandRegionRareStructureSlot.JUNGLE_PYRAMID,
+            IslandRegionRareStructureSlot.MINESHAFT
         };
         int roll = rnd.nextInt(total);
         int acc = 0;
@@ -54,7 +60,7 @@ public final class IslandRegionStructurePicker {
                 return slots[i];
             }
         }
-        return IslandRegionRareStructureSlot.JUNGLE_PYRAMID;
+        return IslandRegionRareStructureSlot.NONE;
     }
 
     /** @return {@code true} if this region allows villages / pillager outposts at all (second roll). */
@@ -84,6 +90,9 @@ public final class IslandRegionStructurePicker {
         }
         if (ResourceLocation.withDefaultNamespace("trial_chambers").equals(id)) {
             return rare != IslandRegionRareStructureSlot.TRIAL_CHAMBERS;
+        }
+        if (ResourceLocation.withDefaultNamespace("mineshaft").equals(id)) {
+            return rare != IslandRegionRareStructureSlot.MINESHAFT;
         }
         if (ResourceLocation.withDefaultNamespace("desert_pyramid").equals(id)) {
             if (rare != IslandRegionRareStructureSlot.DESERT_PYRAMID) {
