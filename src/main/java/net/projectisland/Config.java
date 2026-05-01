@@ -36,12 +36,47 @@ public final class Config {
             .comment(
                     "Second roll per island region, independent of rare slot: relative weight to **allow** {@code village_*} and {@code pillager_outpost}",
                     "starts that survive land-contact checks. When denied, those starts are removed like wrong-slot dungeons.",
-                    "Biome must still match the village type (e.g. plains village on plains island).")
-            .defineInRange("islandRegionSettlementStructureWeightAllow", 85, 0, 1_000_000);
+                    "Default **100** with **Deny** **0** avoids randomly stripping settlements; raise **Deny** only if you want fewer villages/outposts.")
+            .defineInRange("islandRegionSettlementStructureWeightAllow", 100, 0, 1_000_000);
 
     public static final ModConfigSpec.IntValue ISLAND_REGION_SETTLEMENT_STRUCTURE_WEIGHT_DENY = BUILDER
             .comment("Paired with islandRegionSettlementStructureWeightAllow — relative weight to skip settlements in this region.")
-            .defineInRange("islandRegionSettlementStructureWeightDeny", 15, 0, 1_000_000);
+            .defineInRange("islandRegionSettlementStructureWeightDeny", 0, 0, 1_000_000);
+
+    public static final ModConfigSpec.BooleanValue ISLAND_REGION_VILLAGE_REQUIRE_BIOME_MATCH = BUILDER
+            .comment(
+                    "When **true**, {@code village_*} starts are removed if the island biome does not fit that village id (e.g. **village_plains** only on plains/meadow/forest-family).",
+                    "When **false**, only the settlement allow/deny roll applies to villages (useful with **Multi Village Selector** or other mods that place villages across biomes). **Pillager outpost** biome checks are unchanged.")
+            .define("islandRegionVillageRequireBiomeMatch", true);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_CONTROLLED_SETTLEMENT_PLACEMENT = BUILDER
+            .comment(
+                    "When **true**, the floating-islands generator **removes** all vanilla {@code village_*} and {@code pillager_outpost} starts, then places **at most one** controlled jigsaw settlement per **inhabited** island region (same 8×8 grid as biomes).",
+                    "Anchor is randomized near the procedural island center on solid columns so **/locate** and gameplay see predictable surface settlements. Uses **islandRegionSettlement** allow/deny, then weighted **controlledSettlementWeightVillage** / **Outpost** / **None**.",
+                    "When **false**, vanilla structure-set placement runs (still subject to island gating and land-contact rules).")
+            .define("floatingIslandsControlledSettlementPlacement", true);
+
+    public static final ModConfigSpec.IntValue CONTROLLED_SETTLEMENT_WEIGHT_VILLAGE = BUILDER
+            .comment(
+                    "After a region passes **islandRegionSettlementStructureWeightAllow/Deny**: relative weight to place a **village** variant matching the rolled island biome (vs outpost / none).")
+            .defineInRange("controlledSettlementWeightVillage", 78, 0, 1_000_000);
+
+    public static final ModConfigSpec.IntValue CONTROLLED_SETTLEMENT_WEIGHT_OUTPOST = BUILDER
+            .comment("Relative weight for **minecraft:pillager_outpost** in the same roll as controlledSettlementWeightVillage.")
+            .defineInRange("controlledSettlementWeightOutpost", 12, 0, 1_000_000);
+
+    public static final ModConfigSpec.IntValue CONTROLLED_SETTLEMENT_WEIGHT_NONE = BUILDER
+            .comment("Relative weight for **no** controlled settlement this region (even if vanilla would have tried).")
+            .defineInRange("controlledSettlementWeightNone", 10, 0, 1_000_000);
+
+    public static final ModConfigSpec.IntValue CONTROLLED_SETTLEMENT_ANCHOR_JITTER_BLOCKS = BUILDER
+            .comment(
+                    "Max horizontal jitter in blocks from the procedural island **center** when picking the jigsaw anchor (rejected if the column has no island stone). **0** = always center column.")
+            .defineInRange("controlledSettlementAnchorJitterBlocks", 12, 0, 48);
+
+    public static final ModConfigSpec.IntValue CONTROLLED_SETTLEMENT_ANCHOR_TRIES = BUILDER
+            .comment("How many random jitter samples to try before giving up on placing a controlled settlement in this region.")
+            .defineInRange("controlledSettlementAnchorTries", 18, 1, 64);
 
     public static final ModConfigSpec.DoubleValue FLOATING_ISLAND_REGION_SPAWN_CHANCE = BUILDER
             .comment(
@@ -140,8 +175,8 @@ public final class Config {
 
     public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_CAVE_STRUCTURE_REQUIRE_STONE_Y_OVERLAP = BUILDER
             .comment(
-                    "For **minecraft:monster_room** and **minecraft:trial_chambers**: remove the start if its bounding box does not intersect the procedural island **stone column** (by Y) at the box center.",
-                    "Vanilla often anchors Y near **sea level** (`floatingIslandsChunkGeneratorSeaLevel`), so small dungeons appear **floating above** island tops. This does **not** custom-reposition structures — it only strips bad placements.")
+                    "For **minecraft:monster_room**, **minecraft:trial_chambers**, and **minecraft:stronghold**: remove the start if its bounding box does not intersect the procedural island **stone column** (by Y) at the box center.",
+                    "Vanilla anchoring uses **sea level** / spread logic, so dungeons and fortress pieces often appear **above or below** the island mass in open air. This does **not** reposition structures — it only strips bad placements.")
             .define("floatingIslandsCaveStructureRequireStoneYOverlap", true);
 
     public static final ModConfigSpec.IntValue FLOATING_ISLANDS_EXTRA_SURFACE_TREES_PER_CHUNK = BUILDER

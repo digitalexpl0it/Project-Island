@@ -106,6 +106,9 @@ public final class IslandRegionStructurePicker {
             if (ResourceLocation.withDefaultNamespace("pillager_outpost").equals(id)) {
                 return !biomeOkForOutpost(biome);
             }
+            if (!Config.ISLAND_REGION_VILLAGE_REQUIRE_BIOME_MATCH.getAsBoolean()) {
+                return false;
+            }
             return !villagePathMatchesIslandBiome(id, biome);
         }
         return false;
@@ -130,7 +133,11 @@ public final class IslandRegionStructurePicker {
                 || biome.is(Biomes.OLD_GROWTH_SPRUCE_TAIGA)
                 || biome.is(Biomes.SAVANNA)
                 || biome.is(Biomes.SAVANNA_PLATEAU)
-                || biome.is(Biomes.WINDSWEPT_SAVANNA);
+                || biome.is(Biomes.WINDSWEPT_SAVANNA)
+                || biome.is(Biomes.FOREST)
+                || biome.is(Biomes.FLOWER_FOREST)
+                || biome.is(Biomes.BIRCH_FOREST)
+                || biome.is(Biomes.DARK_FOREST);
     }
 
     /**
@@ -140,7 +147,12 @@ public final class IslandRegionStructurePicker {
     private static boolean villagePathMatchesIslandBiome(ResourceLocation villageId, Holder<Biome> biome) {
         String p = villageId.getPath();
         return switch (p) {
-            case "village_plains" -> biome.is(Biomes.PLAINS) || biome.is(Biomes.MEADOW);
+            case "village_plains" -> biome.is(Biomes.PLAINS)
+                    || biome.is(Biomes.MEADOW)
+                    || biome.is(Biomes.FOREST)
+                    || biome.is(Biomes.FLOWER_FOREST)
+                    || biome.is(Biomes.BIRCH_FOREST)
+                    || biome.is(Biomes.DARK_FOREST);
             case "village_desert" -> biome.is(Biomes.DESERT);
             case "village_snowy" -> biome.is(Biomes.SNOWY_PLAINS) || biome.is(Biomes.SNOWY_TAIGA);
             case "village_taiga" -> biome.is(Biomes.TAIGA) || biome.is(Biomes.SNOWY_TAIGA);

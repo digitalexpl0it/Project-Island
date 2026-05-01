@@ -136,6 +136,12 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
         return holderForBiome(chosen);
     }
 
+    /** Surface biome at ({@code wx},{@code wz}) used for village variant selection (matches column top roll). */
+    Holder<Biome> rolledIslandSurfaceBiome(RandomState randomState, int wx, int wz, int minY, int maxY) {
+        int top = FloatingIslandLayout.columnTopY(wx, wz, minY, maxY);
+        return biomeForSurfaceColumn(randomState, wx, wz, minY, maxY, top);
+    }
+
     @Override
     public CompletableFuture<ChunkAccess> createBiomes(
             RandomState randomState, Blender blender, StructureManager structureManager, ChunkAccess chunk) {
@@ -170,7 +176,8 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
      * Vanilla jigsaw villages register as {@code minecraft:village_plains}, {@code village_desert}, … — there is no
      * {@code minecraft:village} structure id in 1.21. Skip aggressive trim / void-only removal for those and outposts.
      */
-    private static boolean isSettlementStructure(ResourceLocation id) {
+    /** Same package: controlled settlement placement strips these ids. */
+    static boolean isSettlementStructure(ResourceLocation id) {
         if (id == null) {
             return false;
         }
@@ -191,6 +198,16 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
         removeStructureStartsWithNoIslandContact(registryAccess, chunk);
         trimFloatingStructureBlocks(registryAccess, chunk);
         Heightmap.primeHeightmaps(chunk, EnumSet.of(Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.WORLD_SURFACE_WG));
+        if (Config.FLOATING_ISLANDS_CONTROLLED_SETTLEMENT_PLACEMENT.getAsBoolean()) {
+            IslandRegionControlledSettlementPlacement.stripVanillaSettlementStarts(registryAccess, chunk);
+            IslandRegionControlledSettlementPlacement.tryPlaceControlledSettlement(
+                    this,
+                    registryAccess,
+                    structureState,
+                    structureManager,
+                    chunk,
+                    structureTemplateManager);
+        }
     }
 
     /**
@@ -311,6 +328,7 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
      * Per {@link FloatingIslandLayout} island region (aligned with {@link IslandRegionBiomePicker}), deterministically
      * decides whether to keep monster rooms, trial chambers, pyramids, and settlements — same weighted pattern as island
      * biomes. Samples chunk noise biome at the structure bounding-box center so temple/village ids match the island biome.
+     * {@link #STRONGHOLD} starts are handled first (vertical stone overlap only — not part of the picker).
      * <p>
      * Must run during {@link #applyBiomeDecoration} (not {@link #createStructures}): at {@code STRUCTURE_STARTS} the
      * {@link ChunkAccess} has no biome data yet and {@link ProtoChunk#getNoiseBiome} throws.
@@ -327,12 +345,29 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
                 continue;
             }
             ResourceLocation id = structureRegistry.getKey(structure);
-            if (id == null || !IslandRegionStructurePicker.isGatedStructureType(id)) {
+            if (id == null) {
                 continue;
             }
             BoundingBox bb = start.getBoundingBox();
             int cx = (bb.minX() + bb.maxX()) >> 1;
             int cz = (bb.minZ() + bb.maxZ()) >> 1;
+
+            // Stronghold libraries / corridors are not in IslandRegionStructurePicker — vanilla ring placement ignores terrain.
+            if (STRONGHOLD.equals(id)
+                    && Config.FLOATING_ISLANDS_CAVE_STRUCTURE_REQUIRE_STONE_Y_OVERLAP.getAsBoolean()
+                    && !structureBoundingIntersectsIslandStoneColumn(cx, cz, bb, minY, maxY)) {
+                wipeStructureBlocksInChunk(chunk, bb);
+                chunk.setStartForStructure(structure, StructureStart.INVALID_START);
+                continue;
+            }
+
+            if (!IslandRegionStructurePicker.isGatedStructureType(id)) {
+                continue;
+            }
+            if (Config.FLOATING_ISLANDS_CONTROLLED_SETTLEMENT_PLACEMENT.getAsBoolean()
+                    && isSettlementStructure(id)) {
+                continue;
+            }
 
             Optional<FloatingIslandKey> owner = FloatingIslandLayout.islandOwningSurface(cx, cz, minY, maxY);
             int rcx;
@@ -358,7 +393,7 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
             if (!remove
                     && Config.FLOATING_ISLANDS_CAVE_STRUCTURE_REQUIRE_STONE_Y_OVERLAP.getAsBoolean()
                     && (MONSTER_ROOM.equals(id) || TRIAL_CHAMBERS.equals(id))
-                    && !caveStructureBoundingIntersectsIslandStoneColumn(cx, cz, bb, minY, maxY)) {
+                    && !structureBoundingIntersectsIslandStoneColumn(cx, cz, bb, minY, maxY)) {
                 remove = true;
             }
             if (remove) {
@@ -372,7 +407,7 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
      * {@code true} when the structure’s Y span intersects the procedural island stone span at the bounding-box center
      * (same column math as {@link FloatingIslandLayout#columnContains}).
      */
-    private static boolean caveStructureBoundingIntersectsIslandStoneColumn(
+    private static boolean structureBoundingIntersectsIslandStoneColumn(
             int cx, int cz, BoundingBox bb, int minY, int maxY) {
         int top = FloatingIslandLayout.columnTopY(cx, cz, minY, maxY);
         if (top <= minY) {
@@ -397,7 +432,7 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
         return chunk.getNoiseBiome(qx, qy, qz);
     }
 
-    private static void wipeStructureBlocksInChunk(ChunkAccess chunk, BoundingBox bb) {
+    static void wipeStructureBlocksInChunk(ChunkAccess chunk, BoundingBox bb) {
         int minY = chunk.getMinBuildHeight();
         int maxY = chunk.getMaxBuildHeight();
         ChunkPos cp = chunk.getPos();
