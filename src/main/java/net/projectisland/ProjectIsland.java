@@ -14,6 +14,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.projectisland.content.ProjectIslandContent;
+import net.projectisland.worldgen.FloatingIslandLayoutSeed;
 import net.projectisland.island.FloatingIslandDisplayNameReloader;
 import net.projectisland.island.FloatingIslandRespawnHandler;
 import net.projectisland.island.IslandCommands;
@@ -40,6 +41,7 @@ public final class ProjectIsland {
         FloatingIslandsSpawnEvents.register();
         FloatingIslandsSpawnTuning.register();
         FloatingIslandsSpawnPregen.register();
+        FloatingIslandLayoutSeed.register();
         IslandCommands.register();
         IslandHudServerSync.register();
         RopeLinkServerSync.register();

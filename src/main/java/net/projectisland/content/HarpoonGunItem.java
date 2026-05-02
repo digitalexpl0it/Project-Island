@@ -27,7 +27,6 @@ import net.projectisland.island.FloatingIslandSavedData;
 import net.projectisland.island.IslandWorld;
 import net.projectisland.island.RopeLink;
 import net.projectisland.island.RopeProgression;
-import net.projectisland.island.RopeTopology;
 import net.projectisland.network.ActionBarToastPayload;
 import net.projectisland.worldgen.FloatingIslandLayout;
 
@@ -148,12 +147,6 @@ public final class HarpoonGunItem extends Item {
                     sp, "projectisland.harpoon.too_far", ActionBarToastPayload.LONG_READ_VISIBLE_TICKS, maxLinkLen, Math.round(dist));
             return InteractionResultHolder.pass(stack);
         }
-        Optional<String> topo = RopeTopology.validateNewRopeLink(data, sp.getUUID(), aKey, key);
-        if (topo.isPresent()) {
-            clearPendingFirstAnchor(sl, sp, pd);
-            ActionBarToastPayload.send(sp, topo.get(), ActionBarToastPayload.LONG_READ_VISIBLE_TICKS);
-            return InteractionResultHolder.pass(stack);
-        }
         if (!placeAnchor(sl, pos, state, linkId, 2)) {
             clearPendingFirstAnchor(sl, sp, pd);
             ActionBarToastPayload.send(sp, "projectisland.harpoon.second_place_failed", ActionBarToastPayload.LONG_READ_VISIBLE_TICKS);
@@ -164,13 +157,8 @@ public final class HarpoonGunItem extends Item {
         float ropeMaxHpBase = (float) Config.ROPE_LINK_MAX_HEALTH.getAsDouble();
         float ropeMaxHp = (float) (ropeMaxHpBase * tier.maxHealthMultiplier);
         data.putRopeLink(new RopeLink(linkId, sp.getUUID(), aKey, key, aPos, pos, maxLinkLen, ropeMaxHp, ropeMaxHp));
-        boolean autoClaimed = data.tryAutoClaimIslandAfterRopePlaced(sp.getUUID(), aKey, key, sl.getGameTime());
         stack.hurtAndBreak(1, sp, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
-        if (autoClaimed) {
-            actionBar(sp, "projectisland.harpoon.linked_and_claimed");
-        } else {
-            actionBar(sp, "projectisland.harpoon.linked");
-        }
+        actionBar(sp, "projectisland.harpoon.linked");
         return InteractionResultHolder.success(stack);
     }
 

@@ -38,37 +38,12 @@ public record IslandHudSyncPayload(List<IslandHudBeacon> beacons) implements Cus
         buf.writeFloat(b.y());
         buf.writeFloat(b.z());
         buf.writeUtf(b.title());
-        buf.writeUtf(b.status());
-        buf.writeUtf(b.idKey());
-        buf.writeInt(b.titleColorArgb());
-        buf.writeInt(b.statusColorArgb());
-        buf.writeVarInt(b.stateKind());
     }
 
     private static IslandHudBeacon decodeBeacon(RegistryFriendlyByteBuf buf) {
-        return new IslandHudBeacon(
-                buf.readFloat(),
-                buf.readFloat(),
-                buf.readFloat(),
-                buf.readUtf(),
-                buf.readUtf(),
-                buf.readUtf(),
-                buf.readInt(),
-                buf.readInt(),
-                buf.readVarInt());
+        return new IslandHudBeacon(buf.readFloat(), buf.readFloat(), buf.readFloat(), buf.readUtf());
     }
 
-    /**
-     * @param stateKind 0 = available, 1 = claimed, 2 = contested (drives client icon)
-     */
-    public record IslandHudBeacon(
-            float x,
-            float y,
-            float z,
-            String title,
-            String status,
-            String idKey,
-            int titleColorArgb,
-            int statusColorArgb,
-            int stateKind) {}
+    /** World-space anchor and procedural island display name only. */
+    public record IslandHudBeacon(float x, float y, float z, String title) {}
 }

@@ -2,6 +2,7 @@ package net.projectisland.worldgen;
 
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BiomeTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
@@ -132,21 +133,7 @@ public final class IslandRegionStructurePicker {
     }
 
     private static boolean biomeOkForOutpost(Holder<Biome> biome) {
-        return biome.is(Biomes.PLAINS)
-                || biome.is(Biomes.SUNFLOWER_PLAINS)
-                || biome.is(Biomes.MEADOW)
-                || biome.is(Biomes.DESERT)
-                || biome.is(Biomes.SNOWY_PLAINS)
-                || biome.is(Biomes.SNOWY_TAIGA)
-                || biome.is(Biomes.TAIGA)
-                || biome.is(Biomes.OLD_GROWTH_SPRUCE_TAIGA)
-                || biome.is(Biomes.SAVANNA)
-                || biome.is(Biomes.SAVANNA_PLATEAU)
-                || biome.is(Biomes.WINDSWEPT_SAVANNA)
-                || biome.is(Biomes.FOREST)
-                || biome.is(Biomes.FLOWER_FOREST)
-                || biome.is(Biomes.BIRCH_FOREST)
-                || biome.is(Biomes.DARK_FOREST);
+        return biome.is(BiomeTags.HAS_PILLAGER_OUTPOST);
     }
 
     /**
@@ -154,18 +141,12 @@ public final class IslandRegionStructurePicker {
      * match; those rolls still gate placement when vanilla tries an incompatible id.
      */
     private static boolean villagePathMatchesIslandBiome(ResourceLocation villageId, Holder<Biome> biome) {
-        String p = villageId.getPath();
-        return switch (p) {
-            case "village_plains" -> biome.is(Biomes.PLAINS)
-                    || biome.is(Biomes.MEADOW)
-                    || biome.is(Biomes.FOREST)
-                    || biome.is(Biomes.FLOWER_FOREST)
-                    || biome.is(Biomes.BIRCH_FOREST)
-                    || biome.is(Biomes.DARK_FOREST);
-            case "village_desert" -> biome.is(Biomes.DESERT);
-            case "village_snowy" -> biome.is(Biomes.SNOWY_PLAINS) || biome.is(Biomes.SNOWY_TAIGA);
-            case "village_taiga" -> biome.is(Biomes.TAIGA) || biome.is(Biomes.SNOWY_TAIGA);
-            case "village_savanna" -> biome.is(Biomes.SAVANNA);
+        return switch (villageId.getPath()) {
+            case "village_plains" -> biome.is(BiomeTags.HAS_VILLAGE_PLAINS);
+            case "village_desert" -> biome.is(BiomeTags.HAS_VILLAGE_DESERT);
+            case "village_snowy" -> biome.is(BiomeTags.HAS_VILLAGE_SNOWY);
+            case "village_taiga" -> biome.is(BiomeTags.HAS_VILLAGE_TAIGA);
+            case "village_savanna" -> biome.is(BiomeTags.HAS_VILLAGE_SAVANNA);
             default -> true;
         };
     }

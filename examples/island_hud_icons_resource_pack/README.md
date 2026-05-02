@@ -1,11 +1,5 @@
-# Island HUD icons — example resource pack
+# Island HUD icons — example resource pack (obsolete)
 
-Vanilla **datapacks** (`data/…`) cannot replace **client textures** for every player. To customize the two island HUD sprites:
+The island HUD **no longer draws icons** — only the procedural **name** on a faint panel — so these textures are **unused** by current builds.
 
-1. Copy this folder to `.minecraft/resourcepacks/` (or zip it; the root must contain `pack.mcmeta` and `assets/`).
-2. Replace the two **64×64 PNG** files (keep filenames and paths):
-   - `assets/projectisland/textures/gui/island_hud/floating-island.png` — used for **claimed** islands and as one frame for **available**.
-   - `assets/projectisland/textures/gui/island_hud/floating-island_ex.png` — second frame for **available** (slow blink).
-3. Enable the pack **above** Default in **Options → Resource Packs** on **each client** (and on the dedicated machine if you run a client there).
-
-The copies shipped here match the mod’s built-in placeholders; swap in your own art and bump `pack.mcmeta` if your format target differs.
+This folder is kept as a reference layout only. You may delete it from copies of the repo if you like.

@@ -17,7 +17,8 @@ import net.projectisland.Config;
 import net.projectisland.ProjectIsland;
 
 /**
- * Saved island claim rows for the overworld when it uses {@link net.projectisland.worldgen.FloatingIslandsChunkGenerator}.
+ * Persisted island-region rows (legacy {@link IslandState} for older worlds), starter-home mappings, and rope links for
+ * the floating-islands overworld. Ropes are **not** gated on claims; starters only use {@linkplain #starterHomes}.
  */
 public final class FloatingIslandSavedData extends SavedData {
     public static final String FILE_ID = ProjectIsland.MOD_ID + "_floating_islands";
@@ -28,12 +29,19 @@ public final class FloatingIslandSavedData extends SavedData {
     private static final String TAG_ISLANDS = "Islands";
     private static final String TAG_STARTER_HOMES = "StarterHomes";
     private static final String TAG_ROPE_LINKS = "RopeLinks";
-    private static final int CURRENT_VERSION = 1;
+    private static final String TAG_STARTER_SPAWN_BASELINE = "StarterSpawnBaseline";
+    private static final String TAG_SHARED_STARTER_HUB = "SharedStarterHub";
+    private static final int CURRENT_VERSION = 2;
 
     private final Map<FloatingIslandKey, IslandRecord> islands = new HashMap<>();
     /** Players who received the one-time starter island grant (UUID → key). */
     private final Map<UUID, FloatingIslandKey> starterHomes = new HashMap<>();
     private final Map<UUID, RopeLink> ropeLinks = new HashMap<>();
+    /** Overworld shared spawn XZ captured on first starter assignment; {@link Integer#MIN_VALUE} = unset. */
+    private int starterSpawnBaselineX = Integer.MIN_VALUE;
+    private int starterSpawnBaselineZ = Integer.MIN_VALUE;
+    /** First island claimed as the shared starter hub when {@link Config#STARTER_ISLAND_SHARED_HUB} is used. */
+    private FloatingIslandKey sharedStarterHubKey;
 
     public FloatingIslandSavedData() {}
 
@@ -47,6 +55,9 @@ public final class FloatingIslandSavedData extends SavedData {
         islands.clear();
         starterHomes.clear();
         ropeLinks.clear();
+        starterSpawnBaselineX = Integer.MIN_VALUE;
+        starterSpawnBaselineZ = Integer.MIN_VALUE;
+        sharedStarterHubKey = null;
         if (root.contains(TAG_ISLANDS)) {
             CompoundTag sec = root.getCompound(TAG_ISLANDS);
             for (String key : sec.getAllKeys()) {
@@ -63,6 +74,30 @@ public final class FloatingIslandSavedData extends SavedData {
                 } catch (IllegalArgumentException ignored) {
                     // skip malformed uuid or key
                 }
+            }
+        }
+        if (root.contains(TAG_STARTER_SPAWN_BASELINE)) {
+            CompoundTag b = root.getCompound(TAG_STARTER_SPAWN_BASELINE);
+            starterSpawnBaselineX = b.getInt("X");
+            starterSpawnBaselineZ = b.getInt("Z");
+        }
+        if (root.contains(TAG_SHARED_STARTER_HUB)) {
+            FloatingIslandKey.parseStorageKey(root.getString(TAG_SHARED_STARTER_HUB)).ifPresent(k -> sharedStarterHubKey = k);
+        }
+        if (sharedStarterHubKey == null && !starterHomes.isEmpty()) {
+            FloatingIslandKey only = null;
+            boolean conflict = false;
+            for (FloatingIslandKey k : starterHomes.values()) {
+                if (only == null) {
+                    only = k;
+                } else if (!only.equals(k)) {
+                    conflict = true;
+                    break;
+                }
+            }
+            if (!conflict && only != null) {
+                sharedStarterHubKey = only;
+                setDirty();
             }
         }
         if (root.contains(TAG_ROPE_LINKS)) {
@@ -102,33 +137,105 @@ public final class FloatingIslandSavedData extends SavedData {
     }
 
     /**
-     * Atomically claim {@code key} for {@code owner} as starter home if the row is missing or {@link IslandState#AVAILABLE}.
-     * Does nothing if {@code owner} already has a starter home entry. Caller must run on the server thread.
+     * Records overworld shared spawn XZ once (first starter-assignment attempt). Used with
+     * {@link #hasWorldSpawnMovedFromStarterBaseline} when {@link Config#STARTER_ISLAND_SPLIT_WHEN_WORLD_SPAWN_MOVES} is on.
+     */
+    public synchronized void captureStarterSpawnBaselineIfUnset(BlockPos spawn) {
+        if (starterSpawnBaselineX != Integer.MIN_VALUE) {
+            return;
+        }
+        starterSpawnBaselineX = spawn.getX();
+        starterSpawnBaselineZ = spawn.getZ();
+        setDirty();
+    }
+
+    public synchronized boolean hasWorldSpawnMovedFromStarterBaseline(BlockPos spawn) {
+        if (starterSpawnBaselineX == Integer.MIN_VALUE) {
+            return false;
+        }
+        return spawn.getX() != starterSpawnBaselineX || spawn.getZ() != starterSpawnBaselineZ;
+    }
+
+    /** True when two or more players have starter homes on different island regions (legacy per-player starters). */
+    public synchronized boolean hasMultipleDistinctStarterHomes() {
+        if (starterHomes.size() < 2) {
+            return false;
+        }
+        FloatingIslandKey first = null;
+        for (FloatingIslandKey k : starterHomes.values()) {
+            if (first == null) {
+                first = k;
+            } else if (!first.equals(k)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public synchronized Optional<FloatingIslandKey> getSharedStarterHubKey() {
+        return Optional.ofNullable(sharedStarterHubKey);
+    }
+
+    public synchronized void setSharedStarterHubKeyIfUnset(FloatingIslandKey key) {
+        if (sharedStarterHubKey != null) {
+            return;
+        }
+        sharedStarterHubKey = key;
+        setDirty();
+    }
+
+    /**
+     * Adds {@code owner} → {@code hub} in {@linkplain #starterHomes starter homes} only. Requires {@code hub} to match
+     * {@linkplain #sharedStarterHubKey} and at least one existing starter-home entry on that hub (first player already
+     * assigned).
+     */
+    public synchronized Optional<FloatingIslandKey> tryAssignStarterHomeAtSharedHub(UUID owner, FloatingIslandKey hub) {
+        if (starterHomes.containsKey(owner)) {
+            return Optional.empty();
+        }
+        if (sharedStarterHubKey == null || !sharedStarterHubKey.equals(hub)) {
+            return Optional.empty();
+        }
+        boolean hubHasStarter =
+                starterHomes.values().stream().anyMatch(h -> h.equals(hub));
+        if (!hubHasStarter) {
+            return Optional.empty();
+        }
+        starterHomes.put(owner, hub);
+        setDirty();
+        return Optional.of(hub);
+    }
+
+    /** Removes only the starter-home mapping. */
+    public synchronized void revertStarterHomeMappingOnly(UUID owner) {
+        if (starterHomes.remove(owner) != null) {
+            setDirty();
+        }
+    }
+
+    /**
+     * Assign {@code key} as {@code owner}'s starter-home region if they do not already have one and no <em>other</em>
+     * player uses {@code key} as their starter (shared hub assigns multiple players to the same key via
+     * {@link #tryAssignStarterHomeAtSharedHub}). Does not use {@link IslandState#CLAIMED}.
      */
     public synchronized Optional<FloatingIslandKey> tryClaimStarterIsland(FloatingIslandKey key, UUID owner, long gameTime) {
         if (starterHomes.containsKey(owner)) {
             return Optional.empty();
         }
-        IslandRecord rec = islands.get(key);
-        if (rec != null && rec.state() != IslandState.AVAILABLE) {
-            return Optional.empty();
+        for (Map.Entry<UUID, FloatingIslandKey> e : starterHomes.entrySet()) {
+            if (!e.getKey().equals(owner) && e.getValue().equals(key)) {
+                return Optional.empty();
+            }
         }
-        if (rec == null) {
-            rec = new IslandRecord();
-            islands.put(key, rec);
-        }
-        if (rec.state() != IslandState.AVAILABLE) {
-            return Optional.empty();
-        }
-        rec.setClaimed(owner, gameTime);
+        islands.computeIfAbsent(key, k -> new IslandRecord());
         starterHomes.put(owner, key);
         setDirty();
         return Optional.of(key);
     }
 
     /**
-     * Undo a starter-home row when placement failed (e.g. could not find a supported feet column). Caller must only use
-     * this right after {@link #tryClaimStarterIsland} returned {@code key} for the same {@code owner}.
+     * Undo a starter-home mapping when placement failed (e.g. could not find supported feet). Caller must only use this
+     * right after {@link #tryClaimStarterIsland} returned {@code key} for the same {@code owner}.
      */
     public synchronized void revertStarterIslandClaim(UUID owner, FloatingIslandKey key) {
         FloatingIslandKey assigned = starterHomes.get(owner);
@@ -136,89 +243,7 @@ public final class FloatingIslandSavedData extends SavedData {
             return;
         }
         starterHomes.remove(owner);
-        IslandRecord rec = islands.get(key);
-        if (rec != null && rec.state() == IslandState.CLAIMED && owner.equals(rec.owner())) {
-            rec.clearClaim();
-        }
         setDirty();
-    }
-
-    /**
-     * Atomically claim {@code key} for {@code owner} if missing or {@link IslandState#AVAILABLE}. Does not touch
-     * {@linkplain #starterHomes starter homes} — for secondary claims (e.g. OP command until dock/link gameplay exists).
-     */
-    private synchronized boolean islandClaimedBy(FloatingIslandKey key, UUID owner) {
-        return peek(key).map(r -> r.state() == IslandState.CLAIMED && owner.equals(r.owner())).orElse(false);
-    }
-
-    /** True if this region is {@link IslandState#CLAIMED} by {@code owner}. */
-    public synchronized boolean isClaimedByPlayer(FloatingIslandKey key, UUID owner) {
-        return islandClaimedBy(key, owner);
-    }
-
-    /**
-     * True if {@code claimer} owns a {@link RopeLink} whose endpoints are {@code targetToClaim} and another island
-     * they already have {@link IslandState#CLAIMED}.
-     */
-    public synchronized boolean hasRopeLinkFromClaimedIsland(UUID claimer, FloatingIslandKey targetToClaim) {
-        Optional<FloatingIslandKey> starter = getStarterHome(claimer);
-        for (RopeLink link : copyRopeLinks()) {
-            if (!claimer.equals(link.owner())) {
-                continue;
-            }
-            if (!link.fromKey().equals(targetToClaim) && !link.toKey().equals(targetToClaim)) {
-                continue;
-            }
-            FloatingIslandKey other = link.fromKey().equals(targetToClaim) ? link.toKey() : link.fromKey();
-            if (islandClaimedBy(other, claimer)) {
-                return true;
-            }
-            // Rope to your starter-home region always counts, even if the island row is missing CLAIMED (data edge case).
-            if (starter.isPresent() && starter.get().equals(other)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public synchronized boolean trySecondaryClaim(FloatingIslandKey key, UUID owner, long gameTime) {
-        IslandRecord rec = islands.get(key);
-        if (rec != null && rec.state() != IslandState.AVAILABLE) {
-            return false;
-        }
-        if (rec == null) {
-            rec = new IslandRecord();
-            islands.put(key, rec);
-        }
-        if (rec.state() != IslandState.AVAILABLE) {
-            return false;
-        }
-        rec.setClaimed(owner, gameTime);
-        setDirty();
-        return true;
-    }
-
-    /**
-     * Call only after the new {@link RopeLink} is already in {@link #ropeLinks}. If one endpoint is this player's
-     * starter or a region they already claim, and the other is {@link IslandState#AVAILABLE}, claims the available
-     * region (same outcome as {@link #trySecondaryClaim} when used from the harpoon).
-     */
-    public synchronized boolean tryAutoClaimIslandAfterRopePlaced(UUID owner, FloatingIslandKey a, FloatingIslandKey b, long gameTime) {
-        if (!Config.AUTO_CLAIM_ON_ROPE_LINK.getAsBoolean()) {
-            return false;
-        }
-        Optional<FloatingIslandKey> starter = getStarterHome(owner);
-        boolean hubA = isClaimedByPlayer(a, owner) || starter.filter(a::equals).isPresent();
-        boolean hubB = isClaimedByPlayer(b, owner) || starter.filter(b::equals).isPresent();
-        boolean availA = peek(a).map(r -> r.state() == IslandState.AVAILABLE).orElse(true);
-        boolean availB = peek(b).map(r -> r.state() == IslandState.AVAILABLE).orElse(true);
-        if (hubA && availB) {
-            return trySecondaryClaim(b, owner, gameTime);
-        }
-        if (hubB && availA) {
-            return trySecondaryClaim(a, owner, gameTime);
-        }
-        return false;
     }
 
     public synchronized void putRopeLink(RopeLink link) {
@@ -231,37 +256,7 @@ public final class FloatingIslandSavedData extends SavedData {
     }
 
     public synchronized void removeRopeLink(UUID id) {
-        RopeLink removed = ropeLinks.remove(id);
-        if (removed != null) {
-            setDirty();
-            if (Config.SECONDARY_CLAIM_REQUIRES_ROPE_LINK.getAsBoolean()) {
-                revalidateRopeBackedClaimsForOwner(removed.owner());
-            }
-        }
-    }
-
-    /**
-     * Secondary islands (not this player's starter home) must keep a direct owned {@linkplain RopeLink} to another
-     * island they {@linkplain #islandClaimedBy claim}; otherwise they return to {@link IslandState#AVAILABLE}.
-     */
-    public synchronized void revalidateRopeBackedClaimsForOwner(UUID owner) {
-        Optional<FloatingIslandKey> starter = getStarterHome(owner);
-        boolean changed = false;
-        for (Map.Entry<FloatingIslandKey, IslandRecord> e : new ArrayList<>(islands.entrySet())) {
-            IslandRecord rec = e.getValue();
-            if (rec.state() != IslandState.CLAIMED || !owner.equals(rec.owner())) {
-                continue;
-            }
-            FloatingIslandKey key = e.getKey();
-            if (starter.filter(key::equals).isPresent()) {
-                continue;
-            }
-            if (!hasRopeLinkFromClaimedIsland(owner, key)) {
-                rec.clearClaim();
-                changed = true;
-            }
-        }
-        if (changed) {
+        if (ropeLinks.remove(id) != null) {
             setDirty();
         }
     }
@@ -304,6 +299,15 @@ public final class FloatingIslandSavedData extends SavedData {
             st.putString(e.getKey().toString(), e.getValue().toStorageKey());
         }
         root.put(TAG_STARTER_HOMES, st);
+        if (starterSpawnBaselineX != Integer.MIN_VALUE) {
+            CompoundTag b = new CompoundTag();
+            b.putInt("X", starterSpawnBaselineX);
+            b.putInt("Z", starterSpawnBaselineZ);
+            root.put(TAG_STARTER_SPAWN_BASELINE, b);
+        }
+        if (sharedStarterHubKey != null) {
+            root.putString(TAG_SHARED_STARTER_HUB, sharedStarterHubKey.toStorageKey());
+        }
         CompoundTag rl = new CompoundTag();
         for (Map.Entry<UUID, RopeLink> e : ropeLinks.entrySet()) {
             RopeLink link = e.getValue();

@@ -10,8 +10,8 @@ public final class ClientConfig {
             .define("islandHudShow", true);
 
     public static final ModConfigSpec.DoubleValue ISLAND_HUD_TEXT_SCALE = BUILDER
-            .comment("World-space scale for debug-style floating text (vanilla debug labels use 0.02).")
-            .defineInRange("islandHudTextScale", 0.056d, 0.024d, 0.11d);
+            .comment("World-space scale for island name labels (vanilla debug labels use ~0.02).")
+            .defineInRange("islandHudTextScale", 0.062d, 0.024d, 0.11d);
 
     public static final ModConfigSpec.BooleanValue ISLAND_HUD_SEE_THROUGH_TEXT = BUILDER
             .comment("Use see-through text so labels stay readable when blocks or terrain sit in front of them.")
@@ -25,18 +25,22 @@ public final class ClientConfig {
 
     public static final ModConfigSpec.DoubleValue ISLAND_HUD_PANEL_FILL_OPACITY = BUILDER
             .comment(
-                    "Alpha for the **dark fill** behind island HUD billboard text (0 = invisible, 1 = opaque).",
-                    "Default matches the previous hard-coded panel (~85% opacity); lower for a more see-through HUD.")
-            .defineInRange("islandHudPanelFillOpacity", 216.0d / 255.0d, 0.0d, 1.0d);
+                    "Alpha for the **light** translucent panel behind the island name (0 = text only, 1 = opaque).",
+                    "Tune on bright snow/sky; default is a soft wash.")
+            .defineInRange("islandHudPanelFillOpacity", 100.0d / 255.0d, 0.0d, 1.0d);
 
-    public static final ModConfigSpec.DoubleValue ISLAND_HUD_PANEL_BORDER_OPACITY = BUILDER
-            .comment("Alpha for the **tinted border** around the island HUD panel (0–1).")
-            .defineInRange("islandHudPanelBorderOpacity", 0.92d, 0.0d, 1.0d);
+    public static final ModConfigSpec.ConfigValue<String> ISLAND_HUD_TITLE_COLOR_MODE = BUILDER
+            .comment(
+                    "**white** — always white title.",
+                    "**island_hue** — stable pastel per island name (hash); easier to spot names at a glance.")
+            .define(
+                    "islandHudTitleColorMode",
+                    "island_hue",
+                    o -> o instanceof String s && ("white".equals(s) || "island_hue".equals(s)));
 
     public static final ModConfigSpec.DoubleValue ISLAND_HUD_PANEL_SCALE = BUILDER
             .comment(
-                    "Scales **padding, icon slot, and border** for the island HUD billboard (1 = legacy size).",
-                    "Text size still follows **islandHudTextScale**; title ellipsis width scales with this value.")
+                    "Scales max title width before ellipsis (**220 × this**, GUI px); text size is **`islandHudTextScale`**.")
             .defineInRange("islandHudPanelScale", 1.0d, 0.35d, 2.5d);
 
     public static final ModConfigSpec.BooleanValue ROPE_LINKS_SHOW = BUILDER

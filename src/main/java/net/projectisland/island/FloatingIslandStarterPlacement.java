@@ -16,12 +16,15 @@ import net.projectisland.ProjectIsland;
 import net.projectisland.ProjectIslandDimensions;
 import net.projectisland.worldgen.FloatingIslandLayout;
 import net.projectisland.worldgen.FloatingIslandsChunkGenerator;
+import net.projectisland.worldgen.IslandRegionSettlementRoll;
 
 /**
- * Phase 4: first-join starter island — region spiral for {@link IslandState#AVAILABLE}, atomic claim + starter-home
- * map entry, teleport to procedural island center (same anchor as {@link IslandHudServerSync} beacons). Spiral origin:
- * world {@code (0,0)} when {@link Config#STARTER_ISLAND_SEARCH_FROM_WORLD_ORIGIN} is set, else shared spawn or join
- * chunk per {@link Config#STARTER_ISLAND_SEARCH_FROM_WORLD_SPAWN}.
+ * Phase 4: first-join starter — by default a **shared hub** island for everyone; after world spawn XZ moves (e.g.
+ * {@code /setworldspawn}), **new** players without a home spiral for their **own** island again (see
+ * {@link Config#STARTER_ISLAND_SHARED_HUB} and {@link Config#STARTER_ISLAND_SPLIT_WHEN_WORLD_SPAWN_MOVES}). Otherwise
+ * region spiral + {@linkplain FloatingIslandSavedData#tryClaimStarterIsland starter-home mapping} only. Spiral origin: world {@code (0,0)}
+ * when {@link Config#STARTER_ISLAND_SEARCH_FROM_WORLD_ORIGIN} is set, else shared spawn or join chunk per
+ * {@link Config#STARTER_ISLAND_SEARCH_FROM_WORLD_SPAWN}.
  *
  * @return {@code true} if the player was kicked because no starter could be assigned and a kick message is configured.
  */
@@ -55,7 +58,7 @@ public final class FloatingIslandStarterPlacement {
             return true;
         }
         ProjectIsland.LOGGER.warn(
-                "FloatingIslandStarterPlacement: no AVAILABLE starter island within search radius for player {}",
+                "FloatingIslandStarterPlacement: no starter island candidate within search radius for player {}",
                 player.getGameProfile().getName());
         return false;
     }
@@ -64,7 +67,36 @@ public final class FloatingIslandStarterPlacement {
         UUID owner = player.getUUID();
         long gameTime = level.getGameTime();
         int maxR = Config.STARTER_ISLAND_MAX_REGION_SEARCH_RADIUS.getAsInt();
-        int minSep = Config.STARTER_ISLAND_MIN_REGION_SEPARATION.getAsInt();
+
+        BlockPos sharedSpawn = level.getSharedSpawnPos();
+        data.captureStarterSpawnBaselineIfUnset(sharedSpawn);
+
+        boolean splitNewPlayers =
+                !Config.STARTER_ISLAND_SHARED_HUB.getAsBoolean()
+                        || (Config.STARTER_ISLAND_SPLIT_WHEN_WORLD_SPAWN_MOVES.getAsBoolean()
+                                && data.hasWorldSpawnMovedFromStarterBaseline(sharedSpawn))
+                        || (Config.STARTER_ISLAND_SHARED_HUB.getAsBoolean()
+                                && data.hasMultipleDistinctStarterHomes());
+
+        if (!splitNewPlayers) {
+            Optional<FloatingIslandKey> hubOpt = data.getSharedStarterHubKey();
+            if (hubOpt.isPresent()) {
+                Optional<FloatingIslandKey> atHub = data.tryAssignStarterHomeAtSharedHub(owner, hubOpt.get());
+                if (atHub.isPresent()) {
+                    FloatingIslandKey home = atHub.get();
+                    if (teleportToIslandCenter(player, level, home)) {
+                        if (Config.DEBUG_LOGGING.getAsBoolean()) {
+                            ProjectIsland.LOGGER.debug(
+                                    "Assigned shared starter hub {} to {}", home, player.getGameProfile().getName());
+                        }
+                        return true;
+                    }
+                    data.revertStarterHomeMappingOnly(owner);
+                }
+            }
+        }
+
+        int minSep = splitNewPlayers ? Config.STARTER_ISLAND_MIN_REGION_SEPARATION.getAsInt() : 0;
 
         int originRx;
         int originRz;
@@ -95,6 +127,9 @@ public final class FloatingIslandStarterPlacement {
                     if (!FloatingIslandLayout.regionHasIsland(rx, rz)) {
                         continue;
                     }
+                    if (IslandRegionSettlementRoll.commitsControlledPillagerSettlement(level.getSeed(), rx, rz)) {
+                        continue;
+                    }
                     FloatingIslandKey key = new FloatingIslandKey(rx, rz);
                     if (minSep > 0 && !passesMinSeparation(key, minSep, data)) {
                         continue;
@@ -106,6 +141,9 @@ public final class FloatingIslandStarterPlacement {
                             if (Config.DEBUG_LOGGING.getAsBoolean()) {
                                 ProjectIsland.LOGGER.debug(
                                         "Assigned starter island {} to {}", home, player.getGameProfile().getName());
+                            }
+                            if (!splitNewPlayers) {
+                                data.setSharedStarterHubKeyIfUnset(home);
                             }
                             return true;
                         }

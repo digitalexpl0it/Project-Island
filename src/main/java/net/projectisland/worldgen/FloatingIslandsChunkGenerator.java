@@ -55,6 +55,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.projectisland.Config;
 import net.projectisland.ProjectIsland;
 import net.projectisland.compat.BiomeModIntegration;
+import net.projectisland.compat.TakesAPillageIntegration;
 import net.projectisland.island.FloatingIslandKey;
 import org.jetbrains.annotations.Nullable;
 
@@ -268,6 +269,19 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
     }
 
     /**
+     * Vanilla settlements plus optional **takesapillage** bastille / camp when controlled replacement for those is enabled.
+     */
+    static boolean shouldStripBeforeControlledSettlement(ResourceLocation id) {
+        if (isSettlementStructure(id)) {
+            return true;
+        }
+        return Config.FLOATING_ISLANDS_CONTROLLED_SETTLEMENT_PLACEMENT.getAsBoolean()
+                && Config.FLOATING_ISLANDS_TAKESAPILLAGE_CONTROLLED_OUTPOST.getAsBoolean()
+                && TakesAPillageIntegration.isLoaded()
+                && TakesAPillageIntegration.isPillagerStructure(id);
+    }
+
+    /**
      * Skip “floating above procedural top” stripping — multi-story builds would lose upper floors (see
      * {@link #trimFloatingStructureBlocks}).
      */
@@ -276,6 +290,9 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
             return false;
         }
         if (isSettlementStructure(id)) {
+            return true;
+        }
+        if (TakesAPillageIntegration.isPillagerStructure(id)) {
             return true;
         }
         return WOODLAND_MANSION.equals(id) || IGLOO.equals(id);
@@ -334,6 +351,11 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
             }
             ResourceLocation sid = structureRegistry.getKey(structure);
             if (isSettlementStructure(sid)) {
+                continue;
+            }
+            if (Config.FLOATING_ISLANDS_CONTROLLED_SETTLEMENT_PLACEMENT.getAsBoolean()
+                    && Config.FLOATING_ISLANDS_TAKESAPILLAGE_CONTROLLED_OUTPOST.getAsBoolean()
+                    && TakesAPillageIntegration.isPillagerStructure(sid)) {
                 continue;
             }
             BoundingBox bb = start.getBoundingBox();

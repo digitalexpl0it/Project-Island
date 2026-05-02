@@ -20,7 +20,15 @@ import net.projectisland.network.IslandHudSyncPayload.IslandHudBeacon;
 
 @EventBusSubscriber(modid = ProjectIsland.MOD_ID, value = Dist.CLIENT)
 public final class IslandHudRenderer {
-    private static final int ID_LINE_BASE = 0xFFB0B8C8;
+    private static final int TITLE_BASE = 0xFFFFFFFF;
+
+    private static int titleArgbForConfig(String islandTitle) {
+        String mode = ClientConfig.ISLAND_HUD_TITLE_COLOR_MODE.get();
+        if ("white".equals(mode)) {
+            return TITLE_BASE;
+        }
+        return IslandHudTitleColors.argbForName(islandTitle);
+    }
     /** Max distance vs {@code renderDistance * 16} so labels disappear a bit before chunk mesh typically drops. */
     private static final double HUD_DISTANCE_FRACTION_OF_RENDER_RADIUS = 0.90d;
 
@@ -63,10 +71,9 @@ public final class IslandHudRenderer {
             if (!shouldDrawHudForBeacon(clientLevel, mc, b)) {
                 continue;
             }
-            int titleC = brightenForNight(mc, event, b.x(), b.y(), b.z(), b.titleColorArgb());
-            int statusC = brightenForNight(mc, event, b.x(), b.y(), b.z(), b.statusColorArgb());
-            int idC = brightenForNight(mc, event, b.x(), b.y(), b.z(), ID_LINE_BASE);
-            IslandHudWorldBillboard.render(mc, pose, buffers, b, scale, seeThrough, titleC, statusC, idC);
+            int baseTitle = titleArgbForConfig(b.title());
+            int titleC = brightenForNight(mc, event, b.x(), b.y(), b.z(), baseTitle);
+            IslandHudWorldBillboard.render(mc, pose, buffers, b, scale, seeThrough, titleC);
         }
         buffers.endBatch();
     }

@@ -1,5 +1,7 @@
 package net.projectisland;
 
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
@@ -118,6 +120,18 @@ public final class FloatingIslandsSpawnTuning {
         if (type == EntityType.CREEPER) {
             return Config.FLOATING_ISLANDS_NATURAL_CREEPER_SPAWN_KEEP_CHANCE.getAsDouble();
         }
+        ResourceLocation id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
+        if (id != null) {
+            String ns = id.getNamespace();
+            for (String bypass : Config.FLOATING_ISLANDS_SPAWN_TUNING_BYPASS_ENTITY_NAMESPACES.get()) {
+                if (ns.equals(bypass)) {
+                    return 1.0d;
+                }
+            }
+        }
+        if (isVanillaIllagerNaturalMob(type)) {
+            return Config.FLOATING_ISLANDS_NATURAL_ILLAGER_SPAWN_KEEP_CHANCE.getAsDouble();
+        }
         MobCategory cat = type.getCategory();
         return switch (cat) {
             case MONSTER -> Config.FLOATING_ISLANDS_NATURAL_MONSTER_SPAWN_KEEP_CHANCE.getAsDouble();
@@ -126,5 +140,14 @@ public final class FloatingIslandsSpawnTuning {
             case WATER_CREATURE -> Config.FLOATING_ISLANDS_NATURAL_WATER_CREATURE_SPAWN_KEEP_CHANCE.getAsDouble();
             default -> 1.0d;
         };
+    }
+
+    private static boolean isVanillaIllagerNaturalMob(EntityType<?> type) {
+        return type == EntityType.PILLAGER
+                || type == EntityType.VINDICATOR
+                || type == EntityType.EVOKER
+                || type == EntityType.VEX
+                || type == EntityType.RAVAGER
+                || type == EntityType.ILLUSIONER;
     }
 }

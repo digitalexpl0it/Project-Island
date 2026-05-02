@@ -1,6 +1,8 @@
 # Phase 4 — Dock / link specification (secondary claims)
 
-This document is the **authoritative design** for how a non-starter island becomes **CLAIMED** today, how **rope links** are created and enforced, and what is **intentionally deferred** (e.g. airship movement, dedicated dock blocks). It matches the **1.21.1 NeoForge** codebase as of the doc date; when behavior changes, update this file in the same PR.
+> **Superseded (gameplay):** rope links are **public ziplines** — no topology enforcement, no `/projectisland island claim`, no auto-claim on harpoon. Starter homes use **`StarterHomes`** only (no **`IslandState#CLAIMED`** for new assignments). The sections below describe the **retired** dock/claim model and remain as historical reference.
+
+This document was the **authoritative design** for how a non-starter island became **CLAIMED**, how **rope links** were enforced against topology, and what was **deferred** (e.g. airship movement, dedicated dock blocks). It matched an older **1.21.1 NeoForge** codebase; current behavior defers to source + README.
 
 ---
 

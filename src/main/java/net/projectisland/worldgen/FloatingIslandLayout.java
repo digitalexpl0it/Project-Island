@@ -45,6 +45,11 @@ public final class FloatingIslandLayout {
         out.centerZ = baseChunkZ * 16 + rnd.nextInt(16);
         out.centerY = 92 + rnd.nextInt(36);
         out.hr = 28 + rnd.nextInt(36) + Config.FLOATING_ISLAND_HORIZONTAL_RADIUS_BONUS.getAsInt();
+        Long layoutSeed = FloatingIslandLayoutSeed.getOrNull();
+        if (layoutSeed != null
+                && IslandRegionSettlementRoll.commitsControlledPillagerSettlement(layoutSeed, regionX, regionZ)) {
+            out.hr += Config.FLOATING_ISLAND_HORIZONTAL_RADIUS_OUTPOST_EXTRA_BLOCKS.getAsInt();
+        }
         out.vrTop = 5 + rnd.nextInt(7);
         out.vrBottom = 24 + rnd.nextInt(24);
         out.shapeSalt = rnd.nextLong();

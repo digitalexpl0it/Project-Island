@@ -15,10 +15,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.projectisland.island.IslandSecondaryClaim;
-import net.projectisland.island.IslandWorld;
 import net.projectisland.island.RopeSurfingState;
-import net.projectisland.network.ActionBarToastPayload;
 
 public final class RopeAnchorBlock extends Block implements EntityBlock {
     private static final VoxelShape BASE = Block.box(0, 0, 0, 16, 10, 16);
@@ -76,9 +73,8 @@ public final class RopeAnchorBlock extends Block implements EntityBlock {
     }
 
     /**
-     * Sneak + use empty hand: try to {@linkplain IslandSecondaryClaim claim} the island region this anchor sits on
-     * (same rules as the command, plus this anchor must be your linked harpoon endpoint). Non-sneak empty hand: try
-     * {@linkplain RopeSurfingState rope surfing} toward the linked other anchor when enabled.
+     * Empty-hand use on a linked anchor: {@linkplain RopeSurfingState rope surfing} toward the other anchor when
+     * enabled (any player; no island claim). Sneaking does not claim islands.
      */
     @Override
     protected InteractionResult useWithoutItem(
@@ -90,18 +86,8 @@ public final class RopeAnchorBlock extends Block implements EntityBlock {
             return InteractionResult.PASS;
         }
         if (player.isShiftKeyDown()) {
-            return IslandWorld.keyAt(sl, pos)
-                    .map(
-                            key -> {
-                                IslandSecondaryClaim.Outcome o = IslandSecondaryClaim.tryAtIsland(sp, sl, key, pos);
-                                ActionBarToastPayload.send(sp, IslandSecondaryClaim.translationKey(o));
-                                return o == IslandSecondaryClaim.Outcome.SUCCESS
-                                        ? InteractionResult.SUCCESS
-                                        : InteractionResult.FAIL;
-                            })
-                    .orElse(InteractionResult.PASS);
+            return InteractionResult.PASS;
         }
         return RopeSurfingState.tryStart(sl, sp, pos);
     }
 }
-

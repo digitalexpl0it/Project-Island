@@ -17,8 +17,17 @@ public final class Config {
     private static final Pattern ISLAND_BIOME_MOD_WEIGHTED_ENTRY =
             Pattern.compile("^[a-z0-9_.-]+:[a-z0-9_.-]+=[1-9][0-9]{0,6}$");
 
+    private static final Pattern SPAWN_TUNING_BYPASS_ENTITY_NAMESPACE =
+            Pattern.compile("^[a-z0-9_]+$");
+
+    private static final List<String> DEFAULT_SPAWN_TUNING_BYPASS_ENTITY_NAMESPACES = List.of("mowziesmobs");
+
     private static boolean validateIslandBiomeModWeightedEntry(Object o) {
         return o instanceof String s && ISLAND_BIOME_MOD_WEIGHTED_ENTRY.matcher(s).matches();
+    }
+
+    private static boolean validateSpawnTuningBypassEntityNamespace(Object o) {
+        return o instanceof String s && SPAWN_TUNING_BYPASS_ENTITY_NAMESPACE.matcher(s).matches();
     }
 
     public static final ModConfigSpec.BooleanValue DEBUG_LOGGING = BUILDER
@@ -78,7 +87,8 @@ public final class Config {
             .defineInRange("controlledSettlementWeightVillage", 78, 0, 1_000_000);
 
     public static final ModConfigSpec.IntValue CONTROLLED_SETTLEMENT_WEIGHT_OUTPOST = BUILDER
-            .comment("Relative weight for **minecraft:pillager_outpost** in the same roll as controlledSettlementWeightVillage.")
+            .comment(
+                    "Relative weight for the **outpost** branch ( **minecraft:pillager_outpost** or **takesapillage:*** pillager structures when that mod is loaded — see **floatingIslandsTakesapillageControlledOutpost**).")
             .defineInRange("controlledSettlementWeightOutpost", 12, 0, 1_000_000);
 
     public static final ModConfigSpec.IntValue CONTROLLED_SETTLEMENT_WEIGHT_NONE = BUILDER
@@ -99,6 +109,13 @@ public final class Config {
                     "After the village/outpost/none weight roll **chose** a village or outpost (not **none**): probability to **actually** generate that controlled settlement (**0–1**).",
                     "**1** = always place when chosen; **0.5** ≈ halves settlement density; **0** never places (strip-only until you turn off **floatingIslandsControlledSettlementPlacement**).")
             .defineInRange("controlledSettlementPlaceTryChance", 0.5d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_TAKESAPILLAGE_CONTROLLED_OUTPOST = BUILDER
+            .comment(
+                    "When **true** (default) and NeoForge mod **takesapillage** (**It Takes a Pillage**) is loaded: controlled **outpost** rolls place **takesapillage:bastille** or **pillager_camp** (weights **1**:**2**, matching the mod’s structure set) via generic structure placement instead of **minecraft:pillager_outpost**.",
+                    "Those mod structures are also stripped before controlled placement (like vanilla settlements) and skip aggressive surface trimming / void land-contact stripping while controlled settlements are enabled.",
+                    "When **false**, outpost branch keeps **minecraft:pillager_outpost** even if the mod is present.")
+            .define("floatingIslandsTakesapillageControlledOutpost", true);
 
     public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_SNAP_RARE_STRUCTURES_TO_ISLAND_COLUMN = BUILDER
             .comment(
@@ -292,6 +309,17 @@ public final class Config {
                     "Increase if villages or large structures clip off the rim; 0 yields smaller legacy-sized masses.")
             .defineInRange("floatingIslandHorizontalRadiusBonus", 18, 0, 48);
 
+    /**
+     * Added only when {@link net.projectisland.worldgen.IslandRegionSettlementRoll#commitsControlledPillagerSettlement}
+     * is true for the region (controlled pillager settlement branch). Gives Takes a Pillage bastilles / large outposts
+     * more island surface so footprints do not hang in void.
+     */
+    public static final ModConfigSpec.IntValue FLOATING_ISLAND_HORIZONTAL_RADIUS_OUTPOST_EXTRA_BLOCKS = BUILDER
+            .comment(
+                    "Extra horizontal radius (blocks) when the region rolls a controlled pillager outpost settlement.",
+                    "Stacks with floatingIslandHorizontalRadiusBonus; 0 disables this bump.")
+            .defineInRange("floatingIslandHorizontalRadiusOutpostExtraBlocks", 32, 0, 96);
+
     public static final ModConfigSpec.IntValue FLOATING_ISLANDS_CHUNK_GENERATOR_SEA_LEVEL = BUILDER
             .comment(
                     "Returned only by **ChunkGenerator#getSeaLevel()** for the floating-islands overworld (not the same as **Level#getSeaLevel()**, which still comes from the overworld **dimension type**, usually **~63**).",
@@ -421,8 +449,25 @@ public final class Config {
     public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_NATURAL_MONSTER_SPAWN_KEEP_CHANCE = BUILDER
             .comment(
                     "Per natural spawn attempt for non-creeper **monsters** (zombies, skeletons, spiders, …): keep with this probability (1 = vanilla, 0.35 ≈ 65% fewer).",
-                    "Creepers use floatingIslandsNaturalCreeperSpawnKeepChance instead.")
+                    "Creepers use floatingIslandsNaturalCreeperSpawnKeepChance instead.",
+                    "Vanilla illagers (pillager, vindicator, …) use floatingIslandsNaturalIllagerSpawnKeepChance instead.")
             .defineInRange("floatingIslandsNaturalMonsterSpawnKeepChance", 0.42d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_NATURAL_ILLAGER_SPAWN_KEEP_CHANCE = BUILDER
+            .comment(
+                    "Per natural spawn attempt for vanilla **illagers** (pillager, vindicator, evoker, vex, ravager, illusioner): keep probability.",
+                    "Separate from floatingIslandsNaturalMonsterSpawnKeepChance so patrol/outpost pressure can rise without raising all hostiles.")
+            .defineInRange("floatingIslandsNaturalIllagerSpawnKeepChance", 0.58d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> FLOATING_ISLANDS_SPAWN_TUNING_BYPASS_ENTITY_NAMESPACES = BUILDER
+            .comment(
+                    "Entity registry **namespaces** that skip floating-islands spawn thinning for NATURAL / CHUNK_GENERATION (**keep = 1**).",
+                    "Useful for rare boss/content mods. Default includes **mowziesmobs**; remove or clear to thin them like vanilla monsters.",
+                    "Each entry must match lowercase mod-id pattern **`^[a-z0-9_]+$`**.")
+            .defineListAllowEmpty(
+                    "floatingIslandsSpawnTuningBypassEntityNamespaces",
+                    () -> List.copyOf(DEFAULT_SPAWN_TUNING_BYPASS_ENTITY_NAMESPACES),
+                    Config::validateSpawnTuningBypassEntityNamespace);
 
     public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_NATURAL_CREEPER_SPAWN_KEEP_CHANCE = BUILDER
             .comment(
@@ -466,7 +511,7 @@ public final class Config {
 
     public static final ModConfigSpec.BooleanValue ISLAND_HUD_SYNC_ENABLED = BUILDER
             .comment(
-                    "When true, players in the floating-islands overworld receive periodic island state labels (available / claimed / contested).",
+                    "When true, players in the floating-islands overworld receive periodic nearby-island **names** (HUD beacons).",
                     "When false, the server sends an empty list on the same interval so clients clear any stale HUD.")
             .define("islandHudSyncEnabled", true);
 
@@ -485,9 +530,23 @@ public final class Config {
 
     public static final ModConfigSpec.BooleanValue STARTER_ISLAND_AUTO_ASSIGN_ENABLED = BUILDER
             .comment(
-                    "On first join to the floating-islands overworld, assign one AVAILABLE island region as the player's starter home (CLAIMED + persisted), then teleport to that island's procedural center (HUD-aligned).",
+                    "On first join to the floating-islands overworld, assign a starter-home island region (persisted **`StarterHomes`** mapping only), then teleport to that island's procedural center (HUD-aligned).",
                     "Players who already have a starter home entry are unchanged. Void rescue still runs afterward if needed.")
             .define("starterIslandAutoAssignEnabled", true);
+
+    public static final ModConfigSpec.BooleanValue STARTER_ISLAND_SHARED_HUB = BUILDER
+            .comment(
+                    "When true: after the server picks a **shared starter hub** island, **new** players without a starter home are sent there (same region as existing starters) instead of claiming a new island.",
+                    "The hub is created by the first successful starter claim while **starterIslandSplitWhenWorldSpawnMoves** still considers spawn unchanged (see that option).",
+                    "When false: every new player spirals for their own AVAILABLE island (legacy one-island-per-player behavior).")
+            .define("starterIslandSharedHub", true);
+
+    public static final ModConfigSpec.BooleanValue STARTER_ISLAND_SPLIT_WHEN_WORLD_SPAWN_MOVES = BUILDER
+            .comment(
+                    "When **starterIslandSharedHub** is true: the overworld **shared spawn XZ** is remembered the first time starter assignment runs.",
+                    "If an operator later moves world spawn (e.g. `/setworldspawn`) so **XZ** differs, **new** players without a starter home claim **their own** islands again (**starterIslandMinRegionSeparation** applies).",
+                    "Set false to keep assigning everyone to the shared hub even after spawn moves.")
+            .define("starterIslandSplitWhenWorldSpawnMoves", true);
 
     public static final ModConfigSpec.BooleanValue STARTER_ISLAND_SEARCH_FROM_WORLD_ORIGIN = BUILDER
             .comment(
@@ -611,57 +670,44 @@ public final class Config {
             .defineInRange("ropeAnchorLinkDamagePerDigTick", 0.35d, 0.0d, 20.0d);
 
     public static final ModConfigSpec.BooleanValue ROPE_TOPOLOGY_ENABLED = BUILDER
-            .comment(
-                    "When true, completing a harpoon link must keep the network connected to your starter island and within depth / spoke caps below.",
-                    "Turn off only for unrestricted testing.")
+            .comment("**Legacy — ignored.** Harpoon ziplines are not restricted by starter-centric graph rules.")
             .define("ropeTopologyEnabled", true);
 
     public static final ModConfigSpec.IntValue ROPE_TOPOLOGY_MAX_DEPTH_FROM_STARTER = BUILDER
-            .comment(
-                    "Maximum BFS hop count from the starter region along **your** ropes (0 = starter only). Value **2** allows starter → secondary → tertiary when **ropeAllowTertiaryIslandLinks** is true; otherwise depth is capped at **1** regardless of this number.")
+            .comment("**Legacy — ignored.**")
             .defineInRange("ropeTopologyMaxDepthFromStarter", 2, 0, 8);
 
     public static final ModConfigSpec.BooleanValue ROPE_ALLOW_TERTIARY_ISLAND_LINKS = BUILDER
-            .comment(
-                    "When **false** (default), topology never lets a rope put an island **two hops** from your starter (only the hub + one ring). Set **true** to apply the full **ropeTopologyMaxDepthFromStarter** depth (e.g. 2 = tertiary islands). Advancement-based unlocks can replace this toggle later.")
+            .comment("**Legacy — ignored.**")
             .define("ropeAllowTertiaryIslandLinks", false);
 
     public static final ModConfigSpec.IntValue ROPE_MAIN_DIRECT_SPOKE_CAP = BUILDER
-            .comment(
-                    "Max **distinct** other regions linked **directly** to your starter by your ropes (default **1**; raise up to **4** as a stand-in until advancement gates exist).")
+            .comment("**Legacy — ignored.**")
             .defineInRange("ropeMainDirectSpokeCap", 1, 1, 4);
 
     public static final ModConfigSpec.IntValue ROPE_SISTER_OUTBOUND_CAP = BUILDER
-            .comment(
-                    "Per **claimed** non-starter region you own: max distinct **non-starter** rope neighbors (links back to the starter excluded). Default **1**, max **3**.")
+            .comment("**Legacy — ignored.**")
             .defineInRange("ropeSisterOutboundCap", 1, 1, 3);
 
     public static final ModConfigSpec.BooleanValue SECONDARY_CLAIM_REQUIRES_ROPE_LINK = BUILDER
-            .comment(
-                    "When true, secondary claims require a harpoon RopeLink owned by the claimer between the target island and an island they already own (starter or prior claim).")
+            .comment("**Legacy — ignored.** Island **claims** and rope placement were decoupled; `/projectisland island claim` was removed.")
             .define("secondaryClaimRequiresRopeLink", true);
 
     public static final ModConfigSpec.IntValue SECONDARY_CLAIM_COMMAND_MAX_DISTANCE_BLOCKS = BUILDER
-            .comment(
-                    "For `/projectisland island claim` only: if > 0, require the player to be within this horizontal distance (blocks) of a rope anchor endpoint on the target island that is part of a valid owned link (per secondaryClaimRequiresRopeLink gate).",
-                    "Set to 0 to disable the proximity requirement.")
+            .comment("**Legacy — ignored.**")
             .defineInRange("secondaryClaimCommandMaxDistanceBlocks", 160, 0, 2048);
 
     public static final ModConfigSpec.BooleanValue AUTO_CLAIM_ON_ROPE_LINK = BUILDER
-            .comment(
-                    "When true, completing a harpoon link immediately **claims** an **AVAILABLE** endpoint if the other endpoint is your **starter home** or an island you already **claim** (no shift-click needed). Turn off to require anchor sneak-use or `/projectisland island claim` only.")
+            .comment("**Legacy — ignored.**")
             .define("autoClaimIslandOnRopeLink", true);
 
     public static final ModConfigSpec.IntValue SECONDARY_CLAIM_COMMAND_PERMISSION_LEVEL = BUILDER
-            .comment(
-                    "Minimum permission level for `/projectisland island claim` (0 = any player; 2 = OP on vanilla).",
-                    "Rope-anchor shift-use is not gated by this — only the Brigadier command.")
+            .comment("**Legacy — ignored.**")
             .defineInRange("secondaryClaimCommandPermissionLevel", 0, 0, 4);
 
     public static final ModConfigSpec.BooleanValue ROPE_TRAVERSAL_SURF_ENABLED = BUILDER
             .comment(
-                    "When true, empty-hand use (not sneaking) on a linked rope anchor starts rope surfing along the rope sag toward the other anchor.",
-                    "Sneak + empty hand remains secondary island claim.")
+                    "When true, empty-hand use (not sneaking) on a linked rope anchor starts rope surfing along the sag toward the other anchor (any player).")
             .define("ropeTraversalSurfEnabled", true);
 
     public static final ModConfigSpec.DoubleValue ROPE_TRAVERSAL_SURF_MIN_HEALTH_FRACTION = BUILDER
