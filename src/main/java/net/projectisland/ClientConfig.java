@@ -25,8 +25,8 @@ public final class ClientConfig {
 
     public static final ModConfigSpec.DoubleValue ISLAND_HUD_PANEL_FILL_OPACITY = BUILDER
             .comment(
-                    "Alpha for the **light** translucent panel behind the island name (0 = text only, 1 = opaque).",
-                    "Tune on bright snow/sky; default is a soft wash.")
+                    "Alpha for the **dark (black)** translucent panel behind the island name (0 = text only, 1 = opaque).",
+                    "Tune for readability vs showing the world through the panel.")
             .defineInRange("islandHudPanelFillOpacity", 100.0d / 255.0d, 0.0d, 1.0d);
 
     public static final ModConfigSpec.ConfigValue<String> ISLAND_HUD_TITLE_COLOR_MODE = BUILDER

@@ -4,6 +4,7 @@ import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.PoseStack.Pose;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.Camera;
@@ -13,19 +14,20 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.projectisland.ClientConfig;
 import net.projectisland.network.IslandHudSyncPayload.IslandHudBeacon;
 
 /**
- * World-space billboard: light translucent backing + island name (no outline or drop shadow).
+ * World-space billboard: dark translucent backing + island name (no outline or drop shadow).
  */
 public final class IslandHudWorldBillboard {
     private static final float BILLBOARD_Y_BIAS = 0.07f;
     private static final float PANEL_PAD_BASE = 5f;
-    /** Near-white panel tint (readable on snow / bright sky). */
-    private static final int PANEL_FILL_RGB = 0xF6F6F8;
+    private static final ResourceLocation WHITE_TEX =
+            ResourceLocation.withDefaultNamespace("textures/misc/white.png");
 
     private IslandHudWorldBillboard() {}
 
@@ -60,7 +62,6 @@ public final class IslandHudWorldBillboard {
         float ty = -halfH + pad;
 
         int fillA = alphaByte(ClientConfig.ISLAND_HUD_PANEL_FILL_OPACITY.getAsDouble());
-        int panelFillArgb = (fillA << 24) | (PANEL_FILL_RGB & 0x00FFFFFF);
 
         Vec3 cam = camera.getPosition();
         pose.pushPose();
@@ -70,13 +71,12 @@ public final class IslandHudWorldBillboard {
         pose.scale(textScale, -textScale, textScale);
 
         PoseStack.Pose poseEntry = pose.last();
-        Matrix4f mat = poseEntry.pose();
         final float zFill = 0.5f;
         final float zText = 2.0f;
 
         if (fillA > 0) {
-            VertexConsumer quads = buffers.getBuffer(RenderType.debugQuads());
-            fillQuad(quads, mat, -halfW, -halfH, halfW, halfH, zFill, panelFillArgb);
+            VertexConsumer quads = buffers.getBuffer(RenderType.entityTranslucent(WHITE_TEX, false));
+            fillTranslucentTexturedQuad(quads, poseEntry, -halfW, -halfH, halfW, halfH, zFill, 0, 0, 0, fillA);
         }
 
         Font.DisplayMode mode = seeThroughText ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL;
@@ -103,15 +103,48 @@ public final class IslandHudWorldBillboard {
         return Mth.clamp(Mth.floor(opacity01 * 255.0 + 0.5), 0, 255);
     }
 
-    private static void fillQuad(VertexConsumer buffer, Matrix4f mat, float x0, float y0, float x1, float y1, float z, int argb) {
-        int a = (argb >>> 24) & 0xFF;
-        int r = (argb >> 16) & 0xFF;
-        int g = (argb >> 8) & 0xFF;
-        int b = argb & 0xFF;
-        buffer.addVertex(mat, x0, y1, z).setColor(r, g, b, a);
-        buffer.addVertex(mat, x1, y1, z).setColor(r, g, b, a);
-        buffer.addVertex(mat, x1, y0, z).setColor(r, g, b, a);
-        buffer.addVertex(mat, x0, y0, z).setColor(r, g, b, a);
+    private static void fillTranslucentTexturedQuad(
+            VertexConsumer buffer,
+            Pose pose,
+            float x0,
+            float y0,
+            float x1,
+            float y1,
+            float z,
+            int r,
+            int g,
+            int b,
+            int a) {
+        float nx = 0f;
+        float ny = 0f;
+        float nz = 1f;
+        vertex(buffer, pose, x0, y1, z, r, g, b, a, 0f, 0f, nx, ny, nz);
+        vertex(buffer, pose, x1, y1, z, r, g, b, a, 1f, 0f, nx, ny, nz);
+        vertex(buffer, pose, x1, y0, z, r, g, b, a, 1f, 1f, nx, ny, nz);
+        vertex(buffer, pose, x0, y0, z, r, g, b, a, 0f, 1f, nx, ny, nz);
+    }
+
+    private static void vertex(
+            VertexConsumer buffer,
+            Pose pose,
+            float x,
+            float y,
+            float z,
+            int r,
+            int g,
+            int b,
+            int a,
+            float u,
+            float v,
+            float nx,
+            float ny,
+            float nz) {
+        buffer.addVertex(pose, x, y, z)
+                .setColor(r, g, b, a)
+                .setUv(u, v)
+                .setOverlay(OverlayTexture.NO_OVERLAY)
+                .setLight(LightTexture.FULL_BRIGHT)
+                .setNormal(pose, nx, ny, nz);
     }
 
     private static String ellipsize(Font font, String s, int maxPx) {
