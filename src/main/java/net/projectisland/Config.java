@@ -61,12 +61,14 @@ public final class Config {
             .comment(
                     "Second roll per island region, independent of rare slot: relative weight to **allow** {@code village_*} and {@code pillager_outpost}",
                     "starts that survive land-contact checks. When denied, those starts are removed like wrong-slot dungeons.",
-                    "Default **100** with **Deny** **0** avoids randomly stripping settlements; raise **Deny** only if you want fewer villages/outposts.")
-            .defineInRange("islandRegionSettlementStructureWeightAllow", 100, 0, 1_000_000);
+                    "Default pairs with **Deny** so some regions skip settlements entirely — tune for pack density (e.g. Better Villages).")
+            .defineInRange("islandRegionSettlementStructureWeightAllow", 72, 0, 1_000_000);
 
     public static final ModConfigSpec.IntValue ISLAND_REGION_SETTLEMENT_STRUCTURE_WEIGHT_DENY = BUILDER
-            .comment("Paired with islandRegionSettlementStructureWeightAllow — relative weight to skip settlements in this region.")
-            .defineInRange("islandRegionSettlementStructureWeightDeny", 0, 0, 1_000_000);
+            .comment(
+                    "Paired with islandRegionSettlementStructureWeightAllow — relative weight to **skip** controlled settlements in this region.",
+                    "Higher **Deny** thins village/outpost frequency across islands.")
+            .defineInRange("islandRegionSettlementStructureWeightDeny", 28, 0, 1_000_000);
 
     public static final ModConfigSpec.BooleanValue ISLAND_REGION_VILLAGE_REQUIRE_BIOME_MATCH = BUILDER
             .comment(
@@ -84,21 +86,24 @@ public final class Config {
     public static final ModConfigSpec.IntValue CONTROLLED_SETTLEMENT_WEIGHT_VILLAGE = BUILDER
             .comment(
                     "After a region passes **islandRegionSettlementStructureWeightAllow/Deny**: relative weight to place a **village** variant matching the rolled island biome (vs outpost / none).")
-            .defineInRange("controlledSettlementWeightVillage", 78, 0, 1_000_000);
+            .defineInRange("controlledSettlementWeightVillage", 42, 0, 1_000_000);
 
     public static final ModConfigSpec.IntValue CONTROLLED_SETTLEMENT_WEIGHT_OUTPOST = BUILDER
             .comment(
                     "Relative weight for the **outpost** branch ( **minecraft:pillager_outpost** or **takesapillage:*** pillager structures when that mod is loaded — see **floatingIslandsTakesapillageControlledOutpost**).")
-            .defineInRange("controlledSettlementWeightOutpost", 12, 0, 1_000_000);
+            .defineInRange("controlledSettlementWeightOutpost", 13, 0, 1_000_000);
 
     public static final ModConfigSpec.IntValue CONTROLLED_SETTLEMENT_WEIGHT_NONE = BUILDER
-            .comment("Relative weight for **no** controlled settlement this region (even if vanilla would have tried).")
-            .defineInRange("controlledSettlementWeightNone", 10, 0, 1_000_000);
+            .comment(
+                    "Relative weight for **no** controlled settlement this region (even if vanilla would have tried).",
+                    "Raise this (and **controlledSettlementPlaceTryChance** down) when packs add oversized villages / castles so settlements feel less crowded.")
+            .defineInRange("controlledSettlementWeightNone", 45, 0, 1_000_000);
 
     public static final ModConfigSpec.IntValue CONTROLLED_SETTLEMENT_ANCHOR_JITTER_BLOCKS = BUILDER
             .comment(
-                    "Max horizontal jitter in blocks from the procedural island **center** when picking the jigsaw anchor (rejected if the column has no island stone). **0** = always center column.")
-            .defineInRange("controlledSettlementAnchorJitterBlocks", 12, 0, 48);
+                    "Max horizontal jitter in blocks from the procedural island **center** when picking the jigsaw anchor (rejected if the column has no island stone). **0** = always center column.",
+                    "Lower jitter keeps large jigsaw footprints nearer the plateau center (less rim overhang).")
+            .defineInRange("controlledSettlementAnchorJitterBlocks", 8, 0, 48);
 
     public static final ModConfigSpec.IntValue CONTROLLED_SETTLEMENT_ANCHOR_TRIES = BUILDER
             .comment("How many random jitter samples to try before giving up on placing a controlled settlement in this region.")
@@ -107,8 +112,8 @@ public final class Config {
     public static final ModConfigSpec.DoubleValue CONTROLLED_SETTLEMENT_PLACE_TRY_CHANCE = BUILDER
             .comment(
                     "After the village/outpost/none weight roll **chose** a village or outpost (not **none**): probability to **actually** generate that controlled settlement (**0–1**).",
-                    "**1** = always place when chosen; **0.5** ≈ halves settlement density; **0** never places (strip-only until you turn off **floatingIslandsControlledSettlementPlacement**).")
-            .defineInRange("controlledSettlementPlaceTryChance", 0.5d, 0.0d, 1.0d);
+                    "**1** = always place when chosen; lower values thin settlements across regions; **0** never places (strip-only until you turn off **floatingIslandsControlledSettlementPlacement**).")
+            .defineInRange("controlledSettlementPlaceTryChance", 0.38d, 0.0d, 1.0d);
 
     public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_TAKESAPILLAGE_CONTROLLED_OUTPOST = BUILDER
             .comment(
@@ -310,15 +315,25 @@ public final class Config {
             .defineInRange("floatingIslandHorizontalRadiusBonus", 18, 0, 48);
 
     /**
-     * Added only when {@link net.projectisland.worldgen.IslandRegionSettlementRoll#commitsControlledPillagerSettlement}
-     * is true for the region (controlled pillager settlement branch). Gives Takes a Pillage bastilles / large outposts
-     * more island surface so footprints do not hang in void.
+     * Added when {@link net.projectisland.worldgen.IslandRegionSettlementRoll#controlledSettlementSizing} is
+     * {@link net.projectisland.worldgen.IslandRegionSettlementRoll.ControlledSettlementSizing#OUTPOST} for the region.
      */
     public static final ModConfigSpec.IntValue FLOATING_ISLAND_HORIZONTAL_RADIUS_OUTPOST_EXTRA_BLOCKS = BUILDER
             .comment(
                     "Extra horizontal radius (blocks) when the region rolls a controlled pillager outpost settlement.",
                     "Stacks with floatingIslandHorizontalRadiusBonus; 0 disables this bump.")
-            .defineInRange("floatingIslandHorizontalRadiusOutpostExtraBlocks", 32, 0, 96);
+            .defineInRange("floatingIslandHorizontalRadiusOutpostExtraBlocks", 52, 0, 96);
+
+    /**
+     * Added when {@link net.projectisland.worldgen.IslandRegionSettlementRoll#controlledSettlementSizing} is
+     * {@link net.projectisland.worldgen.IslandRegionSettlementRoll.ControlledSettlementSizing#VILLAGE} — larger footprints
+     * from packs like Better Villages need a wider plateau so jigsaw pieces do not hang past the rim.
+     */
+    public static final ModConfigSpec.IntValue FLOATING_ISLAND_HORIZONTAL_RADIUS_VILLAGE_EXTRA_BLOCKS = BUILDER
+            .comment(
+                    "Extra horizontal radius (blocks) when the region rolls a controlled **village** settlement.",
+                    "Stacks with floatingIslandHorizontalRadiusBonus; 0 disables. Tune up if modded villages still overhang.")
+            .defineInRange("floatingIslandHorizontalRadiusVillageExtraBlocks", 46, 0, 96);
 
     public static final ModConfigSpec.IntValue FLOATING_ISLANDS_CHUNK_GENERATOR_SEA_LEVEL = BUILDER
             .comment(
