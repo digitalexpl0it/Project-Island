@@ -418,6 +418,26 @@ public final class Config {
                     "Runs before extra trees. Default **1** with **~0.25** chunk chance ≈ **~80%** less coverage than the old default of **4** pools every chunk.")
             .defineInRange("floatingIslandsSurfaceWaterPoolsPerChunk", 1, 0, 32);
 
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_STRIP_EXTERIOR_FLUIDS_AFTER_DECORATION = BUILDER
+            .comment(
+                    "After biome decoration (including optional surface pools / extra trees), remove **water** / **lava** that can leak into the void:",
+                    "either outside the procedural island envelope, or inside it but touching **air**, **cave_air**, or open fluid in a **horizontal or downward** neighbor **outside** FloatingIslandLayout.columnContains.",
+                    "**Upward** neighbors are ignored so sky above surface pools is not treated as a leak.",
+                    "Within **`floatingIslandsStripExteriorFluidsTopDepthExemptBlocks`** of **`columnTopY`**, **water** skips leak stripping and is **not** cleared merely for lying outside **`columnContains`** (rim lakes). Set **false** for legacy behavior.")
+            .define("floatingIslandsStripExteriorFluidsAfterDecoration", true);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_STRIP_EXTERIOR_FLUIDS_MAX_PASSES = BUILDER
+            .comment(
+                    "Max strip iterations per chunk (**1**–**16**). Multiple passes clear chained sources along the shell after the first removal.")
+            .defineInRange("floatingIslandsStripExteriorFluidsMaxPasses", 6, 1, 16);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_STRIP_EXTERIOR_FLUIDS_TOP_DEPTH_EXEMPT_BLOCKS = BUILDER
+            .comment(
+                    "Band under **`columnTopY`** where **water** is protected from exterior stripping: skips sideways/down leak removal **and** skips clearing water whose block sits **outside** columnContains (vanilla lakes often spill past the analytic ellipsoid at the rim).",
+                    "**Lava** outside columnContains is always cleared; lava inside the envelope still follows leak rules below this band.",
+                    "**0** = no exemption (aggressive shell strip). Deep water far below this band is still stripped when it leaks.")
+            .defineInRange("floatingIslandsStripExteriorFluidsTopDepthExemptBlocks", 48, 0, 256);
+
     /**
      * After biome decoration, each ore block is kept with this probability (1.0 = unchanged). Values below 1 thin veins;
      * 0 removes that ore category from generated chunks. Applies only to {@link net.projectisland.worldgen.FloatingIslandsChunkGenerator}.

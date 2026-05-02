@@ -621,6 +621,7 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
         FloatingIslandsOreThinning.applyAfterDecoration(level, chunk);
         sprinkleSurfaceWaterPools(level, chunk);
         sprinkleExtraSurfaceTrees(level, chunk);
+        FloatingIslandExteriorFluidStrip.applyAfterDecoration(level, chunk);
     }
 
     /**
