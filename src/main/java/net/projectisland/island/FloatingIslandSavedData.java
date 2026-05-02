@@ -316,12 +316,14 @@ public final class FloatingIslandSavedData extends SavedData {
     }
 
     /** Records that {@code player} used a waystone on {@code island} (for HUD / map highlight sync). */
-    public synchronized void markPlayerUsedWaystoneOnIsland(UUID player, FloatingIslandKey island) {
+    public synchronized boolean markPlayerUsedWaystoneOnIsland(UUID player, FloatingIslandKey island) {
         long pk = packIslandRegionKey(island.regionX(), island.regionZ());
         HashSet<Long> set = playerWaystoneIslandHits.computeIfAbsent(player, u -> new HashSet<>());
         if (set.add(pk)) {
             setDirty();
+            return true;
         }
+        return false;
     }
 
     /** Snapshot of packed region keys for {@linkplain net.projectisland.network.IslandHudSyncPayload island HUD sync}. */

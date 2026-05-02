@@ -18,6 +18,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.projectisland.Config;
+import net.projectisland.compat.WaystoneActivatedClientResync;
 import net.projectisland.compat.WaystoneActivatedIslandHitsMerge;
 import net.projectisland.compat.WaystoneIslandHudTitle;
 import net.projectisland.ProjectIslandDimensions;
@@ -65,6 +66,7 @@ public final class IslandHudServerSync {
                 WaystoneIslandHudTitle.invalidateCache();
             }
             syncHudPayloadToPlayer(sp);
+            WaystoneActivatedClientResync.scheduleDeferred(sp);
         });
     }
 
@@ -77,21 +79,21 @@ public final class IslandHudServerSync {
          * Waystones is the source of truth for “have I ever activated this stone?” Re-merge each HUD tick so reconnect
          * and edge cases repopulate island hit keys even if our saved map drifted (Xaero gold / persistence follows).
          */
-        WaystoneActivatedIslandHitsMerge.tryMergeActivatedWaystones(player, level);
+        boolean reconciledNewHits = WaystoneActivatedIslandHitsMerge.tryMergeActivatedWaystones(player, level);
         if (!Config.ISLAND_HUD_SYNC_ENABLED.getAsBoolean()) {
-            PacketDistributor.sendToPlayer(player, new IslandHudSyncPayload(List.of(), List.of()));
+            PacketDistributor.sendToPlayer(player, new IslandHudSyncPayload(List.of(), List.of(), List.of()));
+            if (reconciledNewHits) {
+                WaystoneActivatedClientResync.scheduleDeferred(player);
+            }
             return;
         }
         List<Long> visited = IslandWorld.get(level).copyWaystoneIslandHits(player.getUUID());
-        List<IslandHudBeacon> built = buildBeacons(player, level);
-        /*
-         * Merge Waystone visits into the beacon list only in void/navigation modes (0 or many scan beacons). On solid
-         * island surface, {@link #buildBeacons} returns exactly one beacon — merging every visited region would balloon
-         * the payload and force Xaero through the multi-beacon upsert path every tick (waypoint/minimap clutter).
-         */
-        List<IslandHudBeacon> beacons =
-                built.size() == 1 ? built : mergeVisitedRegionsIntoBeacons(level, built, visited);
-        PacketDistributor.sendToPlayer(player, new IslandHudSyncPayload(beacons, visited));
+        List<IslandHudBeacon> billboard = buildBeacons(player, level);
+        List<IslandHudBeacon> waypointSync = mergeVisitedRegionsIntoBeacons(level, billboard, visited);
+        PacketDistributor.sendToPlayer(player, new IslandHudSyncPayload(billboard, waypointSync, visited));
+        if (reconciledNewHits) {
+            WaystoneActivatedClientResync.scheduleDeferred(player);
+        }
     }
 
     /**
@@ -156,9 +158,9 @@ public final class IslandHudServerSync {
     }
 
     /**
-     * Ensures every Waystone-visited procedural region has a beacon in the payload when not in the single-surface
-     * {@linkplain #buildBeacons(ServerPlayer, ServerLevel) one-beacon} case. Called from void/empty/multi-scan paths only;
-     * skipping merge on exactly-one beacon avoids flooding Xaero with every visited island while standing on an island.
+     * Union of {@code positionBeacons} and one beacon per Waystone-visited region — used only for the
+     * {@linkplain IslandHudSyncPayload#waypointSyncBeacons()} arm (Xaero). {@linkplain IslandHudSyncPayload#billboardBeacons()}
+     * stays {@linkplain #buildBeacons} only so world labels stay single/navigation-ring semantics.
      */
     private static List<IslandHudBeacon> mergeVisitedRegionsIntoBeacons(
             ServerLevel level, List<IslandHudBeacon> positionBeacons, List<Long> visitedPackedKeys) {

@@ -41,16 +41,21 @@ public final class IslandWorld {
      * Without the extra keys, client coords for the pin can fall in a neighbor grid cell while only the waystone column
      * was marked → gold/temporary flags break and pins look “lost” when you fly away.
      */
-    public static void markWaystoneHitsForHudSync(ServerLevel level, UUID playerId, BlockPos waystonePos, BlockPos playerFeet) {
+    /** @return {@code true} if any procedural region key was newly recorded for {@code playerId} */
+    public static boolean markWaystoneHitsForHudSync(ServerLevel level, UUID playerId, BlockPos waystonePos, BlockPos playerFeet) {
         HashSet<FloatingIslandKey> keys = new HashSet<>();
         keyAt(level, waystonePos).ifPresent(keys::add);
         keyAt(level, playerFeet).ifPresent(keys::add);
         addSurfaceWinnerAtProceduralCenter(level, waystonePos.getY(), keys, keyAt(level, waystonePos));
         addSurfaceWinnerAtProceduralCenter(level, playerFeet.getY(), keys, keyAt(level, playerFeet));
         FloatingIslandSavedData data = get(level);
+        boolean anyNew = false;
         for (FloatingIslandKey k : keys) {
-            data.markPlayerUsedWaystoneOnIsland(playerId, k);
+            if (data.markPlayerUsedWaystoneOnIsland(playerId, k)) {
+                anyNew = true;
+            }
         }
+        return anyNew;
     }
 
     private static void addSurfaceWinnerAtProceduralCenter(

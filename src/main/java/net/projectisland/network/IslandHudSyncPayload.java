@@ -15,7 +15,16 @@ import net.projectisland.Config;
 import net.projectisland.ProjectIsland;
 import net.projectisland.client.IslandHudClientCache;
 
-public record IslandHudSyncPayload(List<IslandHudBeacon> beacons, List<Long> waystoneVisitedRegionKeys)
+/**
+ * @param billboardBeacons    World HUD / navigation ring only — {@linkplain net.projectisland.client.IslandHudRenderer}
+ *                            uses this list (one beacon on island surface, scan ring in void).
+ * @param waypointSyncBeacons Minimap / Xaero mirror — always includes merged Waystone visits (see
+ *                            {@link net.projectisland.island.IslandHudServerSync}) so pins update on island, not only in void.
+ */
+public record IslandHudSyncPayload(
+        List<IslandHudBeacon> billboardBeacons,
+        List<IslandHudBeacon> waypointSyncBeacons,
+        List<Long> waystoneVisitedRegionKeys)
         implements CustomPacketPayload {
     public static final CustomPacketPayload.Type<IslandHudSyncPayload> TYPE =
             new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ProjectIsland.MOD_ID, "island_hud_sync"));
@@ -26,9 +35,14 @@ public record IslandHudSyncPayload(List<IslandHudBeacon> beacons, List<Long> way
     private static final StreamCodec<RegistryFriendlyByteBuf, Long> VISITED_REGION_KEY_CODEC =
             StreamCodec.of((buf, v) -> buf.writeVarLong(v), RegistryFriendlyByteBuf::readVarLong);
 
+    private static final StreamCodec<RegistryFriendlyByteBuf, List<IslandHudBeacon>> BEACON_LIST_CODEC =
+            ByteBufCodecs.collection(ArrayList::new, BEACON_STREAM_CODEC, 512);
+
     public static final StreamCodec<RegistryFriendlyByteBuf, IslandHudSyncPayload> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.collection(ArrayList::new, BEACON_STREAM_CODEC, 512),
-            IslandHudSyncPayload::beacons,
+            BEACON_LIST_CODEC,
+            IslandHudSyncPayload::billboardBeacons,
+            BEACON_LIST_CODEC,
+            IslandHudSyncPayload::waypointSyncBeacons,
             ByteBufCodecs.collection(ArrayList::new, VISITED_REGION_KEY_CODEC, 512),
             IslandHudSyncPayload::waystoneVisitedRegionKeys,
             IslandHudSyncPayload::new);
@@ -40,12 +54,12 @@ public record IslandHudSyncPayload(List<IslandHudBeacon> beacons, List<Long> way
 
     public static void handleOnClient(IslandHudSyncPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
-            IslandHudClientCache.replace(payload.beacons(), payload.waystoneVisitedRegionKeys());
+            IslandHudClientCache.replace(payload.billboardBeacons(), payload.waystoneVisitedRegionKeys());
             if (FMLEnvironment.dist == Dist.CLIENT) {
                 try {
                     Class.forName("net.projectisland.client.compat.XaeroIslandWaypointSync")
                             .getMethod("onHudBeacons", List.class, List.class)
-                            .invoke(null, payload.beacons(), payload.waystoneVisitedRegionKeys());
+                            .invoke(null, payload.waypointSyncBeacons(), payload.waystoneVisitedRegionKeys());
                 } catch (Throwable t) {
                     if (Config.DEBUG_LOGGING.getAsBoolean()) {
                         ProjectIsland.LOGGER.debug("Island HUD Xaero waypoint sync hook failed", t);

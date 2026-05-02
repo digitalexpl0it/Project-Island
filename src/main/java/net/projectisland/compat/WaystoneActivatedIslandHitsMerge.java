@@ -61,23 +61,27 @@ public final class WaystoneActivatedIslandHitsMerge {
      * For each waystone the player has activated in this level’s dimension, apply the same region keys as a physical
      * waystone use (centers + merged-surface variants).
      */
-    public static void tryMergeActivatedWaystones(ServerPlayer player, ServerLevel level) {
+    /**
+     * @return {@code true} if any island-hit key was newly written reconciling Waystones’ activated list with ours
+     */
+    public static boolean tryMergeActivatedWaystones(ServerPlayer player, ServerLevel level) {
         if (!ModList.get().isLoaded("waystones")) {
-            return;
+            return false;
         }
         if (!ProjectIslandDimensions.isFloatingIslandsGameplay(level)) {
-            return;
+            return false;
         }
         Optional<Bindings> refOpt = bindings();
         if (refOpt.isEmpty()) {
-            return;
+            return false;
         }
         Bindings ref = refOpt.get();
         try {
             Collection<?> activated = (Collection<?>) ref.getActivatedWaystones.invoke(null, player);
             if (activated == null || activated.isEmpty()) {
-                return;
+                return false;
             }
+            boolean anyNew = false;
             for (Object w : activated) {
                 if (w == null) {
                     continue;
@@ -90,12 +94,16 @@ public final class WaystoneActivatedIslandHitsMerge {
                 if (pos == null) {
                     continue;
                 }
-                IslandWorld.markWaystoneHitsForHudSync(level, player.getUUID(), pos, pos);
+                if (IslandWorld.markWaystoneHitsForHudSync(level, player.getUUID(), pos, pos)) {
+                    anyNew = true;
+                }
             }
+            return anyNew;
         } catch (ReflectiveOperationException | ClassCastException e) {
             if (!probeFailed) {
                 ProjectIsland.LOGGER.debug("Project Island: Waystones activated merge failed", e);
             }
+            return false;
         }
     }
 
