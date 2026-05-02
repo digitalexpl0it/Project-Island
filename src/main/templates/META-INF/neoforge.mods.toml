@@ -27,3 +27,17 @@ type="required"
 versionRange="${minecraft_version_range}"
 ordering="NONE"
 side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="waystones"
+type="optional"
+versionRange="[21.0,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="xaerominimap"
+type="optional"
+versionRange="[25.0,)"
+ordering="NONE"
+side="CLIENT"

@@ -64,10 +64,20 @@ public final class IslandHudRenderer {
             buffers.endBatch();
             return;
         }
+        List<IslandHudBeacon> beacons = IslandHudClientCache.beacons();
+        /*
+         * Server sends one beacon when the player's column owns island surface, but many beacons when standing in open
+         * void (navigation ring). Drawing every label produces a horizon-wide wall of text; skip world billboards in
+         * that case. {@link net.projectisland.client.compat.XaeroIslandWaypointSync} applies the same rule so minimap/world map are not flooded.
+         */
+        if (!ClientConfig.ISLAND_HUD_WORLD_BILLBOARD_VOID_NAVIGATION.getAsBoolean() && beacons.size() != 1) {
+            buffers.endBatch();
+            return;
+        }
         float scale = (float) ClientConfig.ISLAND_HUD_TEXT_SCALE.getAsDouble();
         boolean seeThrough = ClientConfig.ISLAND_HUD_SEE_THROUGH_TEXT.getAsBoolean();
 
-        for (IslandHudBeacon b : IslandHudClientCache.beacons()) {
+        for (IslandHudBeacon b : beacons) {
             if (!shouldDrawHudForBeacon(clientLevel, mc, b)) {
                 continue;
             }

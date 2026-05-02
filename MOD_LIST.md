@@ -5,11 +5,13 @@ This file is the **authoritative manifest** for the **official Project Island mo
 - **Loader / game version:** see [README.md](README.md) — *Pinned toolchain*.
 - **Where to put JARs for Gradle dev runs:** your local **`run-client/mods/`** and **`run-server/mods/`** (those game dirs are **gitignored**). Keep those folders **in sync** with this list when you bump versions.
 - **Project Island itself:** `build/libs/projectisland-<version>.jar` from `./gradlew build` (not always copied into `run-*/mods`; the MDK run injects the mod from sources).
+- **Villager defense:** **[Villager Guards](https://modrinth.com/mod/villager-guards)** ([CurseForge](https://www.curseforge.com/minecraft/mc-mods/villager-guards)), NeoForge **1.21.1**, is listed **first** below. *(**Guard Villagers – Autonomous Villager Defense** was dropped from the manifest — it did not work in this pack stack; avoid redundant guard/conversion mods alongside Villager Guards.)*
 
 ## Required third-party mods (pinned filenames)
 
 | JAR (exact) | Role | Side |
 |-------------|------|------|
+| `villager-guards-v1.1.5.jar` | **[Villager Guards](https://modrinth.com/mod/villager-guards)** **v1.1.5** — armed guards defend villagers (configurable; includes player-attack options in recent releases). License: **AGPL-3.0** (see Modrinth). | **Client + server** |
 | `architectury-13.0.8-neoforge.jar` | Shared API / bridge for several mods | **Client + server** |
 | `cloth-config-15.0.140-neoforge.jar` | Config screens / API for mods that depend on it | **Client + server** |
 | `create-1.21.1-6.0.10.jar` | Create (kinetic / contraptions) | **Client + server** |
@@ -23,6 +25,8 @@ This file is the **authoritative manifest** for the **official Project Island mo
 | `jei-1.21.1-neoforge-19.27.0.340.jar` | Just Enough Items (recipe / item lookup) | **Client + server** *(dedicated server may omit only if you accept missing recipe UI parity; official pack keeps it on both.)* |
 | `xaerominimap-neoforge-1.21.1-25.3.10.jar` | Xaero’s Minimap | **Client + server** *(official pack ships both; many servers keep it for version parity.)* |
 | `xaeroworldmap-neoforge-1.21.1-1.40.11.jar` | Xaero’s World Map | **Client + server** *(same as minimap.)* |
+
+**Note:** When bumping Villager Guards, pick the **NeoForge** build for **1.21.1** from the **[Modrinth versions page](https://modrinth.com/mod/villager-guards/versions)** and update this table’s filename if it changes.
 
 ## Optional / not in this list
 

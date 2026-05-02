@@ -563,6 +563,18 @@ public final class Config {
             .comment("Vertical offset in blocks above each island's procedural surface peak for the HUD anchor.")
             .defineInRange("islandHudHeightAbovePeakBlocks", 20, 4, 128);
 
+    public static final ModConfigSpec.BooleanValue ISLAND_HUD_WAYSTONE_TITLE_WHEN_LOADED = BUILDER
+            .comment(
+                    "When **waystones** is installed, use the **nearest named waystone** inside the procedural island (see `FloatingIslandLayout#columnContains`) as the **island HUD title** instead of the generated name.",
+                    "Falls back to **`FloatingIslandDisplayName`** when no named waystone is found. Set **false** to always use generated names.")
+            .define("islandHudWaystoneTitleWhenLoaded", true);
+
+    public static final ModConfigSpec.IntValue ISLAND_HUD_WAYSTONE_TITLE_CACHE_TICKS = BUILDER
+            .comment(
+                    "How long (in ticks) to cache the resolved waystone title per island region before re-querying Waystones' manager (renames pick up after this interval, or immediately after right-clicking a waystone).",
+                    "Higher values reduce repeated lookups; lower values refresh faster.")
+            .defineInRange("islandHudWaystoneTitleCacheTicks", 120, 20, 72000);
+
     public static final ModConfigSpec.BooleanValue STARTER_ISLAND_AUTO_ASSIGN_ENABLED = BUILDER
             .comment(
                     "On first join to the floating-islands overworld, assign a starter-home island region (persisted **`StarterHomes`** mapping only), then teleport to that island's procedural center (HUD-aligned).",

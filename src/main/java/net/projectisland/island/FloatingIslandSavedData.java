@@ -3,6 +3,7 @@ package net.projectisland.island;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +32,7 @@ public final class FloatingIslandSavedData extends SavedData {
     private static final String TAG_ROPE_LINKS = "RopeLinks";
     private static final String TAG_STARTER_SPAWN_BASELINE = "StarterSpawnBaseline";
     private static final String TAG_SHARED_STARTER_HUB = "SharedStarterHub";
+    private static final String TAG_WAYSTONE_ISLAND_HITS = "WaystoneIslandHits";
     private static final int CURRENT_VERSION = 2;
 
     private final Map<FloatingIslandKey, IslandRecord> islands = new HashMap<>();
@@ -43,7 +45,17 @@ public final class FloatingIslandSavedData extends SavedData {
     /** First island claimed as the shared starter hub when {@link Config#STARTER_ISLAND_SHARED_HUB} is used. */
     private FloatingIslandKey sharedStarterHubKey;
 
+    /**
+     * Packed procedural island region keys ({@link #packIslandRegionKey}) where this player has used a Waystones block
+     * on that island — synced to the client for Xaero “hit” (gold) tint.
+     */
+    private final Map<UUID, HashSet<Long>> playerWaystoneIslandHits = new HashMap<>();
+
     public FloatingIslandSavedData() {}
+
+    private static long packIslandRegionKey(int regionX, int regionZ) {
+        return ((long) regionX << 32) | (regionZ & 0xffffffffL);
+    }
 
     public static FloatingIslandSavedData load(CompoundTag tag, HolderLookup.Provider registries) {
         FloatingIslandSavedData d = new FloatingIslandSavedData();
@@ -58,6 +70,7 @@ public final class FloatingIslandSavedData extends SavedData {
         starterSpawnBaselineX = Integer.MIN_VALUE;
         starterSpawnBaselineZ = Integer.MIN_VALUE;
         sharedStarterHubKey = null;
+        playerWaystoneIslandHits.clear();
         if (root.contains(TAG_ISLANDS)) {
             CompoundTag sec = root.getCompound(TAG_ISLANDS);
             for (String key : sec.getAllKeys()) {
@@ -119,6 +132,22 @@ public final class FloatingIslandSavedData extends SavedData {
                     float hp = t.contains("Health") ? t.getFloat("Health") : maxHp;
                     hp = Math.min(Math.max(0f, hp), maxHp);
                     ropeLinks.put(id, new RopeLink(id, owner, fromKey.get(), toKey.get(), fromPos, toPos, maxLen, hp, maxHp));
+                } catch (IllegalArgumentException ignored) {
+                    // skip malformed uuid
+                }
+            }
+        }
+        if (root.contains(TAG_WAYSTONE_ISLAND_HITS)) {
+            CompoundTag hitsRoot = root.getCompound(TAG_WAYSTONE_ISLAND_HITS);
+            for (String uuidStr : hitsRoot.getAllKeys()) {
+                try {
+                    UUID id = UUID.fromString(uuidStr);
+                    long[] arr = hitsRoot.getLongArray(uuidStr);
+                    HashSet<Long> set = new HashSet<>(arr.length);
+                    for (long v : arr) {
+                        set.add(v);
+                    }
+                    playerWaystoneIslandHits.put(id, set);
                 } catch (IllegalArgumentException ignored) {
                     // skip malformed uuid
                 }
@@ -286,6 +315,24 @@ public final class FloatingIslandSavedData extends SavedData {
         return Optional.ofNullable(islands.get(key));
     }
 
+    /** Records that {@code player} used a waystone on {@code island} (for HUD / map highlight sync). */
+    public synchronized void markPlayerUsedWaystoneOnIsland(UUID player, FloatingIslandKey island) {
+        long pk = packIslandRegionKey(island.regionX(), island.regionZ());
+        HashSet<Long> set = playerWaystoneIslandHits.computeIfAbsent(player, u -> new HashSet<>());
+        if (set.add(pk)) {
+            setDirty();
+        }
+    }
+
+    /** Snapshot of packed region keys for {@linkplain net.projectisland.network.IslandHudSyncPayload island HUD sync}. */
+    public synchronized List<Long> copyWaystoneIslandHits(UUID player) {
+        HashSet<Long> set = playerWaystoneIslandHits.get(player);
+        if (set == null || set.isEmpty()) {
+            return List.of();
+        }
+        return List.copyOf(set);
+    }
+
     @Override
     public CompoundTag save(CompoundTag root, HolderLookup.Provider registries) {
         root.putInt(TAG_VERSION, CURRENT_VERSION);
@@ -323,6 +370,15 @@ public final class FloatingIslandSavedData extends SavedData {
             rl.put(e.getKey().toString(), t);
         }
         root.put(TAG_ROPE_LINKS, rl);
+        if (!playerWaystoneIslandHits.isEmpty()) {
+            CompoundTag hitsRoot = new CompoundTag();
+            for (Map.Entry<UUID, HashSet<Long>> e : playerWaystoneIslandHits.entrySet()) {
+                HashSet<Long> set = e.getValue();
+                long[] arr = set.stream().mapToLong(Long::longValue).toArray();
+                hitsRoot.putLongArray(e.getKey().toString(), arr);
+            }
+            root.put(TAG_WAYSTONE_ISLAND_HITS, hitsRoot);
+        }
         return root;
     }
 }
