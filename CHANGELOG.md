@@ -7,9 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24**._ _README/TODO sync: **2026-04-25**._ _FTB Quests / ProgressiveStages baseline + void-rescue center preference: **2026-04-25**._ _Rope surf + ore/island tuning docs: **2026-04-30**._ _Denser islands + spawn/resource tuning defaults: **2026-04-30**._ _Island-interior rare structures + masked carvers: **2026-04-29**._
+_Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24**._ _README/TODO sync: **2026-04-25**._ _FTB Quests / ProgressiveStages baseline + void-rescue center preference: **2026-04-25**._ _Rope surf + ore/island tuning docs: **2026-04-30**._ _Denser islands + spawn/resource tuning defaults: **2026-04-30**._ _Island-interior rare structures + masked carvers: **2026-04-29**._ _Modpack RPG roadmap + WoF loot bridge: **2026-05-02**._ _Lootr manifest + fantasy RPG positioning: **2026-05-03**._ _No Aeronautics / Valkyrien in official pack: **2026-05-03**._ _TODO Phase 6 trimmed to shelved stub: **2026-05-03**._
+
+### Added
+
+- **Wings Of Fire loot bridge (optional):** when mod **`wings_of_fire`** is loaded, Project Island registers additional **NeoForge global loot modifiers** so WoF **petrified phoenix egg** subtables also roll on **village** chests, **`minecraft:chests/simple_dungeon`**, **jungle temple**, and **trial chamber** chests — complementing WoF’s own structure hooks (mansions, outposts, mineshafts, ancient cities, Nether, etc.) for sparse floating-island worlds. **`MOD_LIST.md`** pins **GeckoLib** + **Wings Of Fire** JARs; **`neoforge.mods.toml`** declares optional **`wings_of_fire`**.
+
+- **Lootr (official modpack):** [MOD_LIST.md](MOD_LIST.md) pins **`lootr-neoforge-1.21.1-1.11.37.119.jar`** ([CurseForge](https://www.curseforge.com/minecraft/mc-mods/lootr)) for **per-player** dungeon/structure loot; optional **`lootr`** dependency in **`neoforge.mods.toml`**.
 
 ### Changed
+
+- **Pack positioning + mod summary:** README pillars and **Roadmap → Current focus** describe the stack as a **high-fantasy mythical RPG** on floating islands (quests, Lootr, mounts, optional magic/classes); **`neoforge.mods.toml`** description matches. Propulsion table is **design reference** (not VS / Aeronautics–led). **Cursor rule** [`.cursor/rules/project-island.mdc`](.cursor/rules/project-island.mdc) updated for the same product intent.
+
+- **Flight / moving assemblies:** official **[MOD_LIST.md](MOD_LIST.md)** drops **Sable** and **Create Aeronautics**; docs state **Valkyrien Skies** is also **not** in the current stack. **Create** remains for kinetic/contraption RPG tech. [TODO.md](TODO.md) **Phase 6** collapsed to a **shelved** stub (whole-island propulsion / airship tech tree not planned ATM).
 
 - **Island HUD → Xaero waypoint persistence:** **`islandHudXaeroWaypointTemporary`** now defaults to **`true`**: auto **`[Island]`** pins for islands where you have **not** used a **Waystones** block (**DARK_GRAY**) are Xaero **temporary** (not saved on world exit). After you use a waystone on an island, that pin turns **GOLD** and is **always persistent**. Set the flag **`false`** to save gray pins too (previous default behavior).
 

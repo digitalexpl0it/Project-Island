@@ -100,7 +100,7 @@ Breaking **both** anchors removes the link and can revert secondary claims that 
 
 1. **`/projectisland island claim`** does **not** require the player to be **near** the target island or either anchor — only a valid rope in saved data + feet on the target column. A player could theoretically stand on the target coast with a valid link created earlier from elsewhere.
 2. **No facing / LOS** at claim or at rope placement (beyond initial raycast per shot).
-3. **No “moving assembly”** check — islands are fixed in world space until Phase 6 propulsion exists.
+3. **No “moving assembly”** check — islands are fixed in world space (**Phase 6** whole-island propulsion is **shelved** on the current roadmap).
 4. **Rope stress** can sever a link at 0 health (`RopeLinkStress` / sever path); that triggers the same **revalidate** behavior as manual break — design intent: **physical link failure can lose the claim**.
 
 **Recommended hardening (future issues / PRs)**

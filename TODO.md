@@ -2,18 +2,19 @@
 
 Phased checklist for the NeoForge mod and dedicated server. Check items off as you complete them.
 
-_Roadmap reviewed **2026-04-22** (island HUD + config documentation). Updated **2026-04-30**: rope surfing + anchor mining damage + **`floatingIslandHorizontalRadiusBonus`** + per-ore **`floatingIslandsOreMultiplier*`** + client rope render delegates to **`RopeCurveUtil`** (README common-config section expanded). Prior: Phase 4 claims; **2026-04-25** FTB Quests + ProgressiveStages dev pack (`examples/dev-progression/`); void rescue prefers region centers; `run-server/ops.json` for dev OP._
+_Roadmap reviewed **2026-05-03** (**Phase 6** shelved — not planned ATM). Prior: **2026-05-02** RPG direction + WoF loot bridge; **2026-04-22** island HUD; **2026-04-30** rope surf + ore; **2026-04-25** FTB dev-progression._
 
 When researching features, use **mods, datapacks, modpacks, and GitHub** as examples (see [README.md](README.md) — “Learning from existing work”); pin anything you depend on and respect licenses.
 
 ## Current focus
 
-- **Phase 2 is closed.** **Phase 4** includes claims, rope topology/tiers, **rope surfing** (`RopeSurfingState`), **mining linked anchors** (rope HP), **larger islands** (radius bonus), and **ore thinning** multipliers. **Player-facing progression:** **FTB Quests + ProgressiveStages** baseline (`examples/dev-progression/`). Next: **server-side stage gating** for PI rules; optional **quest tasks** for first rope link / secondary claim; invite/teams (Phase 5).
+- **Phase 2 is closed.** **Phase 4** (live): shared starter hub, **rope / harpoon** ziplines (public links, tiered span/HP), **rope surfing**, anchor mining vs rope HP, island HUD + optional Waystones/Xaero, **larger islands** + **ore thinning**, **FTB Quests + ProgressiveStages** baseline (`examples/dev-progression/`). **Island “claims” / rope topology enforcement are retired** — see README / CHANGELOG. **Phase 6** (whole-island propulsion) is **shelved** — no active airship/propulsion roadmap.
+- **Modpack direction:** position the official stack as a **high-fantasy RPG sky-islands** experience: magic + classes (pinned third-party mods), authored **FTB Quest** chapters, dungeon/content mods (including **non-primary** portal dimensions if needed), optional mounts (**Wings Of Fire** + GeckoLib in [MOD_LIST.md](MOD_LIST.md)), and UI for **player stats / overhead health** where a stable NeoForge 1.21.1 mod exists. **Implementation checklist:** [Modpack — High fantasy RPG](#modpack--high-fantasy-rpg) below.
 
 ## Out of scope for v1
 
 - Full MMO-style matchmaking or cross-shard persistence.
-- Portal-based lobby worlds as the **primary** way to reach gameplay (core loop is: join → overworld or single dimension is already islands).
+- Portal-based lobby worlds as the **primary** way to reach gameplay (core loop is: join → overworld is already floating islands). **Exception:** optional **dungeon / instance dimensions** or modded portals for RPG content are **in scope** for the modpack as long as they are not the default route into the core island loop.
 - Promising specific third-party mod versions before they are pinned and tested together.
 
 ---
@@ -52,14 +53,14 @@ When researching features, use **mods, datapacks, modpacks, and GitHub** as exam
 **Design intent**
 
 - **Starter island (one per player, free):** on **first join** to the floating-islands overworld, pick an **`AVAILABLE`** `FloatingIslandKey`, **auto-claim** it (**CLAIMED** + owner) **once per UUID** (idempotent on relog—do not re-roll or overwrite others). **Placement search:** spiral in **region coordinates** `(regionX, regionZ)` from a configurable anchor (e.g. **world spawn / origin**), skip `!FloatingIslandLayout.regionHasIsland`, use **`FloatingIslandSavedData.peek` / `getOrCreate`** and require **`AVAILABLE`**. If two players race the same key, **atomic** transition (`AVAILABLE` → `CLAIMED` only if still free) and **retry** the next region. **Teleport target:** stand on a solid top **near the island's procedural center** — reuse **`FloatingIslandLayout.regionIsland`** horizontal **`centerX` / `centerZ`** and the same vertical basis as **`IslandHudServerSync`** (`peakSurfaceYAtIslandCenter` / `columnTopY`), so the starter spawn lines up under the **HUD beacon**, not the **rim** (today's **`FloatingIslandsSpawnEvents`** uses a **chunk** Chebyshev spiral + first hit at sample offsets, which is only a **void-rescue** heuristic). **Chunks:** surface YXZ can be resolved from **layout math** before chunks exist (`islandSurfaceBlockY` / `columnTopY`); optionally **load / ticket** chunks before teleport if you want decoration guaranteed immediately. **Dense servers:** config **max region search steps** (or radius); if exhausted, **documented fallback** (warn, kick with message, staff hook—pick one). Keep **`FloatingIslandsSpawnEvents`** for **void rescue** (bad `/tp`, dimension travel, starter failure).
-- **Additional islands:** no free teleport-to-claim. Prefer **airship / floating-base gameplay:** the player must **move** their owned island assembly into valid proximity of a target `AVAILABLE` island and satisfy a **dock / link** interaction (or equivalent server-checked state) before the extra region flips to `CLAIMED`. Document edge cases (void gaps, max link distance, unlink on abandon). _Depends on Phase 6 propulsion or a minimal MVP “nudge” placeholder until ships exist._
-- **Rope topology (v1 — design):** **Starter is always the main hub.** At most **two rope hops** from starter for expanding the personal network: **main → secondary → tertiary**, with the **tertiary (“third”) island a leaf** — **no further links** from it to a fourth island (no deeper daisy chain). **Breadth** off main (how many secondaries) and **how many links a secondary may place to tertiaries** are **advancement-gated caps** later (targets discussed: main spokes **1→max 4**, sister spokes **1→max 3**; tune in Phase 6). **Abandon:** remove ropes whenever you want; with **`secondaryClaimRequiresRopeLink`**, losing the last rope that satisfies **`hasRopeLinkFromClaimedIsland`** reverts that **non-starter** region to **`AVAILABLE`** (`revalidateRopeBackedClaimsForOwner`).
+- **Additional islands:** no free teleport-to-claim. ~~Prefer **airship / floating-base gameplay**~~ **Superseded:** **Phase 6** (moving assemblies) is **shelved**; ropes are **public ziplines** without topology claims — see completed Phase 4 items + CHANGELOG. _Historical:_ dock/link model — **[docs/phase4-dock-link-spec.md](docs/phase4-dock-link-spec.md)** (superseded).
+- **Rope topology (v1 — design):** **Retired** with claims (`RopeTopology` removed). Hub/spoke rules were documented in **[docs/phase4-dock-link-spec.md](docs/phase4-dock-link-spec.md)** before ziplines-only; ignore for current implementation.
 
 - [x] **New player → shared starter hub (or spiral after spawn moves):** `FloatingIslandStarterPlacement` on **`PlayerLoggedIn`** (before void rescue); **`FloatingIslandSavedData`** `StarterHomes` + optional **`SharedStarterHub`** / spawn baseline; **shared hub** default (**`starterIslandSharedHub`**); **per-player spiral** when **`starterIslandSplitWhenWorldSpawnMoves`** detects **`/setworldspawn`** XZ change or legacy multi-starter data; **`tryClaimStarterIsland`** / **`tryAssignStarterHomeAtSharedHub`**; spiral from **world spawn** (or join chunk); **`IslandChunkLoader`** sync-loads **3×3** **`ChunkStatus.FULL`** before teleports.
 - [x] ~~**Secondary claims — dock / link model**~~ **Retired:** ropes are public ziplines; **`IslandSecondaryClaim`**, **`/projectisland island claim`**, topology, and auto-claim removed. Historical spec (superseded): **[docs/phase4-dock-link-spec.md](docs/phase4-dock-link-spec.md)**.
 - [x] ~~**Rope topology enforcement**~~ **Retired:** **`RopeTopology`** deleted; harpoon only checks span / island surface / distinct regions.
 - [x] **Rope stress + tiers (server):** per-link **health / tension / strain**. **Done:** health + strain snap; **advancement-driven rope tiers** (`RopeProgression`: `projectisland:progression/rope_reinforced` / `rope_steel` scale max length + max health); **existing links auto-upgrade** on a server interval (`RopeLinkProgressionUpgrade`, preserves health fraction; `ropeProgressionUpgradeExistingLinks` / `ropeProgressionUpgradeIntervalTicks`). **Still open:** extra tiered caps beyond length/health, item-tier hooks beyond advancements if desired.
-- [x] **Player-facing progression (FTB Quests + ProgressiveStages) — baseline:** ship a **quest chapter** (`config/ftbquests/quests/chapters/project_island.snbt`) + **`pi_*` stage** TOMLs + **`triggers.toml`** (harpoon item, rope-tier advancements → stages; expansion stage from quest **gamestage** reward). **Source of truth:** `examples/dev-progression/` (copied into Gradle **`run-client`** / **`run-server`** `config/` for dev). **Still open:** call **ProgressiveStages** (or shared flags) from **Project Island Java** to gate mechanics; add **automatic** quest tasks for **first rope link** and **secondary claim**; tune/remove stock **`iron_age` / `diamond_age`** demo stages when building a focused pack.
+- [x] **Player-facing progression (FTB Quests + ProgressiveStages) — baseline:** ship a **quest chapter** (`config/ftbquests/quests/chapters/project_island.snbt`) + **`pi_*` stage** TOMLs + **`triggers.toml`** (harpoon item, rope-tier advancements → stages; expansion stage from quest **gamestage** reward). **Source of truth:** `examples/dev-progression/` (copied into Gradle **`run-client`** / **`run-server`** `config/` for dev). **Still open:** call **ProgressiveStages** (or shared flags) from **Project Island Java** to gate PI mechanics; add **automatic** quest tasks for **first rope link** (and other RPG milestones once magic/class mods are chosen); tune/remove stock **`iron_age` / `diamond_age`** demo stages when the RPG chapter set is finalized ([Modpack — High fantasy RPG](#modpack--high-fantasy-rpg)).
 - [x] **Rope HUD (client) — MVP:** **`RopeLinkSyncPayload`** carries **health fraction**; **`RopeLinkHealthBarRenderer`** billboard bars at **both** anchor ends (`ropeLinkHealthBarsShow`). Optional numeric **tension** text / upgrades later.
 - [x] **Rope surfing (server):** empty-hand use (non-sneak) on a linked anchor moves the player along **`RopeCurveUtil`** sag toward the peer anchor; config **`ropeTraversalSurf*`**; void rescue skips while surfing; **`RopeTraversalEvents`** registers tick + lifecycle.
 - [x] **Linked anchor mining:** survival breaks on a linked anchor damage **`RopeLink`** HP (`RopeAnchorMining`, **`ropeAnchorLinkDamagePerDigTick`**); immediate **`RopeLinkServerSync.sendRopeLinkSyncForLevel`** for HUD.
@@ -78,35 +79,45 @@ When researching features, use **mods, datapacks, modpacks, and GitHub** as exam
 - [ ] Implement **ownership transfer** and audit trail (log or event).
 - [ ] **Anti-abuse**: offline protection policy, raid windows, or explicit “steal allowed” server mode (document in README).
 - [ ] **Alliances**: team IDs on claims; friendly fire and permission rules.
-- [ ] **Travel mix:** **Primary** loop assumes players eventually **move their island** (airship) to pressure or capture neighbors. **Bridges** and early **limited mobility** items remain valid for **early game** or **very close** spawns—tune so they do not obsolete sails/propellers/jets unless that is an explicit server mode.
+- [ ] **Travel mix:** pressure neighbors via **ropes**, **mounts**, **Create** builds, and future capture rules — **not** whole-island flight mods (**Create Aeronautics** / **Valkyrien Skies** are out of scope for the current pack). Tune so optional vanilla-adjacent mobility does not obsolete intentional progression.
 
-## Phase 6 — Propulsion, tech tree, and island airships
+## Phase 6 — Moving islands / propulsion *(shelved)*
 
-- [ ] **Design pillar:** mobility exists to enable **island-vs-island** positioning and **capture** gameplay, not only cosmetics.
-- [ ] **Level 1 — Sails:** slow translation of the controlled island assembly; fuel or wind rules as designed.
-- [ ] **Level 2 — Propellers:** higher speed band; **sub-tiers** that raise thrust **caps**, max modules, or efficiency.
-- [ ] **Level 3 — Jet engines:** top speed band; **sub-tiers** for thrust; stronger fuel or heat tradeoffs if desired.
-- [ ] **Parts vocabulary:** **helm** (pilot / assemble interaction), **sails**, **propellers**, **jets**, **cogwheels** / kinetic dressing (often with **Create** where integrated).
-- [ ] **Unlock / advancement tree (mechanics):** ropes/chains, engines, propellers, jets, etc. each have **their own gameplay rules** (server + items/blocks/events). **Advancements** (datapack JSON + **custom criteria** where needed) **mirror** those milestones for visibility and optional rewards—**server-respected** flags or stats still decide what you can craft, place, or stress. Document the split so “got the toast” never bypasses a server check.
-- [x] **Quest / progress UI (preferred):** **FTB Quests** + **ProgressiveStages** baseline is in (see Phase 4 + `examples/dev-progression/`). **Still open:** pin versions in README when the modpack stack is final; expand chapters and **server** stage checks for propulsion tiers.
-- [ ] **Parallel tech tracks:** defense (turrets, shields, walls), **docking / merge** with allies, power, automation—each with staged unlocks aligned to PvP risk.
-- [ ] **Fuel economy:** non-infinite propulsion (e.g. coal or tiered fuels); balance vs raid windows.
-- [ ] **Research — [Create Aeronautics](https://www.curseforge.com/minecraft/mc-mods/create-aeronautics)** ([Modrinth](https://modrinth.com/mod/create-aeronautics)): **NeoForge** **1.21.1**, depends on **[Create](https://modrinth.com/mod/create)** + **[Sable](https://modrinth.com/mod/sable)** (moving assemblies / “sub-levels”). **Source / issues:** [Creators-of-Aeronautics/Simulated-Project](https://github.com/Creators-of-Aeronautics/Simulated-Project) — read [LICENSE.md](https://github.com/Creators-of-Aeronautics/Simulated-Project/blob/main/LICENSE.md) before copying or redistributing; not the same repo as [Modders-of-Create/Create-Aeronautics](https://github.com/Modders-of-Create/Create-Aeronautics). Skim for **contraption + flight** patterns; decide fit vs **Valkyrien Skies** for **whole-island** translation and server load.
-- [ ] Prototype against **Valkyrien Skies** and/or **Sable + Create (+ Aeronautics)** (or another chosen stack): what counts as one “island ship,” max block count, merge rules, **Iris** / shader caveats if relevant.
+_Not on the active roadmap._ The pack targets **RPG + floating islands** with **ropes**, **mounts**, **Create** contraptions, and **Lootr**—not whole-island airships. **Create Aeronautics**, **Sable**, and **Valkyrien Skies** stay out of scope ([MOD_LIST.md](MOD_LIST.md)).
+
+- [ ] **Reopen only if** capture / territory design (Phase 5) explicitly needs **translating entire islands** and you budget for **custom** mechanics or a **deliberate new** mod choice (still unlikely to be VS/Aero unless plans change).
+- **Design archive:** [README — Propulsion tiers](README.md#propulsion-tiers-design-reference-only--not-vs--create-aeronautics) is kept as **reference only** (sails → jets table), not a commitment to implement.
+
+**Progression UI** lives in Phase 4 + [Modpack — High fantasy RPG](#modpack--high-fantasy-rpg) — expand **FTB Quests** / **ProgressiveStages** for **RPG and island hooks**, not propulsion-tier chapters.
 
 ## Phase 7 — Integrations (optional)
 
-- [ ] Once **Phase 6** narrows the stack, **pin** compatible mod versions and smoke-test (e.g. **Valkyrien Skies** + helm add-ons, **Create / Sable / Create Aeronautics**—research and prototype bullets live in **Phase 6**).
+- [ ] **Pin + smoke-test** whatever optional mods you ship beyond [MOD_LIST.md](MOD_LIST.md) (**Create** stays; **not** VS / Aeronautics unless direction changes).
 - [x] **Biomes O' Plenty:** optional weighted **`biomesoplenty:*`** island biomes when mod **`biomesoplenty`** is present — **`islandBiomeModIntegrationEnabled`**, **`islandBiomeModWeightedEntries`** ([README — Island biome weights](README.md#island-biome-weights-common-config)).
 - [ ] **README:** compatibility matrix + known issues for whatever you ship.
-- [ ] **Defer** heavy pack integration until Phases 2–5 and a **Phase 6** playable prototype exist.
+- [ ] **Defer** heavy optional integration until Phases **2–5** and **modpack** milestones feel stable.
 
 ## Phase 8 — Content
 
-- [ ] Custom **items/blocks** as needed: fuels, **helm**, claim anchor, capture token, **sail / propeller / jet** blocks or entities (IDs, recipes, creative tabs).
+- [ ] Custom **items/blocks** as needed for **RPG / capture / islands** (e.g. claim token, harpoon-adjacent gear, fuels for Create)—**not** propulsion-airship parts unless Phase 6 is reopened.
 - [ ] Resources and **lang** files for player-visible strings.
 - [ ] **Advancement JSON** (if used) or equivalent unlock definitions; keep triggers **server-safe** where security matters.
-- [ ] Server-driven behavior for any item that affects claims, capture, or **thrust unlocks** (do not rely on datapack-only tricks for security-sensitive rules).
+- [ ] Server-driven behavior for any item that affects claims, capture, or **gated unlocks** (do not rely on datapack-only tricks for security-sensitive rules).
+
+## Modpack — High fantasy RPG
+
+_Checklist for the official NeoForge **1.21.1** modpack (see [MOD_LIST.md](MOD_LIST.md)). Pin versions only after multiplayer smoke tests; respect third-party licenses when copying quest SNBT or assets._
+
+- [ ] **Magic:** choose one primary magic mod (or a small compatible stack), balance against **Create** (contraptions), **WoF** mounts, and ropes; document conflicts in README when pinned.
+- [ ] **Classes / identity:** pick **Origins**, a class/job mod, or skill-tree RPG mod — ensure **server-side** gates align with **ProgressiveStages** (or PI flags) for unlocks.
+- [ ] **Combat & bosses:** shortlist encounter mods that behave well on **floating terrain** and with spawn tuning (`floatingIslandsSpawnTuning*` / bypass namespaces); avoid duplicate guard mods ([MOD_LIST.md](MOD_LIST.md) Villager Guards note).
+- [ ] **Dungeons / dimensions:** optional portal mods, structure packs, or trial-adjacent content; gate entry via **FTB Quests** where appropriate.
+- [ ] **FTB Quests:** replace demo chapters with a **full RPG arc** (tutorial → magic → islands → raids); reuse only **license-allowed** SNBT from other packs or write originals; sync rewards with **`pi_*`** / mod stages; add **server** stage checks tied to **RPG/island** milestones (not shelved propulsion tiers unless Phase 6 returns).
+- [ ] **Loot curve:** align chest/table rewards and quest payouts with **ProgressiveStages** so power matches island PvE/PvP targets.
+- [x] **Lootr (multiplayer chests):** pinned in [MOD_LIST.md](MOD_LIST.md); optional **`lootr`** in `neoforge.mods.toml` — **per-player** converted loot chests for RPG co-op (configure decay/refresh in Lootr config).
+- [ ] **Player stats UI:** evaluate NeoForge **1.21.1** mods for **health / mana / attributes** display (HUD and/or **nametag-style** overhead bars); test on dedicated server + FTB Teams parties.
+- [x] **Wings Of Fire mounts:** pin **GeckoLib** + **[Wings Of Fire!](https://modrinth.com/mod/wings-of-fire!)** in [MOD_LIST.md](MOD_LIST.md); optional dependency **`wings_of_fire`** in `neoforge.mods.toml`. **Loot bridge shipped in PI JAR:** extra global loot modifiers (conditional on WoF loaded) add WoF egg subtables to **village**, **simple_dungeon**, **jungle_temple**, and **trial_chambers** chests — see README bullet. **Still verify:** Nether routes for Red/Gilded eggs; with **Lootr**, egg chests should be **per-player** once converted (see Lootr docs).
+- [ ] **Ambient creatures:** if design needs wild dragons/phoenixes (not only WoF summons), evaluate separate mob mods or datapack spawns; watch **`floatingIslandsSpawnTuningBypassEntityNamespaces`**.
 
 ## Phase 9 — Ops
 

@@ -14,9 +14,7 @@ This file is the **authoritative manifest** for the **official Project Island mo
 | `villager-guards-v1.1.5.jar` | **[Villager Guards](https://modrinth.com/mod/villager-guards)** **v1.1.5** — armed guards defend villagers (configurable; includes player-attack options in recent releases). License: **AGPL-3.0** (see Modrinth). | **Client + server** |
 | `architectury-13.0.8-neoforge.jar` | Shared API / bridge for several mods | **Client + server** |
 | `cloth-config-15.0.140-neoforge.jar` | Config screens / API for mods that depend on it | **Client + server** |
-| `create-1.21.1-6.0.10.jar` | Create (kinetic / contraptions) | **Client + server** |
-| `sable-neoforge-1.21.1-1.1.3.jar` | Sable (moving assemblies; Create Aeronautics dependency) | **Client + server** |
-| `create-aeronautics-bundled-1.21.1-1.1.3.jar` | Create Aeronautics (bundled) — flight / assemblies stack | **Client + server** |
+| `create-1.21.1-6.0.10.jar` | **[Create](https://modrinth.com/mod/create)** (kinetic / contraptions / tech fantasy) — **not** paired with **Create Aeronautics** in this pack | **Client + server** |
 | `ftb-library-neoforge-2101.1.31.jar` | FTB Library (base for FTB mods) | **Client + server** |
 | `ftb-teams-neoforge-2101.1.10.jar` | FTB Teams | **Client + server** |
 | `ftb-xmod-compat-neoforge-21.1.8.jar` | Cross-mod compatibility layer for FTB stack | **Client + server** |
@@ -25,8 +23,17 @@ This file is the **authoritative manifest** for the **official Project Island mo
 | `jei-1.21.1-neoforge-19.27.0.340.jar` | Just Enough Items (recipe / item lookup) | **Client + server** *(dedicated server may omit only if you accept missing recipe UI parity; official pack keeps it on both.)* |
 | `xaerominimap-neoforge-1.21.1-25.3.10.jar` | Xaero’s Minimap | **Client + server** *(official pack ships both; many servers keep it for version parity.)* |
 | `xaeroworldmap-neoforge-1.21.1-1.40.11.jar` | Xaero’s World Map | **Client + server** *(same as minimap.)* |
+| `lootr-neoforge-1.21.1-1.11.37.119.jar` | **[Lootr](https://www.curseforge.com/minecraft/mc-mods/lootr)** ([Modrinth](https://modrinth.com/mod/lootr)) **1.11.37.119** — **per-player** loot for converted chests/barrels/carts (multiplayer-friendly dungeon loot); configure decay/refresh in `config/lootr-common.toml` / wiki. | **Client + server** |
+| `geckolib-neoforge-1.21.1-4.8.4.jar` | **[GeckoLib](https://modrinth.com/mod/geckolib)** **4.8.4** — animation/render library (**Wings Of Fire** expects a compatible 1.21.1 NeoForge build; bump only after smoke-testing WoF). | **Client + server** |
+| `Wings Of Fire V1.0 - NeoForge 1.21.1.jar` | **[Wings Of Fire!](https://modrinth.com/mod/wings-of-fire!)** **v1.0** — phoenix mounts from **petrified eggs** (structure chest loot + **Inferno Cradle** / **Tempered Lantern**); not ambient mob spawns. License: **ARR** (Modrinth). Mod id: **`wings_of_fire`**. | **Client + server** |
 
 **Note:** When bumping Villager Guards, pick the **NeoForge** build for **1.21.1** from the **[Modrinth versions page](https://modrinth.com/mod/villager-guards/versions)** and update this table’s filename if it changes.
+
+**Not in the official pack (by design):** **[Create Aeronautics](https://modrinth.com/mod/create-aeronautics)** (and its **Sable** dependency) and **[Valkyrien Skies](https://modrinth.com/mod/valkyrien-skies)** — whole-island flight / rigid assemblies are **not** targeted with those mods right now. Remove their JARs from `run-*/mods` if you still have old copies.
+
+**Wings Of Fire + Project Island:** the WoF mod adds its own global loot modifiers for vanilla tables (mansions, outposts, mineshafts, nether structures, etc.). This repository also ships **optional bridge loot modifiers** (under `data/projectisland/loot_modifiers/`, registered when **`wings_of_fire`** is loaded) that add the same egg loot rolls to **village** chests, **`minecraft:chests/simple_dungeon`** (monster-room style dungeons), **jungle temples**, and **trial chambers** chests — structures that tend to appear on floating islands. Red / Gilded eggs still primarily come from **Nether** loot as in WoF’s docs.
+
+**Lootr:** converts eligible vanilla loot containers to **per-player** chests (multiplayer RPG-friendly). Loot rolls when **each** player opens; tune decay/refresh in **`config/lootr-common.toml`**. New chunks / conversions apply going forward — existing worlds may need exploration or **`/lootr`** commands; verify pacing with WoF + FTB rewards after enabling.
 
 ## Optional / not in this list
 

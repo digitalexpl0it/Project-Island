@@ -1,17 +1,18 @@
 ---
-description: Project Island — NeoForge floating-islands mod, airship progression, server goals
+description: Project Island — NeoForge floating-islands modpack, fantasy RPG + optional island mobility
 alwaysApply: true
 ---
 
 # Project Island
 
-This repository is a **NeoForge** Minecraft **mod + dedicated server** effort: a **void world of procedural floating islands** (biome-aware), **no portal** as the primary entry to gameplay, and **server-authoritative** island and progression state.
+This repository is a **NeoForge** Minecraft **mod + modpack + dedicated server** effort: **high-fantasy mythical RPG** on **procedural floating islands** in the void (quests, loot, mounts, room for magic/classes), **no portal lobby** as the primary entry, and **server-authoritative** island and progression state.
 
 ## Product intent
 
-- **Core loop:** players develop their island into a **mobile airship** (sails → propellers → jet-style thrust, with sub-tiers for thrust) to **pressure, raid, and capture** other islands—not only static bridges.
+- **Core loop (modpack):** **FTB Quests**, staged unlocks (**ProgressiveStages**), exploration and dungeons (**Lootr** per-player chests when pinned), mythical mounts (e.g. **Wings Of Fire**), plus territory drama on scattered islands.
+- **Optional capture meta:** raid/travel via **ropes**, **mounts**, **Create** contraptions, and dimensions — **not** **Create Aeronautics** or **Valkyrien Skies** in the current official pack. Whole-island propulsion is **deferred / custom** if revisited ([TODO.md](TODO.md) Phase 6 note).
 - Islands are **tagged** (e.g. available → claimed); **capture / steal** is in scope—detail win conditions and travel mix in [TODO.md](TODO.md).
-- **Tech / advancement tree** gates better propulsion and other branches (defense, docking, power); **unlock flags and thrust caps must be enforced on the server**, never trusted from the client alone.
+- **Tech / advancement tree** gates propulsion and other branches (defense, docking, power); **unlock flags and thrust caps must be enforced on the server**, never trusted from the client alone.
 - **Ownership, capture, and unlocks** live in **saved data**; respect performance limits for moving assemblies.
 
 ## Research and reuse
@@ -20,12 +21,12 @@ When implementing or designing systems, **use public examples**: other **mods**,
 
 ## Integrations
 
-- Prefer **Valkyrien Skies** (and ecosystem) for **rigid moving island assemblies**; **Create** for **cogwheels** / kinetic contraptions where versions align. Do not block core worldgen and claims on optional mods—see [TODO.md](TODO.md) phase order.
+- **Create** is the pinned tech/contraption mod for the official pack (see [MOD_LIST.md](MOD_LIST.md)); **do not** assume **Valkyrien Skies** or **Create Aeronautics**. Do not block core worldgen on optional mods—see [TODO.md](TODO.md) phase order.
 
 ## Where to look
 
 - [README.md](README.md) — pillars, propulsion table, pinned toolchain, `./gradlew` commands, external-examples policy.
-- [TODO.md](TODO.md) — phased roadmap (including Phase 6 propulsion / tech tree).
+- [TODO.md](TODO.md) — phased roadmap (**Phase 6** moving-island propulsion is **shelved**).
 - [CHANGELOG.md](CHANGELOG.md) — notable changes.
 
 ## Implementation habits

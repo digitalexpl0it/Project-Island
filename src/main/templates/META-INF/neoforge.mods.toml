@@ -9,9 +9,10 @@ modId="${mod_id}"
 version="${mod_version}"
 displayName="${mod_name}"
 description='''
-Void sky of procedural floating islands, claims, capture PvP, and progression toward
-mobile island airships (sails, propellers, jets). Server-authoritative rules.
-See the repository README for design pillars and roadmap.
+High-fantasy mythical RPG on procedural floating islands in the void: quests, staged
+progression, dungeons and mounts (modpack stack), plus server-authoritative island rules.
+Travel uses ropes, mounts, and tech like Create—not Valkyrien Skies or Create Aeronautics.
+See README for pillars and roadmap.
 '''
 
 [[dependencies.${mod_id}]]
@@ -41,3 +42,17 @@ type="optional"
 versionRange="[25.0,)"
 ordering="NONE"
 side="CLIENT"
+
+[[dependencies.${mod_id}]]
+modId="wings_of_fire"
+type="optional"
+versionRange="[1.0,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="lootr"
+type="optional"
+versionRange="[1.0,)"
+ordering="NONE"
+side="BOTH"
