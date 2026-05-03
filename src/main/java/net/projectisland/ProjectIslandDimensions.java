@@ -1,5 +1,7 @@
 package net.projectisland;
 
+import java.util.Optional;
+
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -24,6 +26,21 @@ public final class ProjectIslandDimensions {
             return true;
         }
         return unwrapFloatingIslandsGenerator(gen) != null;
+    }
+
+    /**
+     * The effective {@link FloatingIslandsChunkGenerator} for this overworld level, including a shallow unwrap of
+     * delegate wrappers — same notion as {@link #isFloatingIslandsGameplay(ServerLevel)}.
+     */
+    public static Optional<FloatingIslandsChunkGenerator> floatingIslandsChunkGenerator(ServerLevel level) {
+        if (!level.dimension().equals(Level.OVERWORLD)) {
+            return Optional.empty();
+        }
+        ChunkGenerator gen = level.getChunkSource().getGenerator();
+        if (gen instanceof FloatingIslandsChunkGenerator floating) {
+            return Optional.of(floating);
+        }
+        return Optional.ofNullable(unwrapFloatingIslandsGenerator(gen));
     }
 
     /**

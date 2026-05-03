@@ -20,7 +20,7 @@ public final class Config {
     private static final Pattern SPAWN_TUNING_BYPASS_ENTITY_NAMESPACE =
             Pattern.compile("^[a-z0-9_]+$");
 
-    private static final List<String> DEFAULT_SPAWN_TUNING_BYPASS_ENTITY_NAMESPACES = List.of("mowziesmobs");
+    private static final List<String> DEFAULT_SPAWN_TUNING_BYPASS_ENTITY_NAMESPACES = List.of("mowziesmobs", "cnb");
 
     private static boolean validateIslandBiomeModWeightedEntry(Object o) {
         return o instanceof String s && ISLAND_BIOME_MOD_WEIGHTED_ENTRY.matcher(s).matches();
@@ -497,12 +497,23 @@ public final class Config {
     public static final ModConfigSpec.ConfigValue<List<? extends String>> FLOATING_ISLANDS_SPAWN_TUNING_BYPASS_ENTITY_NAMESPACES = BUILDER
             .comment(
                     "Entity registry **namespaces** that skip floating-islands spawn thinning for NATURAL / CHUNK_GENERATION (**keep = 1**).",
-                    "Useful for rare boss/content mods. Default includes **mowziesmobs**; remove or clear to thin them like vanilla monsters.",
+                    "Useful for rare boss/content mods. Default includes **mowziesmobs** and **cnb** (Creatures and Beasts: Continued); remove entries to thin them like vanilla monsters.",
                     "Each entry must match lowercase mod-id pattern **`^[a-z0-9_]+$`**.")
             .defineListAllowEmpty(
                     "floatingIslandsSpawnTuningBypassEntityNamespaces",
                     () -> List.copyOf(DEFAULT_SPAWN_TUNING_BYPASS_ENTITY_NAMESPACES),
                     Config::validateSpawnTuningBypassEntityNamespace);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_REALM_RPG_BALLOONS_SPAWN_FIX_ENABLED = BUILDER
+            .comment(
+                    "When **true** (default) and mod **realmrpg_balloons** (Realm RPG: Treasure Balloons) is loaded: on the floating-islands overworld, new balloon entities are **raised** to at least **floatingIslandsRealmrpgBalloonsMinBlocksAboveIslandSurface** above the procedural island top at their X/Z. If that column is void, nearby columns are searched before the join is **cancelled**.",
+                    "Does not affect entities loaded from disk (world save).")
+            .define("floatingIslandsRealmrpgBalloonsSpawnFixEnabled", true);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_REALM_RPG_BALLOONS_MIN_BLOCKS_ABOVE_SURFACE = BUILDER
+            .comment(
+                    "Minimum blocks **above** the island surface Y used by **floatingIslandsRealmrpgBalloonsSpawnFixEnabled** for **realmrpg_balloons** entities (first join only).")
+            .defineInRange("floatingIslandsRealmrpgBalloonsMinBlocksAboveIslandSurface", 14, 0, 128);
 
     public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_NATURAL_CREEPER_SPAWN_KEEP_CHANCE = BUILDER
             .comment(
@@ -519,6 +530,59 @@ public final class Config {
                     "After a natural land **animal** spawn succeeds and passes the keep chance above, roll again: with probability **(multiplier − 1)** (capped at 1) spawn one extra tagged duplicate nearby.",
                     "**1** disables; **1.2** ≈ 20% extra animals. Does not apply to breeding, eggs, or spawners.")
             .defineInRange("floatingIslandsNaturalCreatureSpawnMultiplier", 1.2d, 1.0d, 2.5d);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_DAYTIME_CREATURE_SPAWN_BOOST_ENABLED = BUILDER
+            .comment(
+                    "When **true** (default): on floating-islands overworld during **daytime**, periodically roll each online player's biome **CREATURE** spawn list at a random **nearby loaded island surface** column.",
+                    "Complements vanilla natural spawning (which rarely finds grass columns on small islands). Uses **NATURAL** so **`floatingIslandsNaturalCreatureSpawnKeepChance`** still applies.")
+            .define("floatingIslandsDaytimeCreatureSpawnBoostEnabled", true);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_DAYTIME_CREATURE_SPAWN_BOOST_INTERVAL_TICKS = BUILDER
+            .comment(
+                    "How often the boost runs globally (**one** tick per interval). Each eligible player is considered on their own staggered sub-tick (see implementation). Minimum **20**.")
+            .defineInRange("floatingIslandsDaytimeCreatureSpawnBoostIntervalTicks", 200, 20, 12000);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_DAYTIME_CREATURE_SPAWN_BOOST_RADIUS_BLOCKS = BUILDER
+            .comment("Horizontal search radius around each player for a candidate island column (blocks).")
+            .defineInRange("floatingIslandsDaytimeCreatureSpawnBoostRadiusBlocks", 56, 8, 160);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_DAYTIME_CREATURE_SPAWN_BOOST_TRIES_PER_PLAYER = BUILDER
+            .comment("How many random columns to try per player each time their stagger fires (**1–8**).")
+            .defineInRange("floatingIslandsDaytimeCreatureSpawnBoostTriesPerPlayer", 3, 1, 8);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_DAYTIME_CREATURE_SPAWN_BOOST_NEARBY_CAP = BUILDER
+            .comment(
+                    "Skip spawning if this many **CREATURE** mobs already exist within ~**28** blocks of the candidate feet position (reduces clumping).")
+            .defineInRange("floatingIslandsDaytimeCreatureSpawnBoostNearbyCap", 10, 2, 64);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_PACK_SPAWN_BOOST_ENABLED = BUILDER
+            .comment(
+                    "When **true** (default): reloadable **`data/projectisland/floating_island_pack_spawns/rules.json`** drives extra **NATURAL** spawns on floating-islands overworld (e.g. sky **cnb:end_whale** on **`#minecraft:is_overworld`**).",
+                    "Datapacks can override that path. **0** rules disables work until reload.")
+            .define("floatingIslandsPackSpawnBoostEnabled", true);
+
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLANDS_PACK_SPAWN_BOOST_DAY_ONLY = BUILDER
+            .comment(
+                    "When **true** (default), pack spawn attempts only run during the same **daytime** window as **`floatingIslandsDaytimeCreatureSpawnBoost`**.",
+                    "Set **false** for 24h pack spawns (still throttled by interval and chunk cooldown).")
+            .define("floatingIslandsPackSpawnBoostDayOnly", true);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_PACK_SPAWN_BOOST_INTERVAL_TICKS = BUILDER
+            .comment("Per-player stagger interval for pack spawn attempts (minimum **40**).")
+            .defineInRange("floatingIslandsPackSpawnBoostIntervalTicks", 400, 40, 24000);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_PACK_SPAWN_BOOST_RADIUS_BLOCKS = BUILDER
+            .comment("Horizontal search radius around each player for a candidate island column (blocks).")
+            .defineInRange("floatingIslandsPackSpawnBoostRadiusBlocks", 72, 16, 192);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_PACK_SPAWN_BOOST_TRIES_PER_PLAYER = BUILDER
+            .comment("Random island columns to try per player each time their stagger fires.")
+            .defineInRange("floatingIslandsPackSpawnBoostTriesPerPlayer", 2, 1, 12);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLANDS_PACK_SPAWN_CHUNK_COOLDOWN_TICKS = BUILDER
+            .comment(
+                    "Minimum **game ticks** between successful **pack** spawns in the same chunk (**0** disables). Reduces bursts when exploring fast.")
+            .defineInRange("floatingIslandsPackSpawnChunkCooldownTicks", 3600, 0, 120000);
 
     public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_NATURAL_VILLAGER_SPAWN_KEEP_CHANCE = BUILDER
             .comment(

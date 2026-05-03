@@ -20,12 +20,23 @@ import net.minecraft.world.phys.Vec3;
 import net.projectisland.ClientConfig;
 import net.projectisland.network.IslandHudSyncPayload.IslandHudBeacon;
 
-/**
- * World-space billboard: dark translucent backing + island name (no outline or drop shadow).
- */
+/** World-space billboard: optional faint backing + single-pass title (defaults: white text, no outline, low panel alpha). */
 public final class IslandHudWorldBillboard {
     private static final float BILLBOARD_Y_BIAS = 0.07f;
     private static final float PANEL_PAD_BASE = 5f;
+    /** Black outline offsets in font pixels (billboard-local, before final pose scale). */
+    private static final int[][] OUTLINE_OFFSETS = {
+        {-1, 0},
+        {1, 0},
+        {0, -1},
+        {0, 1},
+        {-1, -1},
+        {1, -1},
+        {-1, 1},
+        {1, 1}
+    };
+
+    private static final int OUTLINE_ARGB = 0xFF000000;
     private static final ResourceLocation WHITE_TEX =
             ResourceLocation.withDefaultNamespace("textures/misc/white.png");
 
@@ -77,12 +88,33 @@ public final class IslandHudWorldBillboard {
         if (fillA > 0) {
             VertexConsumer quads = buffers.getBuffer(RenderType.entityTranslucent(WHITE_TEX, false));
             fillTranslucentTexturedQuad(quads, poseEntry, -halfW, -halfH, halfW, halfH, zFill, 0, 0, 0, fillA);
+            /*
+             * Flush the entity-translucent batch before Font draws. Shader packs / Embeddium often leave the entity
+             * pipeline bound; interleaving translucent quads with {@link Font#drawInBatch} without flushing can bind the
+             * wrong texture for glyphs → solid black “block” letters and a fog-tinted panel (e.g. purple).
+             */
+            buffers.endBatch(RenderType.entityTranslucent(WHITE_TEX, false));
         }
 
         Font.DisplayMode mode = seeThroughText ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.NORMAL;
         pose.pushPose();
         pose.translate(0f, 0f, zText);
         Matrix4f matText = pose.last().pose();
+        if (ClientConfig.ISLAND_HUD_WORLD_TEXT_OUTLINE.getAsBoolean()) {
+            for (int[] d : OUTLINE_OFFSETS) {
+                font.drawInBatch(
+                        title,
+                        tx + d[0],
+                        ty + d[1],
+                        OUTLINE_ARGB,
+                        false,
+                        matText,
+                        buffers,
+                        mode,
+                        LightTexture.FULL_BRIGHT,
+                        OverlayTexture.NO_OVERLAY);
+            }
+        }
         font.drawInBatch(
                 title,
                 tx,

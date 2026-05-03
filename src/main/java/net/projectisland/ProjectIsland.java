@@ -24,6 +24,7 @@ import net.projectisland.island.RopeLinkServerSync;
 import net.projectisland.island.RopeTraversalEvents;
 import net.projectisland.network.ProjectIslandNetworking;
 import net.projectisland.compat.IslandBiomeModDiagnostics;
+import net.projectisland.compat.RealmRpgTreasureBalloonsFloatingIslandCompat;
 import net.projectisland.worldgen.FloatingIslandsSpawnPregen;
 import net.projectisland.worldgen.ProjectIslandWorldgen;
 
@@ -40,6 +41,8 @@ public final class ProjectIsland {
         NeoForge.EVENT_BUS.register(this);
         FloatingIslandsSpawnEvents.register();
         FloatingIslandsSpawnTuning.register();
+        FloatingIslandsDaytimeCreatureSpawnBoost.register();
+        FloatingIslandsPackSpawnBoost.register();
         FloatingIslandsSpawnPregen.register();
         FloatingIslandLayoutSeed.register();
         IslandCommands.register();
@@ -48,6 +51,7 @@ public final class ProjectIsland {
         RopeAnchorMining.register();
         RopeTraversalEvents.register();
         FloatingIslandRespawnHandler.register();
+        RealmRpgTreasureBalloonsFloatingIslandCompat.register();
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
     }
@@ -68,5 +72,6 @@ public final class ProjectIsland {
     @SubscribeEvent
     public void onAddReloadListeners(AddReloadListenerEvent event) {
         event.addListener(new FloatingIslandDisplayNameReloader());
+        event.addListener(new FloatingIslandPackSpawnReloader());
     }
 }

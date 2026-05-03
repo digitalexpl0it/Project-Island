@@ -7,9 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24**._ _README/TODO sync: **2026-04-25**._ _FTB Quests / ProgressiveStages baseline + void-rescue center preference: **2026-04-25**._ _Rope surf + ore/island tuning docs: **2026-04-30**._ _Denser islands + spawn/resource tuning defaults: **2026-04-30**._ _Island-interior rare structures + masked carvers: **2026-04-29**._ _Modpack RPG roadmap + WoF loot bridge: **2026-05-02**._ _Lootr manifest + fantasy RPG positioning: **2026-05-03**._ _No Aeronautics / Valkyrien in official pack: **2026-05-03**._ _TODO Phase 6 trimmed to shelved stub: **2026-05-03**._ _FTB **rpg_series** chapter + README/TODO/MOD_LIST alignment (claims vs ziplines): **2026-05-02**._
+_Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24**._ _README/TODO sync: **2026-04-25**._ _FTB Quests / ProgressiveStages baseline + void-rescue center preference: **2026-04-25**._ _Rope surf + ore/island tuning docs: **2026-04-30**._ _Denser islands + spawn/resource tuning defaults: **2026-04-30**._ _Island-interior rare structures + masked carvers: **2026-04-29**._ _Modpack RPG roadmap + WoF loot bridge: **2026-05-02**._ _Lootr manifest + fantasy RPG positioning: **2026-05-03**._ _No Aeronautics / Valkyrien in official pack: **2026-05-03**._ _TODO Phase 6 trimmed to shelved stub: **2026-05-03**._ _FTB **rpg_series** chapter + README/TODO/MOD_LIST alignment (claims vs ziplines): **2026-05-02**._ _MOD_LIST: Friends&Foes + Mowzie's/BOP compat note: **2026-05-02**._
 
 ### Added
+
+- **Daytime passive spawn boost (floating islands):** `FloatingIslandsDaytimeCreatureSpawnBoost` rolls biome **`CREATURE`** lists at random **loaded island surface** columns near online players during **day**, throttled by **`floatingIslandsDaytimeCreatureSpawnBoost*`** common config (default **on**). Complements vanilla natural passives on small islands — see [README.md](README.md) (**Daytime passive spawn boost**).
+
+- **Realm RPG: Treasure Balloons (optional):** on floating-islands overworld, **`RealmRpgTreasureBalloonsFloatingIslandCompat`** adjusts **first-join** **`realmrpg_balloons`** entities to sit at least **`floatingIslandsRealmrpgBalloonsMinBlocksAboveIslandSurface`** (default **14**) above the procedural island top at their X/Z, or **cancels** joins in **void** columns — see [Modrinth](https://modrinth.com/mod/realm-rpg-treasure-balloons). Common keys **`floatingIslandsRealmrpgBalloonsSpawnFixEnabled`** / **`floatingIslandsRealmrpgBalloonsMinBlocksAboveIslandSurface`**; optional **`realmrpg_balloons`** in **`neoforge.mods.toml`**; [MOD_LIST.md](MOD_LIST.md) optional row.
+
+- **Optional pack content — Friends&Foes:** [MOD_LIST.md](MOD_LIST.md) pins **`friendsandfoes-neoforge-4.0.25+mc1.21.1.jar`** ([CurseForge](https://www.curseforge.com/minecraft/mc-mods/friends-and-foes-forge)); **`neoforge.mods.toml`** optional dependency **`friendsandfoes`**.
 
 - **Dev-progression FTB Quests — RPG chapter:** [`examples/dev-progression/ftbquests/quests/chapters/rpg_series.snbt`](examples/dev-progression/ftbquests/quests/chapters/rpg_series.snbt) (**order_index** `1`) walks the pinned **Skill Tree + Spell Engine + class** stack after **`Iron Age`** (`E1F0A000000000002`): skill UI (**K**), honor-system skill point + spell binding usage, craft **`spell_engine:spell_binding`**, and optional starter **weapon / armor** item tasks (`archers` / `rogues` / `paladins` / `wizards` ids — verify in **JEI** if a task mismatches a bump).
 
@@ -20,6 +26,14 @@ _Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24*
 - **Lootr (official modpack):** [MOD_LIST.md](MOD_LIST.md) pins **`lootr-neoforge-1.21.1-1.11.37.119.jar`** ([CurseForge](https://www.curseforge.com/minecraft/mc-mods/lootr)) for **per-player** dungeon/structure loot; optional **`lootr`** dependency in **`neoforge.mods.toml`**.
 
 ### Changed
+
+- **Realm RPG: Treasure Balloons compat:** when a balloon’s spawn column is **void**, **`RealmRpgTreasureBalloonsFloatingIslandCompat`** now samples up to **40** random columns within **±112** blocks horizontally for an island top before canceling the join (previously almost every overworld-style sky spawn was discarded on floating islands).
+
+- **Island HUD world billboards (client):** defaults are minimal for readability — **`islandHudTitleColorMode`** **white**, **`islandHudWorldTextOutline`** **false**, **`islandHudPanelFillOpacity`** **0** (no panel quad), **`islandHudNightColorBoost`** **off**, **`islandHudSeeThroughText`** **false** (normal font pass; still configurable in **`projectisland-client.toml`**).
+
+- **`MOD_LIST.md`:** inventory table rebuilt from **`run-server/mods/`** (drops **Create** / **ProgressiveStages** until those JARs are re-added; lists **BOP**, **Better Villages**, **CNB**, **Embeddium** stack, **Mowzie’s**, **takesapillage**, **waystones**, **mobconversion**, supporting libs, and the exact Villager Guards JAR name). **`floatingIslandsSpawnTuningBypassEntityNamespaces`** default now includes **`cnb`** so **Creatures and Beasts: Continued** entities skip natural spawn thinning; optional **`cnb`** in **`neoforge.mods.toml`**.
+
+- **README / MOD_LIST / TODO:** document **Mowzie's Mobs** vs **Biomes O' Plenty** island surfaces — PI bypasses **thinning** only; vanilla-biome-tagged spawns can look rare on **`biomesoplenty:*`** tops (upstream spawn rules / datapacks).
 
 - **README / TODO / MOD_LIST:** opening pitch and **game pillars** match **public ziplines** (no island claiming); **capture / raid** called out as **TODO Phase 5** roadmap. **Mermaid** diagram drops stale **claim/capture** node; **rope surfing** sentence matches code (**sneak** skips start / cancels ride — **not** claiming). **TODO** HUD bullet and FTB baseline bullet updated (no **gamestage expansion** wording); **Modpack — Magic** marked baseline-complete with Spell Engine + FTB hook. **`MOD_LIST.md`** progression blurb lists **`rpg_series.snbt`**.
 
@@ -36,6 +50,8 @@ _Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24*
 - **Island HUD → Xaero waypoint persistence:** **`islandHudXaeroWaypointTemporary`** now defaults to **`true`**: auto **`[Island]`** pins for islands where you have **not** used a **Waystones** block (**DARK_GRAY**) are Xaero **temporary** (not saved on world exit). After you use a waystone on an island, that pin turns **GOLD** and is **always persistent**. Set the flag **`false`** to save gray pins too (previous default behavior).
 
 ### Fixed
+
+- **Island HUD world billboard + shaders:** **`endBatch`** the entity-translucent panel **before** `Font` draws so glyph passes do not run with a stale entity/shader bind (fixes **black unreadable “block” text** and **purple-tinted** panels with **Embeddium / Iris** stacks). **`islandHudPanelFillOpacity`** default **0** avoids the translucent quad unless explicitly enabled.
 
 - **Xaero: player-created persistent pins:** sync-created HUD mirrors append an invisible ownership suffix so only those rows are cleared/recolored/temp-toggled. Manual waypoints (including any named with **`[Island] `**) stay untouched. Older PI mirrors without the suffix are no longer matched by “clear managed” (HUD sync off / empty payload); remove those manually in Xaero once if needed.
 
