@@ -228,3 +228,74 @@ idea {
         downloadJavadoc = true
     }
 }
+
+tasks.register('curseforgeModpackZip', Zip) {
+    def jarTask = tasks.named('jar', Jar)
+    dependsOn jarTask
+    group = 'distribution'
+    description = 'CurseForge client modpack zip (manifest + overrides + Project Island jar + FTB quest SNBT).'
+    archiveFileName = "${mod_id}-modpack-${version}-curseforge.zip"
+    destinationDirectory = layout.buildDirectory.dir('dist')
+    duplicatesStrategy = DuplicatesStrategy.WARN
+    from(layout.projectDirectory.dir('modpack/curseforge'))
+    // Same SNBT as Gradle dev sync (examples/dev-progression); FTB reads <instance>/config/ftbquests/
+    from(layout.projectDirectory.dir('examples/dev-progression/ftbquests')) {
+        into 'overrides/config/ftbquests'
+    }
+    from(jarTask.flatMap { it.archiveFile }) {
+        into 'overrides/mods'
+    }
+}
+
+def curseforgeServerManifestOut = layout.buildDirectory.file('tmp/curseforge-server/manifest.json')
+
+tasks.register('writeCurseforgeServerManifest') {
+    group = 'distribution'
+    description = 'Writes build/tmp/curseforge-server/manifest.json (client manifest minus server-pack-excluded-project-ids.json).'
+    def manifestIn = layout.projectDirectory.file('modpack/curseforge/manifest.json')
+    def excludedIn = layout.projectDirectory.file('modpack/curseforge/server-pack-excluded-project-ids.json')
+    inputs.files(manifestIn, excludedIn)
+    outputs.file(curseforgeServerManifestOut)
+    doLast {
+        def slurp = new groovy.json.JsonSlurper()
+        def base = slurp.parse(manifestIn.asFile)
+        def rule = slurp.parse(excludedIn.asFile)
+        def excluded = rule.excludedProjectIds as Set
+        base.files = base.files.findAll { entry -> !excluded.contains(entry.projectID) }
+        base.name = "${base.name} (Server)"
+        def out = curseforgeServerManifestOut.get().asFile
+        out.parentFile.mkdirs()
+        out.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(base))
+    }
+}
+
+tasks.register('curseforgeServerPackZip', Zip) {
+    def jarTask = tasks.named('jar', Jar)
+    dependsOn jarTask, tasks.named('writeCurseforgeServerManifest')
+    group = 'distribution'
+    description = 'CurseForge server modpack zip (trimmed manifest; no client-only overrides). Upload as an Additional file on the same project.'
+    archiveFileName = "${mod_id}-modpack-${version}-curseforge-server.zip"
+    destinationDirectory = layout.buildDirectory.dir('dist')
+    duplicatesStrategy = DuplicatesStrategy.WARN
+    from(layout.projectDirectory.dir('modpack/curseforge')) {
+        exclude 'manifest.json'
+        exclude 'modlist.html'
+        exclude 'server-pack-excluded-project-ids.json'
+        exclude 'overrides/config/resourcepackoverrides.json'
+        exclude 'overrides/resourcepacks/**'
+        exclude 'overrides/shaderpacks/**'
+    }
+    from(layout.projectDirectory.dir('examples/dev-progression/ftbquests')) {
+        into 'overrides/config/ftbquests'
+    }
+    from(curseforgeServerManifestOut)
+    from(jarTask.flatMap { it.archiveFile }) {
+        into 'overrides/mods'
+    }
+}
+
+tasks.register('curseforgeModpackAll') {
+    group = 'distribution'
+    description = 'Builds curseforgeModpackZip and curseforgeServerPackZip.'
+    dependsOn('curseforgeModpackZip', 'curseforgeServerPackZip')
+}

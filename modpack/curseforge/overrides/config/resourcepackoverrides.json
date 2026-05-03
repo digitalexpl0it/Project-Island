@@ -1,0 +1,10 @@
+{
+  "schema_version": 2,
+  "failed_reloads_per_session": 5,
+  "default_packs": ["file/Project_Island_menu_assets.zip"],
+  "pack_overrides": {
+    "file/Project_Island_menu_assets.zip": {
+      "force_compatible": true
+    }
+  }
+}

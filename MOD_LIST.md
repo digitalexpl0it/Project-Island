@@ -2,6 +2,7 @@
 
 This file lists **every third-party JAR** currently in **`run-server/mods/`** for this checkout (NeoForge **1.21.1**). It is the **authoritative inventory** for matching **dedicated server** and **client** installs: copy the same set into **`run-client/mods/`** unless you intentionally omit client-only stacks.
 
+- **CurseForge modpack:** [`modpack/curseforge/`](modpack/curseforge/README.md) — `manifest.json` + `overrides/`; run **`./gradlew curseforgeModpackZip`** for **`build/dist/projectisland-modpack-*-curseforge.zip`**. Extend the manifest or drop extra JARs under **`overrides/mods/`** until this list is fully covered (see **`modpack/curseforge/overrides/mods/README-SUPPLEMENT.md`**).
 - **Loader / game version:** see [README.md](README.md) — *Pinned toolchain*.
 - **Project Island** itself: `build/libs/projectisland-<version>.jar` from `./gradlew build` (Gradle dev runs often inject the mod from sources instead of dropping a copy in `run-*/mods`).
 - **Spawn tuning:** natural overworld thinning (`floatingIslandsSpawnTuning*`) **does not** apply to entity namespaces in **`floatingIslandsSpawnTuningBypassEntityNamespaces`**. Defaults include **`mowziesmobs`** and **`cnb`** (Creatures and Beasts: Continued) so those mobs are not rolled like vanilla zombies; tune in **`projectisland-common.toml`** if you want different behavior. **Existing configs** keep whatever list was already saved — add **`cnb`** there manually if you do not regenerate common config.
@@ -16,9 +17,9 @@ Sorted by filename. **Not** listed here: anything absent from `run-server/mods/`
 | `archers-neoforge-2.7.0+1.21.1.jar` | **[Archers (RPG Series)](https://modrinth.com/mod/archers)** | **Client + server** |
 | `architectury-13.0.8-neoforge.jar` | **[Architectury](https://modrinth.com/mod/architectury-api)** — shared API for mods that depend on it. | **Client + server** |
 | `azurelibarmor-neo-1.21.1-3.1.3.jar` | **[AzureLib Armor](https://modrinth.com/mod/azurelib-armor)** | **Client + server** |
-| `balm-neoforge-1.21.1-21.0.57.jar` | **Balm** — shared config / utility library (often pulled by world / QoL mods). | **Client + server** |
-| `bettervillage-neoforge-1.21.1-3.3.1.jar` | **Better village** — mod id **`bettervillage`** (village structure overhaul; **ARR** in jar metadata — confirm on the mod page before redistributing). | **Client + server** |
-| `BiomesOPlenty-neoforge-1.21.1-21.1.0.13.jar` | **[Biomes O’ Plenty](https://modrinth.com/mod/biomes-o-plenty)** — extra overworld biomes (pairs with **TerraBlender**). | **Client + server** |
+| `balm-neoforge-1.21.1-21.0.57.jar` | **Balm** — shared config / utility library (often pulled by world / QoL mods). [CurseForge modpack](modpack/curseforge/manifest.json) pins **[balm-neoforge-1.21.1-21.0.56.jar](https://www.curseforge.com/minecraft/mc-mods/balm)** (**`7420963`**); this checkout may carry **`.57`** from Modrinth — align or keep **`overrides/mods`** if you stay ahead of CF. | **Client + server** |
+| `bettervillage-neoforge-1.21.1-3.3.1.jar` | **Better village** — mod id **`bettervillage`** (village structure overhaul; **ARR** in jar metadata — confirm on the mod page before redistributing). CurseForge modpack pins **[Better Villages - NeoForge](https://www.curseforge.com/minecraft/mc-mods/better-village-neoforge)** (**`6593297`**); do **not** use **[better-village-forge](https://www.curseforge.com/minecraft/mc-mods/better-village-forge)** **`…-all.jar`** on NeoForge **21.1+**. | **Client + server** |
+| `BiomesOPlenty-neoforge-1.21.1-21.1.0.13.jar` | **[Biomes O’ Plenty](https://www.curseforge.com/minecraft/mc-mods/biomes-o-plenty)** ([Modrinth](https://modrinth.com/mod/biomes-o-plenty)) — extra overworld biomes (pairs with **TerraBlender**). **CurseForge modpack** pins **`7251965`** for this filename (`manifest.json` **220318**). | **Client + server** |
 | `bundle-api-neoforge-1.1.0.jar` | **[Bundle API](https://modrinth.com/mod/bundle-api)** | **Client + server** |
 | `cloth-config-15.0.140-neoforge.jar` | **Cloth Config** — config UI / API. | **Client + server** |
 | `CNB-1.21.1-neoforge-1.7.0.jar` | **[Creatures and Beasts: Continued](https://www.curseforge.com/minecraft/mc-mods/creatures-and-beasts-continued)** — mod id **`cnb`**. Biome-tied creatures; on floating islands density follows **island biomes** (see BOP note below). Optional **`cnb`** in **`neoforge.mods.toml`**. | **Client + server** |
@@ -32,18 +33,19 @@ Sorted by filename. **Not** listed here: anything absent from `run-server/mods/`
 | `geckolib-neoforge-1.21.1-4.8.4.jar` | **[GeckoLib](https://modrinth.com/mod/geckolib)** | **Client + server** |
 | `GlitchCore-neoforge-1.21.1-2.1.0.0.jar` | **GlitchCore** — dependency for Embeddium / rendering stack. | **Client + server** *(often bundled with client perf mods)* |
 | `jei-1.21.1-neoforge-19.27.0.340.jar` | **Just Enough Items** | **Client + server** |
-| `jupiter-2.3.7-1.21.1-neoforge.jar` | **Jupiter** — Sodium / Embeddium ecosystem library. | **Usually client** |
-| `libraryferret-neoforge-1.21.1-4.0.0.jar` | **Library Ferret** — dependency (e.g. **Mowzie’s Mobs**). | **Client + server** |
+| `jupiter-2.3.7-1.21.1-neoforge.jar` | **Jupiter** — Sodium / Embeddium ecosystem library. Pinned on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/jupiter) (**`7738312`**). | **Usually client** |
+| `libraryferret-neoforge-1.21.1-4.0.0.jar` | **Library Ferret** — dependency (e.g. **Better Villages**). Pinned on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/library-ferret-neoforge) (**`6118136`**). | **Client + server** |
 | `lootr-neoforge-1.21.1-1.11.37.119.jar` | **[Lootr](https://modrinth.com/mod/lootr)** — mod id **`lootr`**. | **Client + server** |
 | `mowziesmobs-1.21.1-1.8.2.jar` | **[Mowzie’s Mobs](https://modrinth.com/mod/mowzies-mobs)** — mod id **`mowziesmobs`**. | **Client + server** |
-| `neoculus-mc1.21.1-1.8.7.jar` | **Neoculus** — Iris-style shaders for NeoForge ( **client** ). | **Client** |
-| `owo-lib-neoforge-0.12.15.5-beta.1+1.21.jar` | **[oωo (owo-lib)](https://modrinth.com/mod/owo-lib)** | **Client + server** |
+| `neoculus-mc1.21.1-1.8.7.jar` | **Neoculus** — Iris-style shaders for NeoForge ( **client** ). Pinned on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/neoculus) (**`6787071`**). | **Client** |
+| `owo-lib-neoforge-0.12.15.5-beta.1+1.21.jar` | **[oωo (owo-lib)](https://modrinth.com/mod/owo-lib)** ([CurseForge](https://www.curseforge.com/minecraft/mc-mods/owo-lib), pin **`6785734`**) | **Client + server** |
 | `paladins-neoforge-2.7.1+1.21.1.jar` | **[Paladins & Priests (RPG Series)](https://modrinth.com/mod/paladins-and-priests)** | **Client + server** |
 | `player-animation-lib-forge-2.0.4+1.21.1.jar` | **[Player Animator](https://modrinth.com/mod/playeranimator)** | **Client + server** |
 | `puffish_skills-0.17.3-1.21-neoforge.jar` | **[Pufferfish's Skills](https://modrinth.com/mod/skills)** | **Client + server** |
 | `ranged_weapon_api-neoforge-2.3.3+1.21.1.jar` | **[Ranged Weapon API](https://modrinth.com/mod/ranged-weapon-api)** | **Client + server** |
-| `realmrpg_balloons-0.9.1-neoforge-1.21.1.jar` | **[Realm RPG: Treasure Balloons](https://modrinth.com/mod/realm-rpg-treasure-balloons)** — mod id **`realmrpg_balloons`**. PI clamps sky spawns above islands and **relocates** void-column spawns by searching nearby columns before canceling; **`floatingIslandsRealmrpgBalloons*`** in common config. | **Client + server** |
-| `resourcefullib-neoforge-1.21-3.0.12.jar` | **Resourceful Lib** — shared library used by several tech / UI mods. | **Client + server** |
+| `realmrpg_balloons-0.9.1-neoforge-1.21.1.jar` | **[Realm RPG: Treasure Balloons](https://modrinth.com/mod/realm-rpg-treasure-balloons)** ([CurseForge](https://www.curseforge.com/minecraft/mc-mods/realm-rpg-treasure-balloons), pin **`7252486`**) — mod id **`realmrpg_balloons`**. PI clamps sky spawns above islands and **relocates** void-column spawns by searching nearby columns before canceling; **`floatingIslandsRealmrpgBalloons*`** in common config. | **Client + server** |
+| `resourcefullib-neoforge-1.21-3.0.12.jar` | **Resourceful Lib** — shared library used by several tech / UI mods. Pinned on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/resourceful-lib) (**`5973188`**). | **Client + server** |
+| `ResourcePackOverrides-v21.1.0-1.21.1-NeoForge.jar` | **[Resource Pack Overrides](https://www.curseforge.com/minecraft/mc-mods/resource-pack-overrides)** — pack-default resource pack list via **`config/resourcepackoverrides.json`** (**client-focused**; safe on server). CurseForge modpack pins **`5733968`** (**`832644`**). | **Client** *(optional on headless server)* |
 | `rogues-neoforge-2.7.0+1.21.1.jar` | **[Rogues & Warriors (RPG Series)](https://modrinth.com/mod/rogues-and-warriors)** | **Client + server** |
 | `runes-neoforge-1.2.1+1.21.1.jar` | **[Runes](https://modrinth.com/mod/runes)** | **Client + server** |
 | `shield_api-neoforge-2.2.0.jar` | **[Shield API](https://modrinth.com/mod/shield-api)** | **Client + server** |
@@ -51,13 +53,13 @@ Sorted by filename. **Not** listed here: anything absent from `run-server/mods/`
 | `spell_engine-neoforge-1.9.9+1.21.1.jar` | **[Spell Engine](https://modrinth.com/mod/spell-engine)** | **Client + server** |
 | `spell_power-neoforge-1.4.6+1.21.1.jar` | **[Spell Power](https://modrinth.com/mod/spell-power)** | **Client + server** |
 | `structure_pool_api-neoforge-1.2.1+1.21.1.jar` | **[Structure Pool API](https://modrinth.com/mod/structure-pool-api)** | **Client + server** |
-| `takesapillage-neoforge-1.0.10+mc1.21.1.jar` | **[It Takes a Pillage](https://modrinth.com/mod/it-takes-a-pillage)** — mod id **`takesapillage`**; PI has controlled-outpost integration when loaded. | **Client + server** |
+| `takesapillage-neoforge-1.0.10+mc1.21.1.jar` | **[It Takes a Pillage Continuation](https://www.curseforge.com/minecraft/mc-mods/it-takes-a-pillage-continuation)** ([Modrinth](https://modrinth.com/mod/it-takes-a-pillage-continuation)) — mod id **`takesapillage`**; PI has controlled-outpost integration when loaded. CurseForge modpack pins **`7417040`** (not the legacy [**it-takes-a-pillage**](https://www.curseforge.com/minecraft/mc-mods/it-takes-a-pillage) listing). | **Client + server** |
 | `TerraBlender-neoforge-1.21.1-4.1.0.8 (1).jar` | **[TerraBlender](https://modrinth.com/mod/terrablender)** — biome layout for **Biomes O’ Plenty**. Prefer renaming to drop the **` (1)`** duplicate suffix when you next tidy `mods/`. | **Client + server** |
-| `uranus-2.4-1.21.1-neoforge.jar` | **Uranus** — Sodium / Embeddium companion library. | **Usually client** |
+| `uranus-2.4-1.21.1-neoforge.jar` | **Uranus** — Sodium / Embeddium companion library. Pinned on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/uranus) (**`6979353`**). | **Usually client** |
 | `villager-guard-autonomy.jar` | **Mob Conversion** — mod id **`mobconversion`** (villager threat / conversion behavior; pairs with Villager Guards in this pack). | **Client + server** |
 | `villager-guards-v1.1.5-1.21.1.jar` | **[Villager Guards](https://modrinth.com/mod/villager-guards)** — mod id **`mr_villager_guards`** **v1.1.5** (NeoForge **1.21.1** filename). | **Client + server** |
 | `waystones-neoforge-1.21.1-21.1.30.jar` | **[Waystones](https://modrinth.com/mod/waystones)** — mod id **`waystones`**; PI syncs island HUD after activation when loaded. | **Client + server** |
-| `Wings Of Fire V1.0 - NeoForge 1.21.1.jar` | **[Wings Of Fire!](https://modrinth.com/mod/wings-of-fire!)** — mod id **`wings_of_fire`**. | **Client + server** |
+| `Wings Of Fire V1.0 - NeoForge 1.21.1.jar` | **[Wings Of Fire!](https://www.curseforge.com/minecraft/mc-mods/the-wings-of-fire)** (CurseForge) · [Modrinth](https://modrinth.com/mod/wings-of-fire!) — mod id **`wings_of_fire`** (phoenix mounts / PI loot bridge). Uses slug **`the-wings-of-fire`**, not the unrelated [**wings-of-fire**](https://www.curseforge.com/minecraft/mc-mods/wings-of-fire) project. Pinned in **`modpack/curseforge/manifest.json`**. | **Client + server** |
 | `wizards-neoforge-2.7.1+1.21.1.jar` | **[Wizards (RPG Series)](https://modrinth.com/mod/wizards)** | **Client + server** |
 | `xaerominimap-neoforge-1.21.1-25.3.10.jar` | **Xaero’s Minimap** | **Client + server** |
 | `xaeroworldmap-neoforge-1.21.1-1.40.11.jar` | **Xaero’s World Map** | **Client + server** |
@@ -81,7 +83,7 @@ WoF adds global loot to many vanilla structure tables; Project Island can add **
 
 ## Optional / not in this list
 
-- **Shader packs, HD resource packs** — player-installed; see [README.md](README.md) *Resource packs*.
+- **Shader packs, HD resource packs** — player-installed; see [README.md](README.md) *Resource packs*. Dev trees may keep shaders under **`run-client/shaderpacks/`** (e.g. **Complementary Reimagined**); redistribution in a CurseForge pack requires checking the shader license — see [`modpack/curseforge/overrides/shaderpacks/README.md`](modpack/curseforge/overrides/shaderpacks/README.md).
 - **Extra QoL** — add JARs to **`run-client/mods`** / **`run-server/mods`** **and** a row in the table above when they become part of the tracked set.
 
 ## Progression data (not mods)
