@@ -1,0 +1,243 @@
+{
+	default_hide_dependency_lines: false
+	default_quest_shape: "circle"
+	filename: "rpg_series"
+	group: ""
+	icon: { Count: 1, id: "spell_engine:spell_binding" }
+	id: "82E113A7D6CB440F"
+	images: [ ]
+	order_index: 1
+	progression_mode: "flexible"
+	quest_links: [ ]
+	quests: [
+		{
+			dependencies: ["E1F0A000000000002"]
+			description: [
+				"&7When:&r After **Iron Age** (you have smelted iron) — same gate as the harpoon line in the **Project Island** chapter."
+				""
+				"&7What:&r This chapter assumes the pinned **Skill Tree (RPG Series)** stack is installed — **Pufferfish's Skills**, **Skill Tree**, **Spell Engine**, and the **Archers / Paladins / Rogues / Wizards** class mods (see **`MOD_LIST.md`** in the repository)."
+				""
+				"&7Why:&r Classes, spells, and skill points are **mod-driven**; quests here only **nudge** you through JEI-friendly milestones (binding table, starter gear, UI)."
+				""
+				"Check this once you have read the note — no rush before iron."
+			]
+			icon: { Count: 1, id: "minecraft:iron_sword" }
+			id: "0197E7EFCC154610"
+			rewards: [{
+				id: "DFA836FC93DA4132"
+				type: "xp"
+				xp: 15
+			}]
+			tasks: [{
+				id: "4DB586DCD31F44C3"
+				title: "Read"
+				type: "checkmark"
+			}]
+			title: "After Iron: Classes \& Skills"
+			x: 0.0d
+			y: 0.0d
+		}
+		{
+			dependencies: ["0197E7EFCC154610"]
+			description: [
+				"&7Skill tree:&r Press **K** (default key — rebind under **Controls** if needed) to open **Pufferfish's Skills** / **Skill Tree** tabs."
+				""
+				"&7Tabs:&r Use the UI tabs to switch between **skill points**, **class trees**, and related views added by the RPG Series mods."
+				""
+				"&7Tip:&r If **K** does nothing, confirm the stack is installed on **client and server** and that keys are not conflicting."
+			]
+			icon: { Count: 1, id: "minecraft:book" }
+			id: "2457A88084014702"
+			rewards: [{
+				id: "E76D35A28CE44EA6"
+				type: "xp"
+				xp: 10
+			}]
+			tasks: [{
+				id: "B919040D3E0F457B"
+				title: "Opened the skill UI (default K)"
+				type: "checkmark"
+			}]
+			title: "Open Your Skill Tree"
+			x: -3.0d
+			y: -1.75d
+		}
+		{
+			dependencies: ["2457A88084014702"]
+			description: [
+				"&7Do:&r In the skill UI, **spend at least one skill point** on any unlocked node you like."
+				""
+				"&7Why:&r Locks in that you are past the \"just browsing\" step — different classes unlock different branches."
+				""
+				"This book cannot verify the exact node; honor-system checkmark after you commit a point."
+			]
+			icon: { Count: 1, id: "minecraft:experience_bottle" }
+			id: "3D212DCF7DE64304"
+			rewards: [
+				{
+					id: "D7C263BD4E614538"
+					item: { Count: 8, id: "minecraft:lapis_lazuli" }
+					type: "item"
+				}
+				{
+					id: "0A00581611294618"
+					type: "xp"
+					xp: 35
+				}
+			]
+			tasks: [{
+				id: "200DF1CA425B46DE"
+				title: "Spent one skill point"
+				type: "checkmark"
+			}]
+			title: "Spend a Skill Point"
+			x: -3.0d
+			y: -3.5d
+		}
+		{
+			dependencies: ["0197E7EFCC154610"]
+			description: [
+				"&7Craft:&r Build the **Spell Binding** workstation from **Spell Engine** — recipe uses **book**, **amethyst shards**, **gold**, and **polished diorite** (see **JEI**)."
+				""
+				"&7Why:&r This block is how many **RPG Series** spells get **assigned** to weapons or turned into books — exact UX depends on mod version."
+				""
+				"&7Item id:&r The placed block drops / crafts as **`spell_engine:spell_binding`** if JEI search differs from the display name."
+			]
+			icon: { Count: 1, id: "spell_engine:spell_binding" }
+			id: "810CB440F2AC4623"
+			rewards: [{
+				id: "A05D48319B7D451E"
+				item: { Count: 4, id: "minecraft:amethyst_shard" }
+				type: "item"
+			}]
+			tasks: [{
+				id: "6C6D9685728C462C"
+				item: { Count: 1, id: "spell_engine:spell_binding" }
+				type: "item"
+			}]
+			title: "Craft a Spell Binding Table"
+			x: 3.0d
+			y: -1.75d
+		}
+		{
+			dependencies: ["810CB440F2AC4623"]
+			description: [
+				"&7Try:&r Place the binding table, open it, and either **bind a spell** onto a compatible weapon **or** produce a spell **book** / scroll your build supports."
+				""
+				"&7Docs:&r Follow **Spell Engine** + your class mod tooltips; balance is intentionally left to the mods."
+				""
+				"Check this after you have run through the flow once (honor system)."
+			]
+			icon: { Count: 1, id: "minecraft:blaze_powder" }
+			id: "A6662569319344F5"
+			rewards: [{
+				id: "CE6E7F9D451E4500"
+				type: "xp"
+				xp: 40
+			}]
+			tasks: [{
+				id: "9A0E83898A554E2A"
+				title: "Used Spell Engine binding once"
+				type: "checkmark"
+			}]
+			title: "Bind or Book a Spell"
+			x: 3.0d
+			y: -3.5d
+		}
+		{
+			dependencies: ["0197E7EFCC154610"]
+			description: [
+				"&7Pick one:&r Early **RPG Series** melee / ranged / caster starters — **JEI** names may differ slightly from ids."
+				""
+				"&7Crafting:&r Most use **class workbenches** or vanilla grids shown in **JEI** once you know your mod's wood tier."
+				""
+				"Completing **any one** row below satisfies this quest."
+			]
+			icon: { Count: 1, id: "archers:flint_spear" }
+			id: "CD23F6B685054315"
+			rewards: [{
+				id: "FE6E1AF0C5EE4473"
+				type: "xp"
+				xp: 25
+			}]
+			subtitle: "Any starter weapon"
+			tasks: [
+				{
+					id: "1FF5DEFC82494C14"
+					item: { Count: 1, id: "archers:flint_spear" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "AFB6EC54BE56468F"
+					item: { Count: 1, id: "rogues:flint_dagger" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "C5012319F17F4C68"
+					item: { Count: 1, id: "paladins:acolyte_wand" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "4F4A563A7ADA421A"
+					item: { Count: 1, id: "wizards:wand_novice" }
+					optional_task: true
+					type: "item"
+				}
+			]
+			title: "Your First Class Weapon"
+			x: -1.75d
+			y: -5.25d
+		}
+		{
+			dependencies: ["0197E7EFCC154610"]
+			description: [
+				"&7Armor:&r Each class line has an early **helmet / hood / hat** tier — craft **one piece** you like."
+				""
+				"&7Optional:&r Greaves / chest / robes often gate behind the same workbenches; this step only needs **one** armor item."
+				""
+				"Completing **any one** row below satisfies this quest. If a task never detects, verify the id with **JEI** / `/give` on a test world."
+			]
+			icon: { Count: 1, id: "wizards:arcane_robe_head" }
+			id: "D9A2FB0602A244EE"
+			rewards: [{
+				id: "877E1E6043CF47CD"
+				item: { Count: 4, id: "minecraft:iron_ingot" }
+				type: "item"
+			}]
+			subtitle: "Any starter helmet"
+			tasks: [
+				{
+					id: "310ECA9BE8EE416C"
+					item: { Count: 1, id: "archers:archer_armor_head" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "04B11CDCF69244C7"
+					item: { Count: 1, id: "rogues:assassin_armor_head" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "CF4DC750745E4FF7"
+					item: { Count: 1, id: "paladins:priest_robe_head" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "E18C44F8B6AA4D01"
+					item: { Count: 1, id: "wizards:arcane_robe_head" }
+					optional_task: true
+					type: "item"
+				}
+			]
+			title: "Your First Class Armor Piece"
+			x: 1.75d
+			y: -5.25d
+		}
+	]
+	title: "RPG Series \& Skills"
+}

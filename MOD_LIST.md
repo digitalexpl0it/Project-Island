@@ -29,6 +29,35 @@ This file is the **authoritative manifest** for the **official Project Island mo
 
 **Note:** When bumping Villager Guards, pick the **NeoForge** build for **1.21.1** from the **[Modrinth versions page](https://modrinth.com/mod/villager-guards/versions)** and update this table’s filename if it changes.
 
+### RPG Series — Skill Tree stack (classes + skills + spells)
+
+**Pinned together for NeoForge 1.21.1** (resolved from [Skill Tree (RPG Series)](https://modrinth.com/mod/skill-tree) **1.4.4+1.21.1** plus required class mods and transitive libraries via Modrinth **required** dependencies). **Skill Tree** mod id: **`skill_tree_rpgs`**. Several RPG Series mods are **ARR**; **Spell Engine** is **GPL-3.0** — see each Modrinth page before redistributing.
+
+**Also required from the core table:** **`cloth-config-15.0.140-neoforge.jar`** (already listed above).
+
+| JAR (exact) | Role | Side |
+|-------------|------|------|
+| `skill_tree-neoforge-1.4.4+1.21.1.jar` | **[Skill Tree (RPG Series)](https://modrinth.com/mod/skill-tree)** — skill trees for the classes below. | **Client + server** |
+| `puffish_skills-0.17.3-1.21-neoforge.jar` | **[Pufferfish's Skills](https://modrinth.com/mod/skills)** — XP / skill points foundation. | **Client + server** |
+| `archers-neoforge-2.7.0+1.21.1.jar` | **[Archers (RPG Series)](https://modrinth.com/mod/archers)** | **Client + server** |
+| `paladins-neoforge-2.7.1+1.21.1.jar` | **[Paladins \& Priests (RPG Series)](https://modrinth.com/mod/paladins-and-priests)** | **Client + server** |
+| `rogues-neoforge-2.7.0+1.21.1.jar` | **[Rogues \& Warriors (RPG Series)](https://modrinth.com/mod/rogues-and-warriors)** | **Client + server** |
+| `wizards-neoforge-2.7.1+1.21.1.jar` | **[Wizards (RPG Series)](https://modrinth.com/mod/wizards)** | **Client + server** |
+| `spell_engine-neoforge-1.9.9+1.21.1.jar` | **[Spell Engine](https://modrinth.com/mod/spell-engine)** — spell runtime (GPL-3.0). | **Client + server** |
+| `spell_power-neoforge-1.4.6+1.21.1.jar` | **[Spell Power](https://modrinth.com/mod/spell-power)** | **Client + server** |
+| `ranged_weapon_api-neoforge-2.3.3+1.21.1.jar` | **[Ranged Weapon API](https://modrinth.com/mod/ranged-weapon-api)** | **Client + server** |
+| `shield_api-neoforge-2.2.0.jar` | **[Shield API](https://modrinth.com/mod/shield-api)** | **Client + server** |
+| `runes-neoforge-1.2.1+1.21.1.jar` | **[Runes](https://modrinth.com/mod/runes)** | **Client + server** |
+| `structure_pool_api-neoforge-1.2.1+1.21.1.jar` | **[Structure Pool API](https://modrinth.com/mod/structure-pool-api)** | **Client + server** |
+| `bundle-api-neoforge-1.1.0.jar` | **[Bundle API](https://modrinth.com/mod/bundle-api)** | **Client + server** |
+| `accessories-neoforge-1.1.0-beta.53+1.21.1.jar` | **[Accessories](https://modrinth.com/mod/accessories)** | **Client + server** |
+| `azurelibarmor-neo-1.21.1-3.1.3.jar` | **[AzureLib Armor](https://modrinth.com/mod/azurelib-armor)** | **Client + server** |
+| `player-animation-lib-forge-2.0.4+1.21.1.jar` | **[Player Animator](https://modrinth.com/mod/playeranimator)** | **Client + server** |
+| `forgified-fabric-api-0.116.7+2.2.4+1.21.1.jar` | **[Forgified Fabric API](https://modrinth.com/mod/forgified-fabric-api)** | **Client + server** |
+| `owo-lib-neoforge-0.12.15.5-beta.1+1.21.jar` | **[oωo (owo-lib)](https://modrinth.com/mod/owo-lib)** | **Client + server** |
+
+**RPG stack bumps:** update **Skill Tree** first, then re-resolve **required** versions on Modrinth for each sibling mod (classes + `spell_engine` + `puffish_skills`) so game versions and loaders stay aligned.
+
 **Not in the official pack (by design):** **[Create Aeronautics](https://modrinth.com/mod/create-aeronautics)** (and its **Sable** dependency) and **[Valkyrien Skies](https://modrinth.com/mod/valkyrien-skies)** — whole-island flight / rigid assemblies are **not** targeted with those mods right now. Remove their JARs from `run-*/mods` if you still have old copies.
 
 **Wings Of Fire + Project Island:** the WoF mod adds its own global loot modifiers for vanilla tables (mansions, outposts, mineshafts, nether structures, etc.). This repository also ships **optional bridge loot modifiers** (under `data/projectisland/loot_modifiers/`, registered when **`wings_of_fire`** is loaded) that add the same egg loot rolls to **village** chests, **`minecraft:chests/simple_dungeon`** (monster-room style dungeons), **jungle temples**, and **trial chambers** chests — structures that tend to appear on floating islands. Red / Gilded eggs still primarily come from **Nether** loot as in WoF’s docs.
@@ -42,7 +71,7 @@ This file is the **authoritative manifest** for the **official Project Island mo
 
 ## Progression data (not mods)
 
-Official pack expects the mirrored config from **`examples/dev-progression/`** (FTB Quests chapters + ProgressiveStages TOML). See [README.md](README.md) *Progress UI* and *Dev runs*.
+Official pack expects the mirrored config from **`examples/dev-progression/`** — FTB **`quests/chapters/project_island.snbt`** (islands, WoF, harpoon) plus **`quests/chapters/rpg_series.snbt`** (Skill Tree **K**, Spell Engine **`spell_engine:spell_binding`**, starter class weapons/armor), and ProgressiveStages TOML. See [README.md](README.md) *Progress UI* and *Dev runs*.
 
 ## Updating this list
 

@@ -9,11 +9,11 @@ This repository is a **NeoForge** Minecraft **mod + modpack + dedicated server**
 
 ## Product intent
 
-- **Core loop (modpack):** **FTB Quests**, staged unlocks (**ProgressiveStages**), exploration and dungeons (**Lootr** per-player chests when pinned), mythical mounts (e.g. **Wings Of Fire**), plus territory drama on scattered islands.
-- **Optional capture meta:** raid/travel via **ropes**, **mounts**, **Create** contraptions, and dimensions — **not** **Create Aeronautics** or **Valkyrien Skies** in the current official pack. Whole-island propulsion is **deferred / custom** if revisited ([TODO.md](TODO.md) Phase 6 note).
-- Islands are **tagged** (e.g. available → claimed); **capture / steal** is in scope—detail win conditions and travel mix in [TODO.md](TODO.md).
-- **Tech / advancement tree** gates propulsion and other branches (defense, docking, power); **unlock flags and thrust caps must be enforced on the server**, never trusted from the client alone.
-- **Ownership, capture, and unlocks** live in **saved data**; respect performance limits for moving assemblies.
+- **Core loop (modpack):** **FTB Quests** (**Project Island** + **RPG Series** chapters in dev-progression), staged unlocks (**ProgressiveStages**), exploration and dungeons (**Lootr** when pinned), **Skill Tree (RPG Series)** + **Spell Engine** when pinned ([MOD_LIST.md](MOD_LIST.md)), mythical mounts (e.g. **Wings Of Fire**), **public rope ziplines**, shared **starter hub** data.
+- **Travel:** **ropes**, **mounts**, **Create** contraptions, optional dimensions — **not** **Create Aeronautics** or **Valkyrien Skies** in the current official pack. Whole-island propulsion is **shelved** ([TODO.md](TODO.md)).
+- **Island claiming was removed** (legacy rows may still deserialize). **Capture / raid / steal** win conditions are **roadmap** ([TODO.md](TODO.md) Phase 5), not current gameplay.
+- **Tech / advancement tree** (design reference) still implies server-enforced unlocks for any future mobility meta; **rope tiers** and RPG gates today use **advancements** / **saved data** on the server.
+- **Starter homes, rope links, and HUD-relevant state** live in **saved data**; respect performance limits for moving assemblies if Phase 6 ever returns.
 
 ## Research and reuse
 

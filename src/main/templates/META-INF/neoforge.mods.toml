@@ -10,9 +10,9 @@ version="${mod_version}"
 displayName="${mod_name}"
 description='''
 High-fantasy mythical RPG on procedural floating islands in the void: quests, staged
-progression, dungeons and mounts (modpack stack), plus server-authoritative island rules.
-Travel uses ropes, mounts, and tech like Create—not Valkyrien Skies or Create Aeronautics.
-See README for pillars and roadmap.
+progression, dungeons, Skill Tree RPG classes (when pinned), and mounts (modpack stack),
+plus server-authoritative island rules. Travel uses ropes, mounts, and tech like Create—
+not Valkyrien Skies or Create Aeronautics. See README for pillars and roadmap.
 '''
 
 [[dependencies.${mod_id}]]
@@ -52,6 +52,55 @@ side="BOTH"
 
 [[dependencies.${mod_id}]]
 modId="lootr"
+type="optional"
+versionRange="[1.0,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="skill_tree_rpgs"
+type="optional"
+versionRange="[1.0,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="puffish_skills"
+type="optional"
+versionRange="[0.1,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="spell_engine"
+type="optional"
+versionRange="[1.0,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="archers"
+type="optional"
+versionRange="[1.0,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="paladins"
+type="optional"
+versionRange="[1.0,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="rogues"
+type="optional"
+versionRange="[1.0,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="wizards"
 type="optional"
 versionRange="[1.0,)"
 ordering="NONE"

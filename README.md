@@ -1,6 +1,6 @@
 # Project Island
 
-A NeoForge Minecraft **server + client** mod and **modpack** foundation: a **high-fantasy mythical RPG** set on **procedurally generated floating islands** in the void—**FTB Quests**, staged progression, mounts (e.g. **Wings Of Fire**), dungeon-friendly loot (**Lootr**), and room for magic/classes via pinned third-party mods ([MOD_LIST.md](MOD_LIST.md)). Underneath that, **server-authoritative** island rules, HUD/navigation, ropes, and optional **territory / capture** goals persist with the world.
+A NeoForge Minecraft **server + client** mod and **modpack** foundation: a **high-fantasy mythical RPG** set on **procedurally generated floating islands** in the void—**FTB Quests**, staged progression, mounts (e.g. **Wings Of Fire**), dungeon-friendly loot (**Lootr**), and **classes / skill trees** via the pinned **Skill Tree (RPG Series)** stack ([MOD_LIST.md](MOD_LIST.md)). **Server-authoritative** island data drives **starter placement**, **public rope ziplines**, HUD/navigation, and worldgen helpers; **capture / raid meta** is **roadmap-only** ([TODO.md](TODO.md) Phase 5), not current gameplay.
 
 Players join the **overworld** as floating-island terrain (no portal lobby for the core experience). Island tech and outcomes stay **server-driven**, not client-trusted.
 
@@ -8,7 +8,7 @@ Players join the **overworld** as floating-island terrain (no portal lobby for t
 
 1. **RPG progression** — Quest-led arcs, loot, mounts, and (when pinned) magic or class identity—gated with **ProgressiveStages** / server checks where it matters.
 2. **Survival on sky islands** — Resources, farming, mining, and building on bounded landmasses over the void; structures and dungeons spawn on solid surfaces.
-3. **Territory and spectacle** — Claim, defend, raid, or **steal** islands where rules exist; alliances optional. Mythical tone and exploration complement PvP goals.
+3. **Exploration and spectacle** — Mythical tone, dungeons, mounts, and sky-island logistics (**ropes**, **Create**, WoF). **Island claiming was removed**; ziplines are **public**. Future **capture / PvP** rules would build on saved data and server checks ([TODO.md](TODO.md) Phase 5), not client trust.
 4. **Mobility** — **Ropes**, **mounts** (e.g. WoF), vanilla gear, and **Create**-style contraptions for local tech—not **Create Aeronautics** or **Valkyrien Skies** in the official pack. Optional **whole-island movement** remains a **future / custom** design topic if you revisit capture meta.
 
 ## Propulsion tiers (design reference only — not VS / Create Aeronautics)
@@ -27,7 +27,7 @@ Other branches (defense, docking / merge, power, automation) can get **their own
 - [CHANGELOG.md](CHANGELOG.md) — notable changes ([Keep a Changelog](https://keepachangelog.com/en/1.1.0/) style).
 - [MOD_LIST.md](MOD_LIST.md) — **required third-party JARs** for the official modpack (pinned filenames; install into your local **`run-client/mods`** / **`run-server/mods`** for Gradle dev runs — those trees are **gitignored**). Villager defense: **[Villager Guards](https://modrinth.com/mod/villager-guards)** (**`villager-guards-v1.1.5.jar`**) is listed **first** there; avoid stacking other guard/conversion mods without testing.
 
-**Current focus:** **Phase 2 is done**; **Phase 4** includes shared starter hub, public **rope / harpoon** links (tiered span/HP), **rope surfing**, **linked-anchor mining** (damages rope HP), **larger islands** (`floatingIslandHorizontalRadiusBonus`), **optional ore thinning** (`floatingIslandsOreMultiplier*`), island HUD, and **optional modpack** pins (**Lootr**, **Wings Of Fire**, FTB stack — [MOD_LIST.md](MOD_LIST.md)). **Player progression UI:** **FTB Quests** + **ProgressiveStages** under **`examples/dev-progression/`** (copy into **`run-client`** / **`run-server`** `config/` for dev). **Void rescue** prefers **procedural island centers** and skips ticks while **rope surfing**. Pack direction: **high-fantasy mythical RPG** on floating islands — see pillars above and [TODO.md](TODO.md).
+**Current focus:** **Phase 2 is done**; **Phase 4** includes shared starter hub, public **rope / harpoon** links (tiered span/HP), **rope surfing**, **linked-anchor mining** (damages rope HP), **larger islands** (`floatingIslandHorizontalRadiusBonus`), **optional ore thinning** (`floatingIslandsOreMultiplier*`), island HUD, and **modpack** pins (**Lootr**, **Wings Of Fire**, **Skill Tree + RPG Series**, FTB stack — [MOD_LIST.md](MOD_LIST.md)). **Player progression UI:** **FTB Quests** (intro **Project Island** chapter + **RPG Series \& Skills** chapter after Iron Age) + **ProgressiveStages** under **`examples/dev-progression/`** (copy into **`run-client`** / **`run-server`** `config/` for dev). **Void rescue** prefers **procedural island centers** and skips ticks while **rope surfing**. Pack direction: **high-fantasy mythical RPG** on floating islands — see pillars above and [TODO.md](TODO.md).
 
 ## Target stack
 
@@ -54,7 +54,7 @@ For **glowing ores / neon** style, you usually want a **shader** (e.g. Complemen
 
 Vanilla advancements can still exist for lightweight toasts/milestones, but they're not the core progression UI for Project Island.
 
-**Dev runs:** a starter quest chapter and Project Island–specific stage files live under `examples/dev-progression/`. **`./gradlew runClient`** / **`runServer`** automatically runs **`syncDevProgressionConfigs*`** first, copying into **`run-client/config/`** and **`run-server/config/`** so **FTB Quests** sees **`config/ftbquests/quests/`** (if those folders are missing, the quest book opens **empty**). Run **`./gradlew syncDevProgressionConfigs`** manually after editing snippets, or copy the same trees into any other instance’s **`config/`**. Those game dirs are **gitignored**. Use **`/progressivestages reload`** after editing stage TOML (and **`/progressivestages validate`** for typos). **`triggers.toml`** maps **`minecraft:story/mine_stone` → `stone_age`** and **`minecraft:story/smelt_iron` → `iron_age`** so stock **`iron_age.toml`** locks match vanilla progression (and **JEI** shows the **Harpoon Gun** after smelting iron). The harpoon recipe is **`data/projectisland/recipe/harpoon_gun.json`**.
+**Dev runs:** FTB quest chapters (**`project_island`** + **`rpg_series`**) and Project Island–specific stage files live under `examples/dev-progression/`. **`./gradlew runClient`** / **`runServer`** automatically runs **`syncDevProgressionConfigs*`** first, copying into **`run-client/config/`** and **`run-server/config/`** so **FTB Quests** sees **`config/ftbquests/quests/`** (if those folders are missing, the quest book opens **empty**). Run **`./gradlew syncDevProgressionConfigs`** manually after editing snippets, or copy the same trees into any other instance’s **`config/`**. Those game dirs are **gitignored**. Use **`/progressivestages reload`** after editing stage TOML (and **`/progressivestages validate`** for typos). **`triggers.toml`** maps **`minecraft:story/mine_stone` → `stone_age`** and **`minecraft:story/smelt_iron` → `iron_age`** so stock **`iron_age.toml`** locks match vanilla progression (and **JEI** shows the **Harpoon Gun** after smelting iron). The harpoon recipe is **`data/projectisland/recipe/harpoon_gun.json`**.
 
 ## Learning from existing work
 
@@ -91,13 +91,13 @@ flowchart LR
     Worldgen[Chunk generator]
     IslandDB[Island SavedData]
     Unlocks[Tech unlock state]
-    Rules[Claim capture rules]
-    Propulsion[Propulsion caps]
+    Ropes[Ropes \& starter homes]
+    Propulsion[Propulsion design caps]
   end
   ModJar -->|same mod id| server
   Worldgen --> IslandDB
   Unlocks --> Propulsion
-  Rules --> IslandDB
+  Ropes --> IslandDB
   IslandDB --> Propulsion
 ```
 
@@ -120,7 +120,7 @@ Details:
 
 ### Rope links, surfing & island resources (common config)
 
-All keys live in **`config/projectisland-common.toml`** (same file as biome weights and HUD). **Dedicated server:** avoid keeping this file open in an editor that **auto-saves** while the server runs — NeoForge may log repeated **“Configuration file … is not correct. Correcting”** / `ConfigWatcher` **DEBUG** lines when the disk file and in-memory spec fight. Close the tab or turn editor sync off; after a mod upgrade, restart once so new keys merge. To quiet NeoForge's config watcher only, raise Log4j **`net.neoforged.fml.config`** to **INFO** in your server's log4j2 config. **Rope stress / HP:** **`ropeLinkMaxHealth`**, **`ropeLinkStressTickInterval`**, **`ropeLinkStrainRatioThreshold`**, **`ropeLinkStrainDamagePerTick`** (set strain damage to **0** to disable overstretch while keeping health sync). **Mining a linked rope anchor** (survival): each completed break attempt damages **link HP** until the rope snaps; tune **`ropeAnchorLinkDamagePerDigTick`** ( **`0`** = vanilla instant break). **Rope surfing:** empty-hand **use** on a linked anchor (not sneaking; sneak remains **secondary claim**) slides along the sag curve toward the other anchor — **`ropeTraversalSurfEnabled`**, **`ropeTraversalSurfMinHealthFraction`**, **`ropeTraversalSurfSpeedBlocksPerSecond`**, **`ropeTraversalSurfCooldownTicks`**, **`ropeTraversalSurfMaxDurationTicks`**. Void rescue does not run the per-tick rescue path while surfing. **Island size:** **`floatingIslandHorizontalRadiusBonus`** (blocks added to procedural horizontal radius — helps villages / flat tops). **Ore density:** **`floatingIslandsOreMultiplierCoal`** … **`Emerald`** — each is a **keep probability** `0..1` after vanilla decoration ( **`1.0`** = unchanged; lower thins that ore category on floating-island chunks). **Rope legacy keys (ignored — ziplines are not topology- or claim-gated):** **`ropeTopologyEnabled`**, **`ropeTopologyMaxDepthFromStarter`**, **`ropeAllowTertiaryIslandLinks`**, **`ropeMainDirectSpokeCap`**, **`ropeSisterOutboundCap`**, **`autoClaimIslandOnRopeLink`**, **`secondaryClaimRequiresRopeLink`**. **Client** `projectisland-client.toml`: **`ropeLinkHealthBarsShow`**, **`ropeLinksShow`**. Island HUD: **`islandHudTitleColorMode`**, **`islandHudPanelFillOpacity`**, **`islandHudPanelScale`**.
+All keys live in **`config/projectisland-common.toml`** (same file as biome weights and HUD). **Dedicated server:** avoid keeping this file open in an editor that **auto-saves** while the server runs — NeoForge may log repeated **“Configuration file … is not correct. Correcting”** / `ConfigWatcher` **DEBUG** lines when the disk file and in-memory spec fight. Close the tab or turn editor sync off; after a mod upgrade, restart once so new keys merge. To quiet NeoForge's config watcher only, raise Log4j **`net.neoforged.fml.config`** to **INFO** in your server's log4j2 config. **Rope stress / HP:** **`ropeLinkMaxHealth`**, **`ropeLinkStressTickInterval`**, **`ropeLinkStrainRatioThreshold`**, **`ropeLinkStrainDamagePerTick`** (set strain damage to **0** to disable overstretch while keeping health sync). **Mining a linked rope anchor** (survival): each completed break attempt damages **link HP** until the rope snaps; tune **`ropeAnchorLinkDamagePerDigTick`** ( **`0`** = vanilla instant break). **Rope surfing:** empty-hand **use** on a linked anchor (**do not sneak** — sneak **does not claim** anything; it **skips** surf start on use and **cancels** surfing while you ride) slides along the sag curve toward the other anchor — **`ropeTraversalSurfEnabled`**, **`ropeTraversalSurfMinHealthFraction`**, **`ropeTraversalSurfSpeedBlocksPerSecond`**, **`ropeTraversalSurfCooldownTicks`**, **`ropeTraversalSurfMaxDurationTicks`**. Void rescue does not run the per-tick rescue path while surfing. **Island size:** **`floatingIslandHorizontalRadiusBonus`** (blocks added to procedural horizontal radius — helps villages / flat tops). **Ore density:** **`floatingIslandsOreMultiplierCoal`** … **`Emerald`** — each is a **keep probability** `0..1` after vanilla decoration ( **`1.0`** = unchanged; lower thins that ore category on floating-island chunks). **Rope legacy keys (ignored — ziplines are not topology- or claim-gated):** **`ropeTopologyEnabled`**, **`ropeTopologyMaxDepthFromStarter`**, **`ropeAllowTertiaryIslandLinks`**, **`ropeMainDirectSpokeCap`**, **`ropeSisterOutboundCap`**, **`autoClaimIslandOnRopeLink`**, **`secondaryClaimRequiresRopeLink`**. **Client** `projectisland-client.toml`: **`ropeLinkHealthBarsShow`**, **`ropeLinksShow`**. Island HUD: **`islandHudTitleColorMode`**, **`islandHudPanelFillOpacity`**, **`islandHudPanelScale`**.
 
 **Rope rendering (client):** the chain mesh samples sag and attachment points from **`RopeCurveUtil`** (same math as server surfing) so the drawn rope matches motion. UV tiling along the span is tuned so vanilla **`chain.png`** reads at a readable scale (not microscopic repeats).
 
@@ -239,4 +239,4 @@ Bundled or third-party assets (resource packs, textures copied from other mods, 
 
 ---
 
-_Documentation last revised **30 April 2026** (rope surf + ore/island tuning + rope rendering; FTB/dev-progression; void rescue)._
+_Documentation last revised **2 May 2026** (README aligned with public ziplines + roadmap capture meta; FTB **RPG Series** chapter; rope surf / HUD notes)._
