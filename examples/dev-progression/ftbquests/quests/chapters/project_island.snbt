@@ -7,14 +7,20 @@
 	id: "E69D15C0D792E29C"
 	images: [ ]
 	order_index: 0
-	progression_mode: "linear"
+	progression_mode: "flexible"
 	quest_links: [ ]
 	quests: [
 		{
 			description: [
-				"You survive on &eprocedural floating islands&r in the overworld."
+				"You play on &eprocedural floating islands&r in the overworld — mostly air between bases."
 				""
-				"This book matches the same steps as &bProgressiveStages&r (your stage list): &bharpoon islands together&r → &9upgrade rope strength&r → &dclaim more land&r."
+				"&7Mounts:&r **Wings Of Fire** adds **petrified phoenix eggs** to loot (vanilla structures plus this pack’s extra rolls on village, dungeon, jungle temple, and trial chamber chests when Lootr converts them). Hatch an egg on the &eleft branch&r."
+				""
+				"&7Travel:&r **Project Island** ropes are **public ziplines**: craft a **Harpoon Gun**, shoot two anchors on island surfaces, then **rope surf** along the line (&eempty hand&r, &enot sneaking&r — see the **right branch**). Tiered rope span and durability unlock from advancements after the harpoon step."
+				""
+				"&7ProgressiveStages:&r **Iron Age** still gates iron tools and the harpoon recipe in **JEI** until you smelt iron (vanilla story advancement). Stages match this book where noted."
+				""
+				"&7Foundation:&r The **column above** this card tracks vanilla **Stone / Iron**, reading your **island id**, **Nether** access and **blaze** fuel for WoF crafts, and a first **Create** alloy."
 			]
 			id: "B1DD98FB3E338D81"
 			rewards: [{
@@ -35,14 +41,421 @@
 		{
 			dependencies: ["B1DD98FB3E338D81"]
 			description: [
-				"&7How to get one:&r You need &6iron ingots&r first — with &bProgressiveStages&r, iron and this recipe stay hidden in &eJEI&r until you unlock &6Iron Age&r (smelt iron ore for the vanilla story advancement). Then &6craft&r a &6Harpoon Gun&r: &73 iron ingots&r top row, &7string · tripwire hook · string&r middle, &7stick&r under the hook. In creative, grab one from the &eTools and Utilities&r tab."
+				"&7Why:&r Vanilla **Stone Age** ties into **ProgressiveStages** so logs/planks/stone-tier recipes behave like the stock pack (when those stages are enabled)."
 				""
-				"&7How to use it:&r In the &bfloating-islands overworld&r, &euse&r (right-click) while aiming at &esolid blocks on an island&r to place the &efirst anchor&r. Use again on a &edifferent island&r within range to finish a &erope link&r. Messages above the hotbar explain if something blocked the shot."
-				""
-				"&7Rules in short:&r new links must stay on your &estarter island network&r (your hub plus a ring of neighbors unless the server enables deeper hops). If the &esecond&r shot fails a rule, the &efirst&r anchor is cleared so you can try elsewhere."
+				"&7Do:&r Punch wood → planks → sticks → **wooden pickaxe**, then mine **stone** with it (or complete the same via your starter gear)."
 			]
-			id: "7E6AB75D3E65449C"
+			icon: { Count: 1, id: "minecraft:wooden_pickaxe" }
+			id: "E1F0A000000000001"
+			rewards: [{
+				id: "RE101010101010101"
+				item: { Count: 16, id: "minecraft:torch" }
+				type: "item"
+			}]
+			tasks: [{
+				advancement: "minecraft:story/mine_stone"
+				id: "TE1100110011001101"
+				type: "advancement"
+			}]
+			title: "Stone Age"
+			x: 0.0d
+			y: -1.5d
+		}
+		{
+			dependencies: ["E1F0A000000000001"]
+			description: [
+				"&7Why:&r Smelting iron completes vanilla **Smelt an Iron Ingot**, which this pack maps to **Iron Age** in **ProgressiveStages** — **JEI** then shows iron tools and the **Harpoon Gun** recipe."
+				""
+				"&7Do:&r Mine **iron ore** (raw iron), build or find a **furnace**, fuel it, and smelt **iron ingots**."
+			]
+			icon: { Count: 1, id: "minecraft:iron_ingot" }
+			id: "E1F0A000000000002"
+			rewards: [
+				{
+					id: "RE101010101010102"
+					item: { Count: 8, id: "minecraft:baked_potato" }
+					type: "item"
+				}
+				{
+					id: "RE101010101010103"
+					type: "xp"
+					xp: 15
+				}
+			]
+			tasks: [{
+				advancement: "minecraft:story/smelt_iron"
+				id: "TE1100110011001102"
+				type: "advancement"
+			}]
+			title: "Iron Age"
+			x: 0.0d
+			y: -3.0d
+		}
+		{
+			dependencies: ["B1DD98FB3E338D81"]
+			description: [
+				"&7HUD:&r While you stand on a procedural island, the server may sync **nearby island beacons** — the client can show **titles / states** (see **projectisland** configs for billboard vs map pins)."
+				""
+				"&7Command:&r Run **/projectisland island here** with an empty-ish situation on solid terrain to print the **island key** and saved record at your feet (void columns report none)."
+				""
+				"Check this after you have read the output once — it is for orientation, not a speedrun gate."
+			]
+			icon: { Count: 1, id: "minecraft:spyglass" }
+			id: "E1F0A000000000003"
+			rewards: [{
+				id: "RE101010101010104"
+				type: "xp"
+				xp: 10
+			}]
+			tasks: [{
+				id: "TE1100110011001103"
+				title: "Used island \"here\" info"
+				type: "checkmark"
+			}]
+			title: "Know Your Island"
+			x: 0.0d
+			y: -4.5d
+		}
+		{
+			dependencies: ["E1F0A000000000002"]
+			description: [
+				"&7Nether:&r Build a **Nether portal**, ignite it, and step through — you need **blaze rods** (→ powder) for **Wings Of Fire** cradle/lantern crafts."
+				""
+				"&7Blazes:&r Spawn from **Nether fortresses**. Kill Blazes for rods; craft **blaze powder** at a crafting grid."
+				""
+				"&7Safety:&r Bridges and fire-resistance prep matter on floating terrain — set a respawn point before risky jumps."
+			]
+			icon: { Count: 1, id: "minecraft:blaze_powder" }
+			id: "E1F0A000000000004"
+			rewards: [
+				{
+					id: "RE101010101010105"
+					item: { Count: 4, id: "minecraft:golden_apple" }
+					type: "item"
+				}
+				{
+					id: "RE101010101010106"
+					type: "xp"
+					xp: 40
+				}
+			]
+			tasks: [
+				{
+					advancement: "minecraft:story/enter_the_nether"
+					id: "TE1100110011001104"
+					type: "advancement"
+				}
+				{
+					id: "TE1100110011001105"
+					item: { Count: 1, id: "minecraft:blaze_powder" }
+					type: "item"
+				}
+			]
+			title: "Nether Blaze Prep"
+			x: 0.0d
+			y: -6.0d
+		}
+		{
+			dependencies: ["E1F0A000000000002"]
+			description: [
+				"&7Mod:&r **Create** is part of the official stack — early alloy unlocks presses, shafts, and compact machines later."
+				""
+				"&7Recipe:&r Shapeless mix of **andesite** with **iron** and **zinc** inputs — open **JEI** for exact counts → **Andesite Alloy**."
+				""
+				"&7Note:&r You already see alloy as harpoon rewards; this step confirms you can produce it yourself."
+			]
+			icon: { Count: 1, id: "create:andesite_alloy" }
+			id: "E1F0A000000000005"
+			rewards: [
+				{
+					id: "RE101010101010107"
+					item: { Count: 24, id: "minecraft:iron_nugget" }
+					type: "item"
+				}
+				{
+					id: "RE101010101010108"
+					type: "xp"
+					xp: 25
+				}
+			]
+			tasks: [{
+				id: "TE1100110011001106"
+				item: { Count: 1, id: "create:andesite_alloy" }
+				type: "item"
+			}]
+			title: "Create Andesite Alloy"
+			x: 0.0d
+			y: -7.5d
+		}
+		{
+			dependencies: ["B1DD98FB3E338D81"]
+			description: [
+				"&7Goal:&r Have &eany one&r **petrified phoenix egg** in your inventory (task completes automatically)."
+				""
+				"&7Where to look:&r **Lootr** chests in dungeons, villages, jungle temples, trial chambers, pillager structures, woodland mansions, mineshafts, ancient cities, and Nether loot — eggs are rare rolls, so explore widely."
+				""
+				"&7Breeds:&r Fire, Wind, Red, Nature, Dark, and Gilded eggs all count. Which egg you find decides which phoenix line you hatch later; **don’t throw away** duplicates if you want backups."
+			]
+			icon: { Count: 1, id: "wings_of_fire:petrified_fire_phoenix_egg" }
+			id: "91F2A8C4D7E30B12"
+			rewards: [{
+				id: "A111111111111111"
+				type: "xp"
+				xp: 25
+			}]
+			subtitle: "Any petrified breed"
+			tasks: [
+				{
+					id: "9111111111111111"
+					item: { Count: 1, id: "wings_of_fire:petrified_fire_phoenix_egg" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "9222222222222222"
+					item: { Count: 1, id: "wings_of_fire:petrified_wind_phoenix_egg" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "9333333333333333"
+					item: { Count: 1, id: "wings_of_fire:petrified_red_phoenix_egg" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "9444444444444444"
+					item: { Count: 1, id: "wings_of_fire:petrified_nature_phoenix_egg" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "9555555555555555"
+					item: { Count: 1, id: "wings_of_fire:petrified_dark_phoenix_egg" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "9666666666666666"
+					item: { Count: 1, id: "wings_of_fire:petrified_gilded_phoenix_egg" }
+					optional_task: true
+					type: "item"
+				}
+			]
+			title: "A Petrified Phoenix Egg"
+			x: -3.5d
+			y: 1.25d
+		}
+		{
+			dependencies: ["91F2A8C4D7E30B12"]
+			description: [
+				"&7Craft (shaped):&r Top row **iron bars · empty · iron bars**; middle **iron · blaze powder · iron**; bottom row **three iron ingots**."
+				""
+				"&7Why:&r The **Inferno Cradle** is the workstation that **warms** a petrified egg into a living **phoenix egg** for your breed. You need blaze powder from Blazes (Nether fortresses) or similar loot."
+				""
+				"&7JEI:&r Open **Just Enough Items** and search **Inferno Cradle** for the exact grid."
+			]
+			icon: { Count: 1, id: "wings_of_fire:inferno_cradle" }
+			id: "82E3B9D5C6F41A23"
+			rewards: [{
+				id: "A222222222222222"
+				item: { Count: 4, id: "minecraft:iron_ingot" }
+				type: "item"
+			}]
+			tasks: [{
+				id: "9BBBBBBBBBBBBBBB"
+				item: { Count: 1, id: "wings_of_fire:inferno_cradle" }
+				type: "item"
+			}]
+			title: "Build an Inferno Cradle"
+			x: -3.5d
+			y: 2.75d
+		}
+		{
+			dependencies: ["82E3B9D5C6F41A23"]
+			description: [
+				"&7What to do:&r Place the **Inferno Cradle** in the world and interact with it using mod **WoF** instructions (slot / fuel UI as shown in-game)."
+				""
+				"&7Timing:&r Warming is **real-time** and usually takes on the order of **~15 minutes** once the cradle is running — stay nearby or secure the area so chunk unloading does not pause progress."
+				""
+				"&7Result:&r Your **petrified … egg** becomes that breed’s normal **phoenix egg** (e.g. petrified fire → **Fire Phoenix Egg**). The task detects **any** warmed breed."
+				""
+				"&7Tip:&r If the mod shows optional cosmetic fire or fuel hints, follow on-screen cues; the important part is waiting until the egg item upgrades."
+			]
+			icon: { Count: 1, id: "wings_of_fire:fire_phoenix_egg" }
+			id: "73D4C8E6B5A32934"
+			rewards: [{
+				id: "A333333333333333"
+				type: "xp"
+				xp: 50
+			}]
+			subtitle: "Warm through the cradle"
+			tasks: [
+				{
+					id: "9711111111111111"
+					item: { Count: 1, id: "wings_of_fire:fire_phoenix_egg" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "9722222222222222"
+					item: { Count: 1, id: "wings_of_fire:wind_phoenix_egg" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "9733333333333333"
+					item: { Count: 1, id: "wings_of_fire:red_phoenix_egg" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "9744444444444444"
+					item: { Count: 1, id: "wings_of_fire:nature_phoenix_egg" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "9755555555555555"
+					item: { Count: 1, id: "wings_of_fire:dark_phoenix_egg" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "9766666666666666"
+					item: { Count: 1, id: "wings_of_fire:gilded_phoenix_egg" }
+					optional_task: true
+					type: "item"
+				}
+			]
+			title: "Warm the Egg in the Cradle"
+			x: -3.5d
+			y: 4.25d
+		}
+		{
+			dependencies: ["73D4C8E6B5A32934"]
+			description: [
+				"&7Craft (shaped):&r Top and bottom rows **three iron ingots** each; middle row **blaze powder · vanilla lantern · blaze powder**."
+				""
+				"&7Why:&r The **Tempered Lantern** is the empty binding frame. You will combine it in a **shapeless** recipe with your **breed-specific phoenix egg** in the next quest."
+				""
+				"&7Ingredients:&r One **Lantern** (iron + torch recipe), blaze powder, iron."
+			]
+			icon: { Count: 1, id: "wings_of_fire:tempered_lantern" }
+			id: "64C5D7F9A48318555"
+			rewards: [{
+				id: "A444444444444444"
+				item: { Count: 2, id: "minecraft:blaze_powder" }
+				type: "item"
+			}]
+			tasks: [{
+				id: "9CCCCCCCCCCCCCCC"
+				item: { Count: 1, id: "wings_of_fire:tempered_lantern" }
+				type: "item"
+			}]
+			title: "Craft a Tempered Lantern"
+			x: -3.5d
+			y: 5.75d
+		}
+		{
+			dependencies: ["64C5D7F9A48318555"]
+			description: [
+				"&7Craft (shapeless):&r Put **one phoenix egg** (the warmed item for your breed) together with **one Tempered Lantern** in any crafting grid."
+				""
+				"&7Match the breed:&r Fire egg → fire lantern item; Wind → wind; Red → red; Nature → nature; Dark → dark (**watch the internal id** in advanced tooltips if items look similarly named); Gilded → gilded."
+				""
+				"&7Outcome:&r You receive that breed’s **bound tempered lantern** — the summoning focus for the final step."
+			]
+			icon: { Count: 1, id: "wings_of_fire:tempered_fire_phoenix_lantern" }
+			id: "55B6E8A09F742975"
+			rewards: [{
+				id: "A555555555555555"
+				type: "xp"
+				xp: 75
+			}]
+			subtitle: "Egg + tempered lantern"
+			tasks: [
+				{
+					id: "9811111111111111"
+					item: { Count: 1, id: "wings_of_fire:tempered_fire_phoenix_lantern" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "9822222222222222"
+					item: { Count: 1, id: "wings_of_fire:tempered_wind_phoenix_lantern" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "9833333333333333"
+					item: { Count: 1, id: "wings_of_fire:tempered_red_phoenix_lantern" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "9844444444444444"
+					item: { Count: 1, id: "wings_of_fire:tempered_nature_phoenix_lantern" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "9855555555555555"
+					item: { Count: 1, id: "wings_of_fire:tempered_dark_phoenixlantern" }
+					optional_task: true
+					type: "item"
+				}
+				{
+					id: "9866666666666666"
+					item: { Count: 1, id: "wings_of_fire:tempered_gilded_phoenixlantern" }
+					optional_task: true
+					type: "item"
+				}
+			]
+			title: "Bind the Lantern to Your Egg"
+			x: -3.5d
+			y: 7.25d
+		}
+		{
+			dependencies: ["55B6E8A09F742975"]
+			description: [
+				"&7Summon:&r With your **bound tempered lantern** in hand, **use** it (**right-click**) on a suitable spot in the world per **Wings Of Fire** behavior — the mod spawns your **phoenix** mount from that lantern."
+				""
+				"&7Afterward:&r Follow WoF tooltips for riding, items, and care. If nothing happens, verify you used the **bound** lantern (tooltip shows it is tied to a breed), you are not in a blocked dimension, and try an open area."
+				""
+				"Check this step once your bird is successfully summoned."
+			]
+			icon: { Count: 1, id: "wings_of_fire:tempered_wind_phoenix_lantern" }
+			id: "46A7F91B8E653084"
+			rewards: [{
+				id: "A666666666666666"
+				item: { Count: 8, id: "minecraft:golden_carrot" }
+				type: "item"
+			}]
+			tasks: [{
+				id: "99DDDDDDDDDDDDDD"
+				title: "Phoenix summoned"
+				type: "checkmark"
+			}]
+			title: "Hatch Out Your Phoenix"
+			x: -3.5d
+			y: 8.75d
+		}
+		{
+			dependencies: ["B1DD98FB3E338D81"]
+			description: [
+				"&7Unlock:&r **Iron Age** (ProgressiveStages) reveals iron and this recipe in **JEI** after you complete vanilla **Smelt an Iron Ingot**."
+				""
+				"&7Craft (shaped):&r Top row **three iron ingots**; middle row **string · tripwire hook · string** (Project Island accepts the **`c:strings`** tag); bottom center **wooden stick** (`**c:rods/wooden**`)."
+				""
+				"&7First link:&r In the floating-islands overworld, **use** the gun while aiming at **solid island terrain** to fire the **first harpoon anchor**. **Use** again from a sensible position toward **another island** within range to place the **second** anchor and finish the **rope link**. Chat/status feedback tells you if the shot failed."
+				""
+				"&7Surf:&r With an **empty main hand** and **not sneaking**, **use** while near an existing link to **ride the rope** between anchors (void rescue favors island centers while surfing)."
+				""
+				"&7Multiplayer:&r Completed links are **world fixtures** — other players can surf **your** ropes; tier upgrades apply to **new** links based on advancements on the **right-side** quests."
+			]
 			icon: { Count: 1, id: "projectisland:harpoon_gun" }
+			id: "7E6AB75D3E65449C"
 			rewards: [
 				{
 					id: "41DAB10A01B9C3E4"
@@ -60,19 +473,19 @@
 				item: { Count: 1, id: "projectisland:harpoon_gun" }
 				type: "item"
 			}]
-			title: "Harpoon"
-			x: 0.0d
-			y: 1.5d
+			title: "Harpoon Gun \& Rope Surfing"
+			x: 3.5d
+			y: 1.25d
 		}
 		{
 			dependencies: ["7E6AB75D3E65449C"]
 			description: [
-				"Hold &6chain&r in your inventory once to earn the &9Reinforced Rope&r advancement — &enew&r harpoon links get &emore reach and health&r (tiers apply when anchors are placed)."
+				"&7Goal:&r Earn advancement **Reinforced Rope** — detected automatically when you pick up or hold **chain**."
 				""
-				"If your pack shows rope stats on anchors or in tooltips, those numbers update for links you create after unlocking this tier."
+				"&7Effect:&r **New** harpoon links you place afterward gain **more maximum span and rope health** (server-side tier). Existing links may upgrade if `ropeProgressionUpgradeExistingLinks` is enabled in **projectisland-common.toml**."
 			]
-			id: "2C8E5A6A42C1113F"
 			icon: { Count: 1, id: "minecraft:chain" }
+			id: "2C8E5A6A42C1113F"
 			rewards: [
 				{
 					id: "51D4F758CBB3254A"
@@ -91,16 +504,18 @@
 				type: "advancement"
 			}]
 			title: "Reinforced Rope"
-			x: 0.0d
-			y: 3.0d
+			x: 3.5d
+			y: 2.75d
 		}
 		{
 			dependencies: ["2C8E5A6A42C1113F"]
 			description: [
-				"Hold a &5netherite ingot&r once to earn &8Steel Rope&r — the highest tier for &elink span&r and &erope health&r on &enew&r harpoon links."
+				"&7Goal:&r Earn advancement **Steel Rope** — detected when you obtain **netherite ingot**."
+				""
+				"&7Effect:&r **New** links use the **best** span and durability tier; again, older links may catch up if periodic upgrades are enabled in config."
 			]
-			id: "2F02EE13EFB18B41"
 			icon: { Count: 1, id: "minecraft:netherite_ingot" }
+			id: "2F02EE13EFB18B41"
 			rewards: [
 				{
 					id: "9A19CE02570F7397"
@@ -119,35 +534,76 @@
 				type: "advancement"
 			}]
 			title: "Steel Rope"
-			x: 0.0d
-			y: 4.5d
+			x: 3.5d
+			y: 4.25d
 		}
 		{
-			dependencies: ["2F02EE13EFB18B41"]
+			dependencies: ["7E6AB75D3E65449C"]
 			description: [
-				"&7Goal:&r &eClaim&r a second island that was &eavailable&r (neutral) before you arrived."
+				"&7Steps:&r With the **Harpoon Gun** selected, **use** on **solid blocks** on one island to leave the **first anchor** (projectile lands on valid terrain)."
 				""
-				"&7How:&r Reach it with your rope, stand on that island, then with an &eempty hand&r &esneak + use&r your &erope anchor&r that is part of the &elink&r to this island. Alternatively, many servers allow &e/projectisland island claim&r while you stand on the island (same rules as the anchor)."
+				"&7Second shot:&r From a clear line of sight, **use** again toward **another island** within **tier range** (base tier is shortest; **chain** / **netherite** tiers unlock longer spans via the quests above this one)."
 				""
-				"Check this task &eafter&r the claim succeeds. Completing it grants the &dExpansion&r stage; the game still validates the claim on the server."
+				"&7Success:&r Chat or action-bar feedback confirms the **rope link**; you should see anchors and the rope mesh. If the second shot fails, the first anchor may clear — reposition and retry."
+				""
+				"Check this quest after at least one **completed** link exists in your world (solo or multiplayer)."
 			]
-			id: "D85E21C4F51A13B7"
-			rewards: [{
-				autoclaim: true
-				id: "F80BC175CCCE7785"
-				remove: false
-				stage: "pi_island_expansion"
-				team: true
-				type: "gamestage"
-			}]
+			icon: { Count: 1, id: "minecraft:lead" }
+			id: "E1F0A000000000006"
+			rewards: [
+				{
+					id: "RE101010101010109"
+					item: { Count: 16, id: "minecraft:string" }
+					type: "item"
+				}
+				{
+					id: "RE101010101010110"
+					type: "xp"
+					xp: 30
+				}
+			]
 			tasks: [{
-				id: "D85E21C4F51A10FF"
-				title: "I claimed a second island"
+				id: "TE1100110011001109"
+				title: "Finished a two-anchor rope link"
 				type: "checkmark"
 			}]
-			title: "Expand"
-			x: 0.0d
-			y: 6.0d
+			title: "Complete a Rope Link"
+			x: 3.5d
+			y: 5.75d
+		}
+		{
+			dependencies: ["E1F0A000000000006"]
+			description: [
+				"&7How:&r Stand near an existing **rope link**, hold **nothing** in your main hand, **do not sneak**, and **use** (right-click) to **mount the line** and surf along the curve toward the other anchor."
+				""
+				"&7Void rescue:&r While surfing, void-related rescue logic is gentler and prefers **island centers** — still avoid jumping mid-span without a plan."
+				""
+				"&7HP bar:&r Linked anchors can show **rope health** client-side; **mining** an anchor in survival damages the link until it snaps — repair strategy is **place a new link** after upgrades if needed."
+				""
+				"Check this after you have surfed at least once."
+			]
+			icon: { Count: 1, id: "minecraft:iron_boots" }
+			id: "E1F0A000000000007"
+			rewards: [
+				{
+					id: "RE101010101010111"
+					item: { Count: 8, id: "minecraft:wind_charge" }
+					type: "item"
+				}
+				{
+					id: "RE101010101010112"
+					type: "xp"
+					xp: 35
+				}
+			]
+			tasks: [{
+				id: "TE1100110011001110"
+				title: "Surfed a rope line"
+				type: "checkmark"
+			}]
+			title: "Ride the Zipline"
+			x: 3.5d
+			y: 7.25d
 		}
 	]
 	title: "Project Island"

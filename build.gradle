@@ -113,6 +113,40 @@ neoForge {
     }
 }
 
+// FTB Quests reads `<gameDir>/config/ftbquests/quests/`; ProgressiveStages reads `config/ProgressiveStages/`.
+// Canonical copies live under examples/dev-progression/ only — without syncing, the quest book UI is empty.
+tasks.register('syncDevProgressionConfigsClient', Sync) {
+    group = 'mod development'
+    description = 'Copies examples/dev-progression into run-client/config/ (FTB Quests + ProgressiveStages).'
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    into(layout.projectDirectory.dir('run-client/config'))
+    from(layout.projectDirectory.dir('examples/dev-progression/ftbquests')) {
+        into('ftbquests')
+    }
+    from(layout.projectDirectory.dir('examples/dev-progression/ProgressiveStages')) {
+        into('ProgressiveStages')
+    }
+}
+tasks.register('syncDevProgressionConfigsServer', Sync) {
+    group = 'mod development'
+    description = 'Copies examples/dev-progression into run-server/config/ (FTB Quests + ProgressiveStages).'
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    into(layout.projectDirectory.dir('run-server/config'))
+    from(layout.projectDirectory.dir('examples/dev-progression/ftbquests')) {
+        into('ftbquests')
+    }
+    from(layout.projectDirectory.dir('examples/dev-progression/ProgressiveStages')) {
+        into('ProgressiveStages')
+    }
+}
+tasks.register('syncDevProgressionConfigs') {
+    group = 'mod development'
+    description = 'Copies examples/dev-progression into both run-client and run-server config/.'
+    dependsOn('syncDevProgressionConfigsClient', 'syncDevProgressionConfigsServer')
+}
+tasks.named('runClient').configure { dependsOn('syncDevProgressionConfigsClient') }
+tasks.named('runServer').configure { dependsOn('syncDevProgressionConfigsServer') }
+
 // Sets up a dependency configuration called 'localRuntime'.
 // This configuration should be used instead of 'runtimeOnly' to declare
 // a dependency that will be present for runtime testing but that is
