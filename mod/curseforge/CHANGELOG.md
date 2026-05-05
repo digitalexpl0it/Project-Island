@@ -2,7 +2,9 @@
 
 Player- and host-facing notes for **`projectisland-<version>.jar`** from **`build/libs/`**. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-The repository root [`CHANGELOG.md`](../../CHANGELOG.md) is the full developer log (mod + modpack + docs). **Mirror or summarize** this file’s sections into each CurseForge **file** changelog when you upload a new JAR.
+The repository root [`CHANGELOG.md`](../../CHANGELOG.md) is the full developer log (mod + modpack + docs). **Mirror or summarize** this file into each CurseForge **file** changelog when you upload a new JAR.
+
+**Version:** set **`mod_version`** in **`gradle.properties`** (or **`-Pmod_version=`**). Optional dev-only suffix: **`append_dev_timestamp_to_mod_version`** → **`mod_version+t<millis>`** on the output jar and **`mods.toml`**.
 
 ---
 
@@ -16,17 +18,18 @@ _Planned changes after **0.1.0**._
 
 ### Added
 
-- **NeoForge 1.21.1** mod id **`projectisland`**: procedural **floating islands** overworld, **server-authoritative** island saved data, starter / rescue behavior tuned for void play.
-- **Harpoon + rope anchors** — linking, tiered limits, stress/damage, **rope surfing**, linked-anchor mining vs rope HP; optional action-bar style toasts (server → client).
-- **Island HUD** — server → client sync for beacons / navigation; optional **Waystones** activation merge and **Xaero** waypoint mirror behavior when those mods are installed.
-- **Config** — `projectisland-common.toml` / `projectisland-client.toml` for worldgen, spawn tuning, HUD, rescue, and compat keys (see in-game or default configs on first run).
-- **Optional integrations** — hooks for **Lootr**, **Wings Of Fire** (loot), **Realm RPG: Treasure Balloons**, **Friends&Foes**, **CNB**, **Skill Tree / Spell Engine** stack, etc., when corresponding mods are loaded (`neoforge.mods.toml` optional entries).
-- **Bundled CC0 resource pack** — **Unshaded Blocks** (client; enable in **Resource packs**).
+- **NeoForge 1.21.1** mod id **`projectisland`**: procedural **floating islands** overworld, **server-authoritative** island saved data, starter / void-rescue / respawn behavior tuned for void play.
+- **Harpoon + rope anchors** — linking, tiered span and rope health, stress/damage, **rope surfing**, linked-anchor mining vs rope HP; optional action-bar style toasts (server → client).
+- **Island HUD** — server → client sync for nearby island beacons / navigation hints; optional **Waystones** integration and **Xaero’s Minimap** waypoint mirror when those mods are installed.
+- **Config** — **`projectisland-common.toml`** (server + shared rules) and **`projectisland-client.toml`** (HUD / rope visuals). See in-game generated TOML comments or the mod’s **CurseForge** **`DESCRIPTION.md`** for a topic map.
+- **Optional integrations** — hooks when **Lootr**, **Wings Of Fire** (loot), **Realm RPG: Treasure Balloons**, **Friends&Foes**, **CNB**, **Skill Tree / Spell Engine** stack, etc., are loaded (`neoforge.mods.toml` optional entries).
+- **Bundled CC0 resource pack** — **Unshaded Blocks** (client; enable under **Resource packs**).
 
 ### Fixed
 
-- **Dedicated server channel registration** for **`action_bar_toast`**: clientbound toast handler is dispatched without forcing the dedicated server classloader to load client-only UI classes during payload registration (same JAR must still be present on the server **`mods/`** folder).
+- **Dedicated server:** **`projectisland:action_bar_toast`** registers without loading client-only UI classes during payload setup (toast handling uses a reflective client path).
+- **Island HUD + Waystones + Xaero:** waypoint mirror persistence (**gold** vs **gray** pins) stays consistent with **Waystones** activation data after reconnect; empty beacon payloads no longer wipe valid **`[Island]`** pins; **Xaero** waypoint list mutations are deferred while the waypoint GUI is open to avoid client crashes; duplicate / wrong-gold **`[Island]`** pins from relaxed waystone search or merged terrain are reduced (caps + server-side region keys).
 
 ### Notes
 
-- **Modpack** releases, quest SNBT, and CurseForge **modpack** zips are separate from this **mod** project — see [`modpack/curseforge/`](../../modpack/curseforge/README.md).
+- **Modpack** releases (manifest, third-party pins, FTB SNBT in **`overrides/`**) are separate from this **Mods** project — see [`modpack/curseforge/`](../../modpack/curseforge/README.md).
