@@ -1,6 +1,8 @@
 ### Gradle ###
 .gradle
 build/
+# Optional local overrides (e.g. extra Gradle properties) — never commit secrets
+gradle.properties.local
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/**/build/
 

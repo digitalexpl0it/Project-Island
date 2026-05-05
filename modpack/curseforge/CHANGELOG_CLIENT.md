@@ -10,11 +10,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Ver
 
 ## [Unreleased]
 
-_Add entries here while developing; copy the relevant bullets into the CurseForge **client** file changelog when you publish._
+_Add entries here while developing; copy into the latest `[x.y.z]` section (or a new one) when you publish._
 
 ---
 
-## [0.1.0] — 2026-05-03
+## [0.1.0] — 2026-05-02
 
 ### Added
 
@@ -24,6 +24,11 @@ _Add entries here while developing; copy the relevant bullets into the CurseForg
 - **[Resource Pack Overrides](https://www.curseforge.com/minecraft/mc-mods/resource-pack-overrides)** plus **`overrides/config/resourcepackoverrides.json`** — default-on external menu/title pack id **`file/Project_Island_menu_assets.zip`** when that zip is shipped under **`overrides/resourcepacks/`** (rename your pack or edit the config).
 - **`modlist.html`** for launcher mod list pages where shown.
 - **`branding/Project_Island_logo.png`** inside the zip for handoff (CurseForge project thumbnail still set manually on the website).
+
+### Changed
+
+- **FTB Quests — Project Island chapter:** **Harpoon Gun & Rope Surfing** / **Reinforced Rope** rewards no longer reference **Create** items; **Stockpile Andesite** replaces the old alloy quest — [`examples/dev-progression/ftbquests/quests/chapters/project_island.snbt`](../../examples/dev-progression/ftbquests/quests/chapters/project_island.snbt).
+- **Server pack Gradle build:** **`curseforgeServerPackZip`** copies third-party JARs from **`run-server/mods/`** (no CurseForge API). Optional dev jar naming: **`append_dev_timestamp_to_mod_version`** in root **`gradle.properties`** (see root **README** **Distribution**).
 
 ### Notes
 

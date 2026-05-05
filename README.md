@@ -32,7 +32,7 @@ Other branches (defense, docking / merge, power, automation) can get **their own
 ## Target stack
 
 - **Loader:** NeoForge (pinned in [`gradle.properties`](gradle.properties)).
-- **Distribution:** matching mod JAR on dedicated server and every client. **CurseForge modpack zips:** [`modpack/curseforge/README.md`](modpack/curseforge/README.md) — `./gradlew curseforgeModpackZip` (client) and **`curseforgeServerPackZip`** (server); **`curseforgeModpackAll`** builds both under **`build/dist/`**. Upload the client zip as the primary file and the **`*-curseforge-server.zip`** as an **Additional file** on the same release.
+- **Distribution:** matching mod JAR on dedicated server and every client (`./gradlew build` → **`build/libs/projectisland-<version>.jar`**; version is **`gradle.properties`** **`mod_version`**, or **`mod_version+t<millis>`** when **`append_dev_timestamp_to_mod_version=true`** for a unique dev jar each run). **CurseForge mod (JAR) listing copy:** [`mod/curseforge/README.md`](mod/curseforge/README.md) (summary, description, changelog). **CurseForge modpack zips:** [`modpack/curseforge/README.md`](modpack/curseforge/README.md) — **`./gradlew curseforgeModpackZip`** (client manifest) and **`curseforgeServerPackZip`** (fat **`overrides/mods/`** by copying **`run-server/mods/*.jar`** — no API key); **`curseforgeModpackAll`** builds both under **`build/dist/`**. Upload the client zip as the primary file and the **`*-curseforge-server.zip`** as an **Additional file** on the same release.
 - **Integrations:** **[Create](https://modrinth.com/mod/create)** is pinned for **kinetic / contraption** gameplay ([MOD_LIST.md](MOD_LIST.md)). **Valkyrien Skies** and **Create Aeronautics** are **not** part of the official stack right now. Optional mods (**Waystones**, **Lootr**, **Wings Of Fire**, maps, etc.) stay version-locked in the manifest when listed.
 
 ## Resource packs (what ships in the JAR)
@@ -79,7 +79,7 @@ This project was bootstrapped from the official **[ModDevGradle MDK for Minecraf
 | ModDevGradle plugin | 2.0.141 (`build.gradle`) |
 | Gradle (wrapper) | 9.2.1 |
 | Java | **21** |
-| CurseForge pack export | `./gradlew curseforgeModpackAll` → `build/dist/` (`curseforge` + `curseforge-server` zips) |
+| CurseForge pack export | `./gradlew curseforgeModpackAll` → `build/dist/` (`curseforge` + `curseforge-server` zips); server zip copies mods from **`run-server/mods/`** (see [`modpack/curseforge/README.md`](modpack/curseforge/README.md)) |
 
 ## Architecture (high level)
 

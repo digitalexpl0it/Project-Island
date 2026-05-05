@@ -50,6 +50,8 @@ Survive and build on **procedural floating islands** in an empty overworld. Foll
 
 Always install **matching** client + server files from the **same** release.
 
+**Connection errors (“Project Island channel missing on the server”):** the dedicated server must load the **same** **Project Island** mod jar as the client. Use the official **server** additional zip (it merges **`overrides/mods/`**) or copy **`projectisland-*.jar`** from the client profile’s **`mods/`** into the server’s **`mods/`**.
+
 ---
 
 #### Changelog

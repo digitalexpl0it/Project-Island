@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.projectisland.ProjectIsland;
 
 /**
@@ -39,6 +40,23 @@ public record ActionBarToastPayload(String translationKey, List<String> stringAr
     @Override
     public Type<? extends CustomPacketPayload> type() {
         return TYPE;
+    }
+
+    /**
+     * Client-only UI; keep the handler here (not a method ref to a client-only class) so dedicated servers register
+     * this play channel during {@link net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent} without
+     * loading {@code net.minecraft.client} types. NeoForge invokes {@code playToClient} handlers on the client only.
+     */
+    public static void handleClientbound(ActionBarToastPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            try {
+                Class.forName("net.projectisland.client.ActionBarToastOverlay")
+                        .getMethod("show", String.class, List.class, int.class)
+                        .invoke(null, payload.translationKey(), payload.stringArgs(), payload.visibleTicks());
+            } catch (Throwable t) {
+                ProjectIsland.LOGGER.warn("Action bar toast client dispatch failed", t);
+            }
+        });
     }
 
     /** Translation key only, default duration. */

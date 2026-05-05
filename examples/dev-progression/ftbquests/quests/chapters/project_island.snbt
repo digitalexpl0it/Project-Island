@@ -20,7 +20,7 @@
 				""
 				"&7ProgressiveStages:&r **Iron Age** still gates iron tools and the harpoon recipe in **JEI** until you smelt iron (vanilla story advancement). Stages match this book where noted."
 				""
-				"&7Foundation:&r The **column above** this card tracks vanilla **Stone / Iron**, reading your **island id**, **Nether** access and **blaze** fuel for WoF crafts, and a first **Create** alloy."
+				"&7Foundation:&r The **column above** this card tracks vanilla **Stone / Iron**, reading your **island id**, **Nether** access and **blaze** fuel for WoF crafts, plus a stockpile of **andesite** for building between islands."
 			]
 			id: "B1DD98FB3E338D81"
 			rewards: [{
@@ -158,13 +158,13 @@
 		{
 			dependencies: ["E1F0A000000000002"]
 			description: [
-				"&7Mod:&r **Create** is part of the official stack — early alloy unlocks presses, shafts, and compact machines later."
+				"&7Why:&r **Andesite** is cheap vanilla building stone — bridges, edges, and temporary platforms between floating islands without rare materials."
 				""
-				"&7Recipe:&r Shapeless mix of **andesite** with **iron** and **zinc** inputs — open **JEI** for exact counts → **Andesite Alloy**."
+				"&7Do:&r Mine **andesite** underground or on island slopes until you hold at least **one stack** in your inventory (task counts automatically)."
 				""
-				"&7Note:&r You already see alloy as harpoon rewards; this step confirms you can produce it yourself."
+				"&7Tip:&r Pair with **scaffolding** or **slabs** from your wood/stone line for safer void crossings while you work toward **ropes** on the right branch."
 			]
-			icon: { Count: 1, id: "create:andesite_alloy" }
+			icon: { Count: 1, id: "minecraft:andesite" }
 			id: "E1F0A000000000005"
 			rewards: [
 				{
@@ -180,10 +180,10 @@
 			]
 			tasks: [{
 				id: "TE1100110011001106"
-				item: { Count: 1, id: "create:andesite_alloy" }
+				item: { Count: 64, id: "minecraft:andesite" }
 				type: "item"
 			}]
-			title: "Create Andesite Alloy"
+			title: "Stockpile Andesite"
 			x: 0.0d
 			y: -7.5d
 		}
@@ -459,7 +459,7 @@
 			rewards: [
 				{
 					id: "41DAB10A01B9C3E4"
-					item: { Count: 4, id: "create:andesite_alloy" }
+					item: { Count: 4, id: "minecraft:iron_ingot" }
 					type: "item"
 				}
 				{
@@ -489,7 +489,7 @@
 			rewards: [
 				{
 					id: "51D4F758CBB3254A"
-					item: { Count: 8, id: "create:copper_sheet" }
+					item: { Count: 8, id: "minecraft:copper_ingot" }
 					type: "item"
 				}
 				{

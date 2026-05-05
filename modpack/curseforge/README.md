@@ -14,7 +14,8 @@ This folder matches what the **CurseForge** launcher expects when you upload a *
 |-------|--------|
 | Minecraft | **1.21.1** (see root `gradle.properties`) |
 | NeoForge | **21.1.227** |
-| Pack / mod version | Keep **`manifest.json`** `version` in sync with **`gradle.properties`** `mod_version` when you cut a release. |
+| Pack / mod **`version`** | **Injected at zip build time** from **`project.version`** (normally **`gradle.properties`** **`mod_version`**; if **`append_dev_timestamp_to_mod_version=true`**, the **Project Island** jar and manifest use **`mod_version+t<millis>`** so every Gradle run gets a new version string). You do **not** need to hand-edit **`manifest.json`** `version` before `./gradlew curseforgeModpackZip` / **`curseforgeServerPackZip`** — the written **`build/tmp/curseforge-client/manifest.json`** is what goes into the zips. |
+| Gradle wrapper | **`gradle/wrapper/gradle-wrapper.properties`** — bump with **`./gradlew wrapper --gradle-version=…`** when you intentionally upgrade the toolchain. |
 
 ## Build the zips (includes Project Island)
 
@@ -22,7 +23,7 @@ From the repository root:
 
 ```bash
 ./gradlew curseforgeModpackZip          # client pack (primary CurseForge download)
-./gradlew curseforgeServerPackZip       # dedicated server pack (upload as Additional file)
+./gradlew curseforgeServerPackZip       # dedicated server pack — copies third-party JARs from run-server/mods (see below)
 ./gradlew curseforgeModpackAll          # both
 ```
 
@@ -37,7 +38,13 @@ Both tasks copy **`build/libs/projectisland-<version>.jar`** into **`overrides/m
 
 ### Server pack vs client
 
-The **server** zip uses **`manifest.json`** with **`name`: `Project Island (Server)`** and drops **CurseForge `projectID`s** listed in **`server-pack-excluded-project-ids.json`** (JEI, Xaero’s map mods, Embeddium + GlitchCore + Jupiter + Uranus + NeOculus, Resource Pack Overrides). It **does not** ship **`modlist.html`**, **`resourcepackoverrides.json`**, **`overrides/resourcepacks/`**, or **`overrides/shaderpacks/`**. When you add a mod to **`manifest.json`**, remove its **`projectID`** from that JSON if it is client-only on the server.
+**Client zip** — Uses the full **`manifest.json`** **`files`** list (CurseForge **`projectID` / `fileID`** pins) so the launcher can download mods; **`overrides/`** layers configs, **Project Island** JAR, FTB quest SNBT, resource packs, shader packs, etc.
+
+**Server zip (fat `mods/`)** — **`copyCurseforgeServerModJarsFromRunServer`** copies every **`.jar`** in **`run-server/mods/`** except **`projectisland-*.jar`** (the build still injects a fresh **Project Island** jar from **`./gradlew jar`**) into **`build/tmp/curseforge-server/mod-jars/`**, and **`curseforgeServerPackZip`** places them under **`overrides/mods/`**. The shipped **`manifest.json`** has **`files`: `[]`** so hosts who unzip manually get a **complete** server **`mods`** tree without resolving the manifest. Minecraft / NeoForge pins (**`minecraft.version`**, **`modLoaders`**) stay in the manifest for tooling.
+
+**Before `curseforgeServerPackZip`:** ensure **`run-server/mods/`** exists and matches what a **dedicated server** should load (see **[`MOD_LIST.md`](../../MOD_LIST.md)** and **`./gradlew runServer`**). The task does **not** strip client-only mods for you — keep **`run-server/mods`** free of JEI, shader loaders, etc. Use **`server-pack-excluded-project-ids.json`** as a **checklist** of Curse **`projectID`s** the *client* manifest lists that typically should **not** appear on a headless server; filenames must match what you actually install under **`run-server/mods`**.
+
+The server zip still **does not** ship **`modlist.html`**, **`resourcepackoverrides.json`**, **`overrides/resourcepacks/`**, or **`overrides/shaderpacks/`**. When you add a mod to **`manifest.json`**, keep **`server-pack-excluded-project-ids.json`** in sync for documentation and client/server parity reviews.
 
 ## Pack logo / thumbnail
 
@@ -63,7 +70,7 @@ Diff the folder listing against **`manifest.json`** `files`: anything **not** co
 1. Create a **Modpack** project (Minecraft / Modpacks).
 2. Upload **`projectisland-modpack-<version>-curseforge.zip`** as the **primary** file (player / client install).
 3. Upload **`projectisland-modpack-<version>-curseforge-server.zip`** as an **Additional file** on the same version so hosts and “server install” flows can download it (wording on the site varies).
-4. The launcher resolves each **`manifest.json`** `projectID` + `fileID` from CurseForge CDN.
+4. The launcher resolves each **`manifest.json`** `projectID` + `fileID` from CurseForge CDN (client zip). The **server** additional file is a **fat** pack: third-party JARs are already under **`overrides/mods/`**; **`files`** in that **`manifest.json`** is empty by design.
 5. Files under **`overrides/`** layer on top (configs, optional extra mods in `overrides/mods/`).
 
 ## Expanding the manifest
