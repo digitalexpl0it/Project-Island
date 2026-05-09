@@ -12,6 +12,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). **`
 
 _Add entries here while developing; merge into `[x.y.z]` when you publish._
 
+### Changed
+
+- **`curseforgeServerPackZip`** no longer places certain third-party **`.jar`** filenames in **`overrides/mods/`** (not redistributable in our server zip); they are still expected under **`run-server/mods/`** for local dev but hosts must obtain those mods separately. Filenames are listed in root **`build.gradle`** (`curseforgeServerPackUndistributableModJars`).
+
 ---
 
 ## [0.1.0] — 2026-05-02

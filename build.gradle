@@ -248,6 +248,15 @@ def curseforgeClientManifestOut = layout.buildDirectory.file('tmp/curseforge-cli
 def curseforgeServerManifestOut = layout.buildDirectory.file('tmp/curseforge-server/manifest.json')
 def curseforgeServerModJarsDir = layout.buildDirectory.dir('tmp/curseforge-server/mod-jars')
 
+// Omitted from curseforgeServerPackZip overrides/mods (not redistributable in our server zip; hosts install matching JARs from official sources).
+def curseforgeServerPackUndistributableModJars = [
+    'GlitchCore-neoforge-1.21.1-2.1.0.0.jar',
+    'TerraBlender-neoforge-1.21.1-4.1.0.8 (1).jar',
+    'balm-neoforge-1.21.1-21.0.57.jar',
+    'bettervillage-neoforge-1.21.1-3.3.1.jar',
+    'waystones-neoforge-1.21.1-21.1.30.jar',
+].toSet()
+
 tasks.register('writeCurseforgeClientManifest') {
     group = 'distribution'
     description = 'Writes build/tmp/curseforge-client/manifest.json with version = project.version (gradle.properties mod_version, optional +t timestamp).'
@@ -290,7 +299,7 @@ tasks.register('curseforgeModpackZip', Zip) {
 
 tasks.register('copyCurseforgeServerModJarsFromRunServer') {
     group = 'distribution'
-    description = 'Copies third-party mod JARs from run-server/mods into the server pack staging dir (excludes this mod\'s jar; fresh Project Island jar comes from ./gradlew jar). Requires a populated run-server — see MOD_LIST.md / ./gradlew runServer.'
+    description = 'Copies third-party mod JARs from run-server/mods into the server pack staging dir (excludes this mod\'s jar + undistributable filenames; fresh Project Island jar comes from ./gradlew jar). Requires a populated run-server — see MOD_LIST.md / ./gradlew runServer.'
     def srcDir = layout.projectDirectory.dir('run-server/mods')
     def modId = mod_id
     outputs.dir(curseforgeServerModJarsDir)
@@ -309,7 +318,7 @@ tasks.register('copyCurseforgeServerModJarsFromRunServer') {
         }
         def copied = 0
         src.eachFile { f ->
-            if (f.isFile() && f.name.endsWith('.jar') && !f.name.startsWith("${modId}-")) {
+            if (f.isFile() && f.name.endsWith('.jar') && !f.name.startsWith("${modId}-") && !curseforgeServerPackUndistributableModJars.contains(f.name)) {
                 java.nio.file.Files.copy(f.toPath(), new File(dest, f.name).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
                 copied++
             }
@@ -365,6 +374,7 @@ tasks.register('curseforgeServerPackZip', Zip) {
     }
     from(layout.projectDirectory.dir('modpack/curseforge/overrides/mods')) {
         include '*.jar'
+        exclude { curseforgeServerPackUndistributableModJars.contains(it.name) }
         into 'overrides/mods'
     }
     from(jarTask.flatMap { it.archiveFile }) {
