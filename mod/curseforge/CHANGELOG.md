@@ -10,7 +10,23 @@ The repository root [`CHANGELOG.md`](../../CHANGELOG.md) is the full developer l
 
 ## [Unreleased]
 
-_Planned changes after **0.1.0**._
+_Planned changes after **0.1.2**._
+
+---
+
+## [0.1.2] — 2026-05-09
+
+### Added
+
+- **Starter supply chest** on first successful starter-home assignment (loot table **`projectisland:chests/starter_supply`**; config **`starterIslandSupplyChestEnabled`**). **`FloatingIslandSavedData`** persists **`StarterSupplyChests`** per island region.
+
+### Fixed
+
+- **FTB Quests (canonical `examples/dev-progression/ftbquests/`):** **WoF** dark/gilded bound lanterns use **`tempered_*_phoenixlantern`** ids (per **Wings Of Fire V1.0**); **Ride the Zipline** rewards use **1.21.1**-valid items (**breeze rod** + **feather**) instead of **wind charge**.
+
+### Build
+
+- **CurseForge modpack zips** run **`verifyDevProgressionFtbQuests`** first so missing chapter SNBT fails the build instead of shipping an empty quest book.
 
 ---
 

@@ -14,7 +14,19 @@ _Add entries here while developing; merge into `[x.y.z]` when you publish._
 
 ### Changed
 
-- **`curseforgeServerPackZip`** no longer places certain third-party **`.jar`** filenames in **`overrides/mods/`** (not redistributable in our server zip); they are still expected under **`run-server/mods/`** for local dev but hosts must obtain those mods separately. Filenames are listed in root **`build.gradle`** (`curseforgeServerPackUndistributableModJars`).
+- **`curseforgeServerPackZip`** omits certain third-party **`.jar`** filenames from **`overrides/mods/`** (not redistributable in our server zip); they are still expected under **`run-server/mods/`** for local dev but hosts must obtain those mods separately. Filenames are listed in root **`build.gradle`** (`curseforgeServerPackUndistributableModJars`).
+
+---
+
+## [0.1.2] — 2026-05-09
+
+### Added
+
+- Same **FTB Quests** SNBT as the client pack; **`curseforgeServerPackZip`** depends on **`verifyDevProgressionFtbQuests`** so a missing **`examples/dev-progression/ftbquests/`** tree fails the build.
+
+### Fixed
+
+- **FTB Quests** chapter fixes (WoF lantern ids, **Ride the Zipline** rewards for **1.21.1**) — see client **[`CHANGELOG_CLIENT.md`](CHANGELOG_CLIENT.md)**.
 
 ---
 

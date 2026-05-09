@@ -248,6 +248,31 @@ def curseforgeClientManifestOut = layout.buildDirectory.file('tmp/curseforge-cli
 def curseforgeServerManifestOut = layout.buildDirectory.file('tmp/curseforge-server/manifest.json')
 def curseforgeServerModJarsDir = layout.buildDirectory.dir('tmp/curseforge-server/mod-jars')
 
+// CurseForge zips embed examples/dev-progression/ftbquests — fail before zip if the canonical tree is incomplete.
+tasks.register('verifyDevProgressionFtbQuests') {
+    group = 'verification'
+    description = 'Ensures examples/dev-progression/ftbquests has required SNBT (client + server modpack zips embed this tree).'
+    def ftbRoot = layout.projectDirectory.dir('examples/dev-progression/ftbquests')
+    inputs.file(ftbRoot.file('quests/data.snbt'))
+    inputs.file(ftbRoot.file('quests/chapters/project_island.snbt'))
+    inputs.file(ftbRoot.file('quests/chapters/rpg_series.snbt'))
+    doLast {
+        def rootDir = ftbRoot.asFile
+        def required = [
+            'quests/data.snbt',
+            'quests/chapters/project_island.snbt',
+            'quests/chapters/rpg_series.snbt',
+        ]
+        required.each { rel ->
+            def f = new File(rootDir, rel)
+            if (!f.isFile()) {
+                throw new GradleException(
+                        "Missing required FTB Quest file: ${f.absolutePath}. Maintain chapters under examples/dev-progression/ftbquests/ before ./gradlew curseforgeModpackZip or curseforgeServerPackZip.")
+            }
+        }
+    }
+}
+
 // Omitted from curseforgeServerPackZip overrides/mods (not redistributable in our server zip; hosts install matching JARs from official sources).
 def curseforgeServerPackUndistributableModJars = [
     'GlitchCore-neoforge-1.21.1-2.1.0.0.jar',
@@ -276,7 +301,7 @@ tasks.register('writeCurseforgeClientManifest') {
 
 tasks.register('curseforgeModpackZip', Zip) {
     def jarTask = tasks.named('jar', Jar)
-    dependsOn jarTask, tasks.named('writeCurseforgeClientManifest')
+    dependsOn jarTask, tasks.named('writeCurseforgeClientManifest'), tasks.named('verifyDevProgressionFtbQuests')
     group = 'distribution'
     description = 'CurseForge client modpack zip (manifest + overrides + Project Island jar + FTB quest SNBT).'
     archiveFileName = "${mod_id}-modpack-${version}-curseforge.zip"
@@ -349,7 +374,7 @@ tasks.register('writeCurseforgeServerManifest') {
 
 tasks.register('curseforgeServerPackZip', Zip) {
     def jarTask = tasks.named('jar', Jar)
-    dependsOn jarTask, tasks.named('writeCurseforgeServerManifest'), tasks.named('copyCurseforgeServerModJarsFromRunServer')
+    dependsOn jarTask, tasks.named('writeCurseforgeServerManifest'), tasks.named('copyCurseforgeServerModJarsFromRunServer'), tasks.named('verifyDevProgressionFtbQuests')
     group = 'distribution'
     description = 'CurseForge dedicated server pack: fat overrides/mods (JARs copied from run-server/mods + fresh Project Island jar), trimmed client-only overrides excluded, manifest files=[] so hosts need not resolve the manifest.'
     archiveFileName = "${mod_id}-modpack-${version}-curseforge-server.zip"

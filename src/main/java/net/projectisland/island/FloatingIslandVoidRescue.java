@@ -180,6 +180,8 @@ public final class FloatingIslandVoidRescue {
             showVoidRescueActionBar(player);
             return true;
         }
+        // Snap target was a bad column (e.g. tree canopy / rope rim). Drop it so we never loop snap → fall → snap.
+        data.remove(TAG_LAST_SAFE_FEET);
         relocatePlayerFromVoid(player, level);
         showVoidRescueActionBar(player);
         return true;

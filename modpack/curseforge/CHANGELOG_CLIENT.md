@@ -14,6 +14,22 @@ _Add entries here while developing; merge into `[x.y.z]` when you publish._
 
 ---
 
+## [0.1.2] — 2026-05-09
+
+### Added
+
+- **Starter supply chest** content is documented in the **Project Island** intro quest; loot is provided by the **Project Island** mod (**`projectisland-0.1.2.jar`**) when players receive their starter island.
+
+### Fixed
+
+- **FTB Quests:** **Ride the Zipline** rewards use **`minecraft:breeze_rod`** and **`minecraft:feather`** (replacing **`wind_charge`**, which is not in Minecraft **1.21.1**). **WoF** dark/gilded bound lanterns: use **`tempered_dark_phoenixlantern`** / **`tempered_gilded_phoenixlantern`** (matches **Wings Of Fire V1.0** jar ids; other breeds use **`…_phoenix_lantern`**).
+
+### Build
+
+- **`./gradlew curseforgeModpackZip`** (and the server pack task) run **`verifyDevProgressionFtbQuests`** so the zip is not produced if **`examples/dev-progression/ftbquests/`** is incomplete — the same tree Gradle copies for **`runClient`** / **`runServer`**.
+
+---
+
 ## [0.1.0] — 2026-05-02
 
 ### Added

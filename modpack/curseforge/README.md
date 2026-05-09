@@ -34,7 +34,7 @@ Outputs:
 | **`curseforgeModpackZip`** | **`build/dist/projectisland-modpack-<version>-curseforge.zip`** |
 | **`curseforgeServerPackZip`** | **`build/dist/projectisland-modpack-<version>-curseforge-server.zip`** |
 
-Both tasks copy **`build/libs/projectisland-<version>.jar`** into **`overrides/mods/`** and merge **`examples/dev-progression/ftbquests/`** into **`overrides/config/ftbquests/`** (same chapters as **`./gradlew runClient`**). Without those files the **FTB Quests** book is empty even though the mod is on the manifest—**single-player vs multiplayer does not matter**.
+Both tasks copy **`build/libs/projectisland-<version>.jar`** into **`overrides/mods/`** and merge **`examples/dev-progression/ftbquests/`** into **`overrides/config/ftbquests/`** (same chapters as **`./gradlew runClient`**). **`verifyDevProgressionFtbQuests`** runs first and fails the build if required SNBT (**`quests/data.snbt`**, **`quests/chapters/project_island.snbt`**, **`quests/chapters/rpg_series.snbt`**) is missing — so shipped zips always match the repo’s canonical quest tree. Without those files the **FTB Quests** book is empty even though the mod is on the manifest—**single-player vs multiplayer does not matter**.
 
 ### Server pack vs client
 

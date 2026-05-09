@@ -14,6 +14,8 @@
 			description: [
 				"You play on &eprocedural floating islands&r in the overworld — mostly air between bases."
 				""
+				"&7Starter:&r The server places **one supply chest** on each starter island region (loot: harpoon, elytra, food, torches, basic tools — see **`projectisland:chests/starter_supply`**). With **Lootr**, it can behave as per-player loot per Lootr config."
+				""
 				"&7Mounts:&r **Wings Of Fire** adds **petrified phoenix eggs** to loot (vanilla structures plus this pack’s extra rolls on village, dungeon, jungle temple, and trial chamber chests when Lootr converts them). Hatch an egg on the &eleft branch&r."
 				""
 				"&7Travel:&r **Project Island** ropes are **public ziplines**: craft a **Harpoon Gun**, shoot two anchors on island surfaces, then **rope surf** along the line (&eempty hand&r, &enot sneaking&r — see the **right branch**). Tiered rope span and durability unlock from advancements after the harpoon step."
@@ -546,7 +548,7 @@
 				""
 				"&7Success:&r Chat or action-bar feedback confirms the **rope link**; you should see anchors and the rope mesh. If the second shot fails, the first anchor may clear — reposition and retry."
 				""
-				"Check this quest after at least one **completed** link exists in your world (solo or multiplayer)."
+				"&7FTB Quests:&r This step completes automatically when the server registers a **new** rope link from your harpoon (same moment as the **linked** action-bar line)."
 			]
 			icon: { Count: 1, id: "minecraft:lead" }
 			id: "E1F0A000000000006"
@@ -563,9 +565,9 @@
 				}
 			]
 			tasks: [{
+				advancement: "projectisland:progression/rope_link_created"
 				id: "TE1100110011001109"
-				title: "Finished a two-anchor rope link"
-				type: "checkmark"
+				type: "advancement"
 			}]
 			title: "Complete a Rope Link"
 			x: 3.5d
@@ -580,14 +582,21 @@
 				""
 				"&7HP bar:&r Linked anchors can show **rope health** client-side; **mining** an anchor in survival damages the link until it snaps — repair strategy is **place a new link** after upgrades if needed."
 				""
-				"Check this after you have surfed at least once."
+				"&7Reward:&r **Breeze rods** and **feathers** are valid on **1.21.1** (this pack); older quest drafts referenced **wind charges**, which are not in this Minecraft version."
+				""
+				"&7FTB Quests:&r Completes when you **ride all the way to the far anchor** (empty hand, not sneaking). Canceling mid-line (sneak, damage, broken rope) does not count."
 			]
 			icon: { Count: 1, id: "minecraft:iron_boots" }
 			id: "E1F0A000000000007"
 			rewards: [
 				{
-					id: "RE101010101010111"
-					item: { Count: 8, id: "minecraft:wind_charge" }
+					id: "RE101010101010111A"
+					item: { Count: 2, id: "minecraft:breeze_rod" }
+					type: "item"
+				}
+				{
+					id: "RE101010101010111B"
+					item: { Count: 8, id: "minecraft:feather" }
 					type: "item"
 				}
 				{
@@ -597,9 +606,9 @@
 				}
 			]
 			tasks: [{
+				advancement: "projectisland:progression/rope_surf_complete"
 				id: "TE1100110011001110"
-				title: "Surfed a rope line"
-				type: "checkmark"
+				type: "advancement"
 			}]
 			title: "Ride the Zipline"
 			x: 3.5d

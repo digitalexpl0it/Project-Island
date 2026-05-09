@@ -688,6 +688,14 @@ public final class Config {
                     "If non-empty and no starter island could be assigned within the search radius, disconnect the joining player with this literal message (otherwise they stay at join position and void rescue may still run).")
             .define("starterIslandFailureKickMessage", "");
 
+    public static final ModConfigSpec.BooleanValue STARTER_ISLAND_SUPPLY_CHEST_ENABLED = BUILDER
+            .comment(
+                    "After a player's **first** starter-home assignment succeeds, place **one** loot chest on that island region (near the procedural center, offset from the spawn column).",
+                    "Loot table: **`projectisland:chests/starter_supply`** (harpoon, elytra, food, torches, basic tools, etc.).",
+                    "With **Lootr** installed, behavior follows Lootr's conversion rules for vanilla loot chests.",
+                    "Persisted per region in **`FloatingIslandSavedData`** so each starter island (hub or per-player) gets at most one chest.")
+            .define("starterIslandSupplyChestEnabled", true);
+
     public static final ModConfigSpec.BooleanValue VOID_RESCUE_EACH_TICK = BUILDER
             .comment(
                     "When true, the server watches floating-islands overworld players in the void: optional **last-safe** mid-fall snap (voidRescueSnapToLastSafe*), then **once per fall** near the world minimum Y (voidRescueTriggerBlocksAboveMinY).",

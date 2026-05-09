@@ -1,0 +1,17 @@
+{
+  "display": {
+    "icon": { "item": "minecraft:iron_boots" },
+    "title": { "translate": "advancement.projectisland.rope_surf_complete.title" },
+    "description": { "translate": "advancement.projectisland.rope_surf_complete.desc" },
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [["done"]]
+}

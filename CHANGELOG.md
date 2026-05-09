@@ -7,7 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_Planned changes after **0.1.0**._
+_Planned changes after **0.1.2**._
+
+### Fixed
+
+- **Void rescue vs rope surf:** **last-safe** snap could repeat-teleport you to a **pre-surf** column (e.g. a **tree** or rim by the anchor) while void rescue skipped saving feet during surf — fall → snap back → fall → kick. **Rope surf** start and **cancel / failed finish** now **`clearLastSafeFeet`**; if a snap still lands unsupported, the saved feet tag is **discarded** before **`relocatePlayerFromVoid`** so the loop cannot reuse the bad spot.
+- **FTB Quests (WoF):** **Bind the Lantern to Your Egg** optional rows for **dark** and **gilded** breeds used **`tempered_*_phoenix_lantern`**, but **Wings Of Fire V1.0 (NeoForge 1.21.1)** registers **`wings_of_fire:tempered_dark_phoenixlantern`** and **`wings_of_fire:tempered_gilded_phoenixlantern`** (MCreator id: no underscore before `lantern`). Fire / wind / red / nature keep **`…_phoenix_lantern`**.
+- **FTB Quests / rope line:** **Ride the Zipline** and **Complete a Rope Link** previously used **checkmark** tasks (manual click only). The mod now grants hidden advancements **`projectisland:progression/rope_surf_complete`** (full surf to the far anchor) and **`projectisland:progression/rope_link_created`** (successful two-anchor link); dev-progression SNBT uses **`advancement`** tasks so completion tracks gameplay.
+
+## [0.1.2] — 2026-05-09
+
+### Added
+
+- **Starter supply chest:** after a successful first **starter-home** teleport, the server can place **one** vanilla loot chest per starter island region (offset from the spawn column). Loot table **`projectisland:chests/starter_supply`** (harpoon gun, elytra, food, seeds, torches, water bucket, stone tools, planks, golden apples, iron nuggets, gunpowder, paper). Toggle **`starterIslandSupplyChestEnabled`** in **`projectisland-common.toml`**. Region keys are stored in **`FloatingIslandSavedData`** (`StarterSupplyChests`) so the chest is not duplicated. Works alongside optional **Lootr** per Lootr’s chest rules.
+- **Modpack build guard:** **`verifyDevProgressionFtbQuests`** Gradle task — **`curseforgeModpackZip`** and **`curseforgeServerPackZip`** depend on it so zips are not built if canonical **`examples/dev-progression/ftbquests/`** files (**`quests/data.snbt`**, **`project_island.snbt`**, **`rpg_series.snbt`**) are missing.
+
+### Fixed
+
+- **FTB Quests (dev progression):** **Ride the Zipline** rewards no longer use **`minecraft:wind_charge`** (not in **1.21.1**); they grant **`minecraft:breeze_rod`** and **`minecraft:feather`** instead. Intro quest text mentions the starter supply chest.
+
+### Release / versioning
+
+- **`mod_version`** set to **`0.1.2`** in **`gradle.properties`**; template **`modpack/curseforge/manifest.json`** **`version`** aligned (runtime zips still inject **`project.version`** via **`writeCurseforgeClientManifest`**).
 
 ## [0.1.0] — 2026-05-02
 

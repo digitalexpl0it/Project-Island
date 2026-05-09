@@ -25,6 +25,7 @@ import net.projectisland.ProjectIslandDimensions;
 import net.projectisland.island.FloatingIslandKey;
 import net.projectisland.island.FloatingIslandSavedData;
 import net.projectisland.island.IslandWorld;
+import net.projectisland.ProjectIslandAdvancements;
 import net.projectisland.island.RopeLink;
 import net.projectisland.island.RopeProgression;
 import net.projectisland.network.ActionBarToastPayload;
@@ -157,6 +158,7 @@ public final class HarpoonGunItem extends Item {
         float ropeMaxHpBase = (float) Config.ROPE_LINK_MAX_HEALTH.getAsDouble();
         float ropeMaxHp = (float) (ropeMaxHpBase * tier.maxHealthMultiplier);
         data.putRopeLink(new RopeLink(linkId, sp.getUUID(), aKey, key, aPos, pos, maxLinkLen, ropeMaxHp, ropeMaxHp));
+        ProjectIslandAdvancements.tryGrant(sp, ProjectIslandAdvancements.ROPE_LINK_CREATED);
         stack.hurtAndBreak(1, sp, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
         actionBar(sp, "projectisland.harpoon.linked");
         return InteractionResultHolder.success(stack);

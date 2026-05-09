@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.projectisland.Config;
 import net.projectisland.ProjectIsland;
+import net.projectisland.ProjectIslandAdvancements;
 import net.projectisland.ProjectIslandDimensions;
 import net.projectisland.content.ProjectIslandContent;
 import net.projectisland.content.RopeAnchorBlockEntity;
@@ -155,6 +156,9 @@ public final class RopeSurfingState {
         d.putLong(TAG_SURF_START, level.getGameTime());
         player.setNoGravity(true);
         player.setDeltaMovement(Vec3.ZERO);
+        // Void rescue skips ticks while surfing — last-safe feet would otherwise stay at pre-surf ground (e.g. a tree
+        // anchor), then snap-back after a knockoff repeats a fall loop.
+        FloatingIslandVoidRescue.clearLastSafeFeet(player);
         ActionBarToastPayload.send(player, "projectisland.rope.surf.started");
         return InteractionResult.SUCCESS;
     }
@@ -276,8 +280,12 @@ public final class RopeSurfingState {
     }
 
     private static void finish(ServerPlayer player, ServerLevel level, boolean completedRun) {
+        if (!completedRun) {
+            FloatingIslandVoidRescue.clearLastSafeFeet(player);
+        }
         clear(player);
         if (completedRun) {
+            ProjectIslandAdvancements.tryGrant(player, ProjectIslandAdvancements.ROPE_SURF_COMPLETE);
             setCooldown(player, level);
         }
     }
@@ -285,6 +293,7 @@ public final class RopeSurfingState {
     /** Called when the player takes damage: cancel without applying cooldown. */
     public static void cancelOnDamage(ServerPlayer player) {
         if (isSurfing(player)) {
+            FloatingIslandVoidRescue.clearLastSafeFeet(player);
             clear(player);
         }
     }

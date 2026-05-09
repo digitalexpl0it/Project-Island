@@ -25,6 +25,7 @@ import net.projectisland.worldgen.IslandRegionSettlementRoll;
  * region spiral + {@linkplain FloatingIslandSavedData#tryClaimStarterIsland starter-home mapping} only. Spiral origin: world {@code (0,0)}
  * when {@link Config#STARTER_ISLAND_SEARCH_FROM_WORLD_ORIGIN} is set, else shared spawn or join chunk per
  * {@link Config#STARTER_ISLAND_SEARCH_FROM_WORLD_SPAWN}.
+ * Optional **starter supply chest** (see {@link StarterIslandSupplyChest}) is placed once per starter region when enabled.
  *
  * @return {@code true} if the player was kicked because no starter could be assigned and a kick message is configured.
  */
@@ -85,6 +86,7 @@ public final class FloatingIslandStarterPlacement {
                 if (atHub.isPresent()) {
                     FloatingIslandKey home = atHub.get();
                     if (teleportToIslandCenter(player, level, home)) {
+                        StarterIslandSupplyChest.placeIfNeeded(level, data, home);
                         if (Config.DEBUG_LOGGING.getAsBoolean()) {
                             ProjectIsland.LOGGER.debug(
                                     "Assigned shared starter hub {} to {}", home, player.getGameProfile().getName());
@@ -138,6 +140,7 @@ public final class FloatingIslandStarterPlacement {
                     if (claimed.isPresent()) {
                         FloatingIslandKey home = claimed.get();
                         if (teleportToIslandCenter(player, level, home)) {
+                            StarterIslandSupplyChest.placeIfNeeded(level, data, home);
                             if (Config.DEBUG_LOGGING.getAsBoolean()) {
                                 ProjectIsland.LOGGER.debug(
                                         "Assigned starter island {} to {}", home, player.getGameProfile().getName());

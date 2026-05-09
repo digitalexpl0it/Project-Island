@@ -11,7 +11,7 @@
   "manifestType": "minecraftModpack",
   "manifestVersion": 1,
   "name": "Project Island",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "author": "Project Island",
   "files": [
     { "projectID": 220318, "fileID": 7251965, "required": true },

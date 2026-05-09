@@ -12,6 +12,9 @@ import java.util.UUID;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.util.datafix.DataFixTypes;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.projectisland.Config;
@@ -33,6 +36,7 @@ public final class FloatingIslandSavedData extends SavedData {
     private static final String TAG_STARTER_SPAWN_BASELINE = "StarterSpawnBaseline";
     private static final String TAG_SHARED_STARTER_HUB = "SharedStarterHub";
     private static final String TAG_WAYSTONE_ISLAND_HITS = "WaystoneIslandHits";
+    private static final String TAG_STARTER_SUPPLY_CHESTS = "StarterSupplyChests";
     private static final int CURRENT_VERSION = 2;
 
     private final Map<FloatingIslandKey, IslandRecord> islands = new HashMap<>();
@@ -50,6 +54,8 @@ public final class FloatingIslandSavedData extends SavedData {
      * on that island — synced to the client for Xaero “hit” (gold) tint.
      */
     private final Map<UUID, HashSet<Long>> playerWaystoneIslandHits = new HashMap<>();
+    /** Island regions where a starter supply chest was successfully placed (one per region). */
+    private final HashSet<FloatingIslandKey> starterSupplyChestIslands = new HashSet<>();
 
     public FloatingIslandSavedData() {}
 
@@ -71,6 +77,7 @@ public final class FloatingIslandSavedData extends SavedData {
         starterSpawnBaselineZ = Integer.MIN_VALUE;
         sharedStarterHubKey = null;
         playerWaystoneIslandHits.clear();
+        starterSupplyChestIslands.clear();
         if (root.contains(TAG_ISLANDS)) {
             CompoundTag sec = root.getCompound(TAG_ISLANDS);
             for (String key : sec.getAllKeys()) {
@@ -152,6 +159,22 @@ public final class FloatingIslandSavedData extends SavedData {
                     // skip malformed uuid
                 }
             }
+        }
+        if (root.contains(TAG_STARTER_SUPPLY_CHESTS, Tag.TAG_LIST)) {
+            ListTag list = root.getList(TAG_STARTER_SUPPLY_CHESTS, Tag.TAG_STRING);
+            for (int i = 0; i < list.size(); i++) {
+                FloatingIslandKey.parseStorageKey(list.getString(i)).ifPresent(starterSupplyChestIslands::add);
+            }
+        }
+    }
+
+    public synchronized boolean hasStarterSupplyChest(FloatingIslandKey island) {
+        return starterSupplyChestIslands.contains(island);
+    }
+
+    public synchronized void addStarterSupplyChest(FloatingIslandKey island) {
+        if (starterSupplyChestIslands.add(island)) {
+            setDirty();
         }
     }
 
@@ -380,6 +403,13 @@ public final class FloatingIslandSavedData extends SavedData {
                 hitsRoot.putLongArray(e.getKey().toString(), arr);
             }
             root.put(TAG_WAYSTONE_ISLAND_HITS, hitsRoot);
+        }
+        if (!starterSupplyChestIslands.isEmpty()) {
+            ListTag list = new ListTag();
+            for (FloatingIslandKey k : starterSupplyChestIslands) {
+                list.add(StringTag.valueOf(k.toStorageKey()));
+            }
+            root.put(TAG_STARTER_SUPPLY_CHESTS, list);
         }
         return root;
     }
