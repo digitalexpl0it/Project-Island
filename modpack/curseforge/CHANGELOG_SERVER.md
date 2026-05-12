@@ -4,7 +4,7 @@ Host-facing notes for **`projectisland-modpack-<version>-curseforge-server.zip`*
 
 **Client pack changelog:** [`CHANGELOG_CLIENT.md`](CHANGELOG_CLIENT.md).
 
-The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). **`manifest.json`** **`version`** is written at build time from **`project.version`** (same base as **`gradle.properties`** **`mod_version`**). Server **`manifest.json`** uses **`name`:** **`Project Island (Server)`** and **`files`: `[]`** because mods ship under **`overrides/mods/`**.
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). **`manifest.json`** **`version`** is written at build time from **`project.version`** (same base as **`gradle.properties`** **`mod_version`**). Server **`manifest.json`** uses **`name`:** **`Project Island (Server)`** and **`files`: `[]`**; **Project Island** ships as **`overrides/mods/projectisland-*.jar`** from **`./gradlew jar`**, and third-party mods ship under **`overrides/mods/`** too.
 
 ---
 
@@ -16,9 +16,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). **`
 - **Traveler's Backpack**, **GraveStone Mod**, and **FallingTree:** manifest pins plus **committed** JARs under **`modpack/curseforge/overrides/mods/`** so **`curseforgeServerPackZip`** always places them in **`overrides/mods/`**; Gradle skips re-staging those filenames from **`run-server/mods`** and omits them from **`curseforgeModpackZip`** to avoid duplicate installs.
 - **`overrides/SERVER_README.md`** in the server zip: lists JARs omitted from **`overrides/mods/`** (see **`curseforgeServerPackUndistributableModJars`**) for manual host install. **ModernFix** and **FerriteCore** are included when built from a populated **`run-server/mods/`** (same as other redistributable mods).
 - Same **FTB Quests** SNBT as the client pack; **`curseforgeServerPackZip`** depends on **`verifyDevProgressionFtbQuests`** so a missing **`examples/dev-progression/ftbquests/`** tree fails the build.
+- **Floating islands grow pointy "stalactite root" undersides** (default **on**). Worldgen-only change shipped by the **Project Island** mod (**`projectisland-0.1.2.jar`**); chunks generated before this release keep their old smooth bottom. To revert or tune, edit **`floatingIslandBottomSpike*`** keys in **`config/projectisland-common.toml`** (most importantly **`floatingIslandBottomSpikesEnabled = false`** for the legacy look).
 
 ### Changed
 
+- **Client vs server Project Island delivery:** **`curseforgeModpackZip`** (client) keeps **Project Island** as a **`manifest.json`** pin only (**no** **`overrides/mods/projectisland-*.jar`** — CurseForge moderation on the **primary** file). **`curseforgeServerPackZip`** embeds **`./gradlew jar`** as **`overrides/mods/projectisland-*.jar`** and sets server **`manifest.json`** **`files`** to **`[]`** so hosts get a self-contained fat **`mods`** tree without duplicating a manifest download.
 - **CurseForge manifest pins** aligned with latest **1.21.1** + **NeoForge** file uploads where newer JARs exist (Waystones, Xaero map mods, Lootr, Uranus, CNB); **`MOD_LIST.md`**, **`build.gradle`** (Waystones omit filename), and **`SERVER_README.md`** updated.
 - **`overrides/config/fml.toml`** (**`versionCheck = false`**) and maintainer workflow **`syncManifestModJarsToDevRuns`** / **`sync_manifest_mods_to_dev_runs.py`** for dev **`run-*/mods`** parity with **`manifest.json`**.
 - **`curseforgeServerPackZip`** omits certain third-party **`.jar`** filenames from **`overrides/mods/`** (not redistributable in our server zip); they are still expected under **`run-server/mods/`** for local dev but hosts must obtain those mods separately. Filenames are listed in root **`build.gradle`** (`curseforgeServerPackUndistributableModJars`).

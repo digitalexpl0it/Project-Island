@@ -1,6 +1,6 @@
 # Project Island — dedicated server pack notes
 
-This zip is built as a **fat** server layout: third-party mods live under **`overrides/mods/`** (plus **`projectisland-*.jar`**). **`manifest.json`** uses **`files`: `[]`** so you do not resolve the CurseForge client manifest on the host.
+This zip is built as a **fat** server layout: third-party mods and **`projectisland-*.jar`** live under **`overrides/mods/`**. Server **`manifest.json`** uses **`files`: `[]`** — merge **`overrides/`** into your server **`mods/`** / instance layout; you do **not** need a CurseForge **`files`** resolve for **Project Island** on this zip (the client **primary** pack still installs it via **`manifest.json`** only).
 
 **`overrides/config/fml.toml`** sets NeoForge **`versionCheck = false`** so the loader’s optional global “newer mod on CurseForge” hint system does not run ([docs](https://docs.neoforged.net/docs/misc/updatechecker)). Merge **`overrides/`** into your server instance so that file lands under **`config/`**. Individual mods may still ship their own update settings under **`config/`**—adjust only if you know what you are changing.
 

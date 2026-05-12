@@ -23,6 +23,7 @@
 ## Features
 
 - **Void sky overworld** — islands as the main survival surface; void below.
+- **Sculpted island silhouettes** — each procedural island grows a small set of **stalactite root** spikes under its rounded body for a more dramatic skyline; one toggle (**`floatingIslandBottomSpikesEnabled`**) restores the legacy smooth bottom.
 - **Harpoon + rope anchors** — link anchors, manage span and rope health, **rope surfing**, **public** zipline-style links between anchors (no per-player “claim” layer in current design).
 - **Island HUD** — server-synced hints for navigation; smoother play when [Waystones](https://www.curseforge.com/minecraft/mc-mods/waystones) or [Xaero’s Minimap](https://www.curseforge.com/minecraft/mc-mods/xaeros-minimap) are installed (optional).
 - **Tuning** — hundreds of knobs live in **`projectisland-common.toml`** and **`projectisland-client.toml`**; see **Configuration** for what you can change without digging blindly.

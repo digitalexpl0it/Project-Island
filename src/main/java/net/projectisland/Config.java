@@ -335,6 +335,57 @@ public final class Config {
                     "Stacks with floatingIslandHorizontalRadiusBonus; 0 disables. Tune up if modded villages still overhang.")
             .defineInRange("floatingIslandHorizontalRadiusVillageExtraBlocks", 46, 0, 96);
 
+    /**
+     * Pointy undersides ("stalactite roots"): scale the per-column bottom ellipsoid radius by smooth
+     * Gaussian bumps inside the disk so each island grows 2–5 hanging spikes instead of one rounded blob.
+     * Implemented in {@link net.projectisland.worldgen.FloatingIslandLayout}; affects both
+     * {@code columnContains} and {@code columnBottomY} so worldgen, carvers, structures, and gameplay agree.
+     */
+    public static final ModConfigSpec.BooleanValue FLOATING_ISLAND_BOTTOM_SPIKES_ENABLED = BUILDER
+            .comment(
+                    "Master toggle for pointy island undersides. When **true**, each island gets 3–5 deterministic Gaussian downward bumps that extend the bottom ellipsoid into stalactite-like roots. When **false**, the legacy smooth bottom is used (existing worlds keep the same silhouette).")
+            .define("floatingIslandBottomSpikesEnabled", true);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLAND_BOTTOM_SPIKE_COUNT_MIN = BUILDER
+            .comment(
+                    "Minimum number of stalactite-root spikes per island (inclusive). Clamped against floatingIslandBottomSpikeCountMax.")
+            .defineInRange("floatingIslandBottomSpikeCountMin", 3, 0, 6);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLAND_BOTTOM_SPIKE_COUNT_MAX = BUILDER
+            .comment(
+                    "Maximum number of stalactite-root spikes per island (inclusive). Hard cap matches the internal spike array length (6).")
+            .defineInRange("floatingIslandBottomSpikeCountMax", 5, 0, 6);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLAND_BOTTOM_SPIKE_MAX_MULTIPLIER = BUILDER
+            .comment(
+                    "Upper cap on the per-column bottom-radius multiplier at a spike center (1.0 = no extension, 2.8 ≈ tap-root depth nearly 3× the smooth bottom). Higher values stretch spikes further into the void; effective cap is also limited by floatingIslandBottomSpikeMaxDepthBelowCenterBlocks / vrBottom.")
+            .defineInRange("floatingIslandBottomSpikeMaxMultiplier", 2.8d, 1.0d, 4.0d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLAND_BOTTOM_SPIKE_FALLOFF_BLOCKS = BUILDER
+            .comment(
+                    "Approximate horizontal radius (in blocks) where a spike's depth boost falls to roughly half. Smaller = sharper points; larger = broader hanging lobes.")
+            .defineInRange("floatingIslandBottomSpikeFalloffBlocks", 7.0d, 2.0d, 64.0d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLAND_BOTTOM_SPIKE_MAX_ANCHOR_HORIZ = BUILDER
+            .comment(
+                    "Maximum sqrt(horiz) at which a spike anchor may sit (fraction of horizontal radius). Keeps roots under the island body rather than the rim; lower = tighter cluster near center, higher = spikes reach toward the rim so the disk is covered evenly on both sides.")
+            .defineInRange("floatingIslandBottomSpikeMaxAnchorHoriz", 0.82d, 0.1d, 0.95d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLAND_BOTTOM_SPIKE_MIN_ANCHOR_HORIZ = BUILDER
+            .comment(
+                    "Minimum sqrt(horiz) at which a spike anchor may sit (fraction of horizontal radius). Pushes anchors outward so K=3-4 spikes do not clump near the island center, leaving the rest of the underside smooth.")
+            .defineInRange("floatingIslandBottomSpikeMinAnchorHoriz", 0.35d, 0.0d, 0.9d);
+
+    public static final ModConfigSpec.DoubleValue FLOATING_ISLAND_BOTTOM_SPIKE_ANGLE_JITTER_FRACTION = BUILDER
+            .comment(
+                    "Fraction of an angular slot (2π / spikeCount) by which each spike's polar angle may jitter inside its slot. 0 = perfectly evenly spaced (looks too symmetric); 1 = spikes can land anywhere in their slot. Lower values guarantee disk coverage with small spike counts.")
+            .defineInRange("floatingIslandBottomSpikeAngleJitterFraction", 0.55d, 0.0d, 1.0d);
+
+    public static final ModConfigSpec.IntValue FLOATING_ISLAND_BOTTOM_SPIKE_MAX_DEPTH_BELOW_CENTER_BLOCKS = BUILDER
+            .comment(
+                    "Hard cap (blocks) on how far below an island's centerY the spike-extended bottom may reach. Prevents extreme vrBottom + spike combinations from poking into the void-floor band used by FloatingIslandVoidRescue (see voidRescueTriggerBlocksAboveMinY).")
+            .defineInRange("floatingIslandBottomSpikeMaxDepthBelowCenterBlocks", 128, 16, 256);
+
     public static final ModConfigSpec.IntValue FLOATING_ISLANDS_CHUNK_GENERATOR_SEA_LEVEL = BUILDER
             .comment(
                     "Returned only by **ChunkGenerator#getSeaLevel()** for the floating-islands overworld (not the same as **Level#getSeaLevel()**, which still comes from the overworld **dimension type**, usually **~63**).",

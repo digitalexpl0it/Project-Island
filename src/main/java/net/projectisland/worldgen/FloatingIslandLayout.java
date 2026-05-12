@@ -14,6 +14,8 @@ public final class FloatingIslandLayout {
     public static final int REGION_CHUNKS = 8;
     private static final int REGION_SEED_SALT = 84062247;
     public static final double TOP_HORIZ_POWER = 0.72d;
+    /** Upper bound on spike-anchor count per island; matches the fixed-size arrays in {@link IslandParams}. */
+    public static final int MAX_BOTTOM_SPIKES = 6;
 
     private FloatingIslandLayout() {}
 
@@ -56,6 +58,35 @@ public final class FloatingIslandLayout {
         out.vrTop = 5 + rnd.nextInt(7);
         out.vrBottom = 24 + rnd.nextInt(24);
         out.shapeSalt = rnd.nextLong();
+
+        out.spikeCount = 0;
+        if (Config.FLOATING_ISLAND_BOTTOM_SPIKES_ENABLED.getAsBoolean()) {
+            int minK = Mth.clamp(Config.FLOATING_ISLAND_BOTTOM_SPIKE_COUNT_MIN.getAsInt(), 0, MAX_BOTTOM_SPIKES);
+            int maxK = Mth.clamp(Config.FLOATING_ISLAND_BOTTOM_SPIKE_COUNT_MAX.getAsInt(), 0, MAX_BOTTOM_SPIKES);
+            if (maxK < minK) {
+                maxK = minK;
+            }
+            if (maxK > 0) {
+                int k = (maxK > minK) ? (minK + rnd.nextInt(maxK - minK + 1)) : minK;
+                double maxFrac = Mth.clamp(Config.FLOATING_ISLAND_BOTTOM_SPIKE_MAX_ANCHOR_HORIZ.getAsDouble(), 0.1d, 0.95d);
+                double minFrac = Mth.clamp(Config.FLOATING_ISLAND_BOTTOM_SPIKE_MIN_ANCHOR_HORIZ.getAsDouble(), 0.0d, maxFrac);
+                double maxR = Math.max(1.0d, out.hr * maxFrac);
+                double minR = Math.max(0.0d, out.hr * minFrac);
+                double jitterFrac = Mth.clamp(Config.FLOATING_ISLAND_BOTTOM_SPIKE_ANGLE_JITTER_FRACTION.getAsDouble(), 0.0d, 1.0d);
+                double slot = (Math.PI * 2.0d) / Math.max(1, k);
+                double phase = rnd.nextDouble() * (Math.PI * 2.0d);
+                for (int i = 0; i < k; i++) {
+                    double slotJitter = (rnd.nextDouble() - 0.5d) * slot * jitterFrac;
+                    double angle = phase + i * slot + slotJitter;
+                    double rFrac = Math.sqrt(rnd.nextDouble());
+                    double radius = minR + (maxR - minR) * rFrac;
+                    out.spikeOffsetX[out.spikeCount] = (float) (Math.cos(angle) * radius);
+                    out.spikeOffsetZ[out.spikeCount] = (float) (Math.sin(angle) * radius);
+                    out.spikeStrength[out.spikeCount] = (float) (0.55d + 0.45d * rnd.nextDouble());
+                    out.spikeCount++;
+                }
+            }
+        }
     }
 
     /**
@@ -175,8 +206,8 @@ public final class FloatingIslandLayout {
                 }
 
                 double cyEff = params.centerY + verticalHill(wx, wz, params.shapeSalt);
-                double warp = edgeBottomWarp(horiz);
-                int bottomY = Mth.floor(cyEff - params.vrBottom * warp * Math.sqrt(Math.max(0.0d, 1.0d - horiz)));
+                double denom = effectiveBottomVerticalRadius(horiz, wx, wz, params);
+                int bottomY = Mth.floor(cyEff - denom * Math.sqrt(Math.max(0.0d, 1.0d - horiz)));
                 best = Math.min(best, bottomY);
             }
         }
@@ -221,8 +252,7 @@ public final class FloatingIslandLayout {
                     }
                 } else {
                     double dy = cyEff - y;
-                    double warp = edgeBottomWarp(horiz);
-                    double denom = Math.max(1.0d, params.vrBottom * warp);
+                    double denom = Math.max(1.0d, effectiveBottomVerticalRadius(horiz, wx, wz, params));
                     if ((dy * dy) / (denom * denom) + horiz <= 1.0d) {
                         return true;
                     }
@@ -251,6 +281,53 @@ public final class FloatingIslandLayout {
         return Math.pow(Math.max(0.0d, horiz), TOP_HORIZ_POWER);
     }
 
+    /**
+     * Per-column scalar (>= 1) that stretches the bottom ellipsoid into "stalactite roots" near each
+     * spike anchor stored on {@code params}. Returns 1.0 when spikes are disabled or absent so the
+     * legacy smooth silhouette is preserved. Output is clamped so {@code vrBottom * multiplier} stays
+     * within {@code floatingIslandBottomSpikeMaxDepthBelowCenterBlocks}, keeping void rescue safe.
+     */
+    private static double bottomDepthMultiplier(int wx, int wz, IslandParams p) {
+        if (p.spikeCount <= 0) {
+            return 1.0d;
+        }
+        double maxMult = Math.max(1.0d, Config.FLOATING_ISLAND_BOTTOM_SPIKE_MAX_MULTIPLIER.getAsDouble());
+        if (maxMult <= 1.0d) {
+            return 1.0d;
+        }
+        double sigma = Math.max(1.0d, Config.FLOATING_ISLAND_BOTTOM_SPIKE_FALLOFF_BLOCKS.getAsDouble());
+        double twoSigmaSq = 2.0d * sigma * sigma;
+        double sampleX = (wx + 0.5d) - p.centerX;
+        double sampleZ = (wz + 0.5d) - p.centerZ;
+        double m = 1.0d;
+        for (int i = 0; i < p.spikeCount; i++) {
+            double dx = sampleX - p.spikeOffsetX[i];
+            double dz = sampleZ - p.spikeOffsetZ[i];
+            double distSq = dx * dx + dz * dz;
+            double factor = Math.exp(-distSq / twoSigmaSq);
+            double boost = 1.0d + (maxMult - 1.0d) * p.spikeStrength[i] * factor;
+            if (boost > m) {
+                m = boost;
+            }
+        }
+        int maxDepth = Math.max(1, Config.FLOATING_ISLAND_BOTTOM_SPIKE_MAX_DEPTH_BELOW_CENTER_BLOCKS.getAsInt());
+        double cap = maxDepth / Math.max(1.0d, p.vrBottom);
+        if (m > cap) {
+            m = cap;
+        }
+        return m < 1.0d ? 1.0d : m;
+    }
+
+    /**
+     * Single source of truth for the bottom-ellipsoid vertical radius in both {@link #columnContains}
+     * (interior test) and {@link #columnBottomY} (gameplay queries) so worldgen, structures, and void
+     * rescue agree on where each column ends.
+     */
+    private static double effectiveBottomVerticalRadius(double horiz, int wx, int wz, IslandParams p) {
+        double base = Math.max(1.0d, p.vrBottom) * edgeBottomWarp(horiz);
+        return base * bottomDepthMultiplier(wx, wz, p);
+    }
+
     public static final class IslandParams {
         public int centerX;
         public int centerZ;
@@ -259,5 +336,9 @@ public final class FloatingIslandLayout {
         public int vrTop;
         public int vrBottom;
         public long shapeSalt;
+        public int spikeCount;
+        public final float[] spikeOffsetX = new float[MAX_BOTTOM_SPIKES];
+        public final float[] spikeOffsetZ = new float[MAX_BOTTOM_SPIKES];
+        public final float[] spikeStrength = new float[MAX_BOTTOM_SPIKES];
     }
 }

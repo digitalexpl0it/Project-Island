@@ -317,10 +317,9 @@ tasks.register('writeCurseforgeClientManifest') {
 }
 
 tasks.register('curseforgeModpackZip', Zip) {
-    def jarTask = tasks.named('jar', Jar)
-    dependsOn jarTask, tasks.named('writeCurseforgeClientManifest'), tasks.named('verifyDevProgressionFtbQuests')
+    dependsOn tasks.named('writeCurseforgeClientManifest'), tasks.named('verifyDevProgressionFtbQuests')
     group = 'distribution'
-    description = 'CurseForge client modpack zip (manifest + overrides + Project Island jar + FTB quest SNBT).'
+    description = 'CurseForge client modpack zip (manifest + overrides + FTB quest SNBT). Project Island is a manifest pin (CurseForge project 1534225) — do not ship projectisland-*.jar under overrides/mods (CurseForge moderation rejects hosted mods duplicated in the zip).'
     archiveFileName = "${mod_id}-modpack-${version}-curseforge.zip"
     destinationDirectory = layout.buildDirectory.dir('dist')
     duplicatesStrategy = DuplicatesStrategy.WARN
@@ -334,9 +333,6 @@ tasks.register('curseforgeModpackZip', Zip) {
     // Same SNBT as Gradle dev sync (examples/dev-progression); FTB reads <instance>/config/ftbquests/
     from(layout.projectDirectory.dir('examples/dev-progression/ftbquests')) {
         into 'overrides/config/ftbquests'
-    }
-    from(jarTask.flatMap { it.archiveFile }) {
-        into 'overrides/mods'
     }
 }
 
@@ -374,15 +370,15 @@ tasks.register('copyCurseforgeServerModJarsFromRunServer') {
 
 tasks.register('writeCurseforgeServerManifest') {
     group = 'distribution'
-    description = 'Writes build/tmp/curseforge-server/manifest.json: server name, version from Gradle, files=[] (JARs ship under overrides/mods).'
+    description = 'Writes build/tmp/curseforge-server/manifest.json: server name, version from Gradle, files = [] (Project Island ships as projectisland-*.jar under overrides/mods; client pack uses manifest pin only).'
     dependsOn tasks.named('writeCurseforgeClientManifest')
-    def excludedIn = layout.projectDirectory.file('modpack/curseforge/server-pack-excluded-project-ids.json')
-    inputs.files(curseforgeClientManifestOut, excludedIn)
+    inputs.file(curseforgeClientManifestOut)
     outputs.file(curseforgeServerManifestOut)
     doLast {
         def slurp = new groovy.json.JsonSlurper()
         def base = slurp.parse(curseforgeClientManifestOut.get().asFile)
         base.name = "${base.name} (Server)"
+        // Server additional zip: ship our mod JAR in overrides/mods; empty files[] avoids launcher double-fetch vs client moderation (no PI jar in client zip).
         base.files = []
         def out = curseforgeServerManifestOut.get().asFile
         out.parentFile.mkdirs()
@@ -391,10 +387,9 @@ tasks.register('writeCurseforgeServerManifest') {
 }
 
 tasks.register('curseforgeServerPackZip', Zip) {
-    def jarTask = tasks.named('jar', Jar)
-    dependsOn jarTask, tasks.named('writeCurseforgeServerManifest'), tasks.named('copyCurseforgeServerModJarsFromRunServer'), tasks.named('verifyDevProgressionFtbQuests')
+    dependsOn tasks.named('writeCurseforgeServerManifest'), tasks.named('copyCurseforgeServerModJarsFromRunServer'), tasks.named('verifyDevProgressionFtbQuests'), tasks.named('jar')
     group = 'distribution'
-    description = 'CurseForge dedicated server pack: fat overrides/mods (JARs from run-server/mods staging + committed modpack/curseforge/overrides/mods/*.jar + Project Island jar). Tree copy excludes overrides/mods/*.jar to avoid duplicates. manifest files=[].'
+    description = 'CurseForge dedicated server pack: fat overrides/mods (JARs from run-server/mods staging + jar task output for Project Island + committed modpack/curseforge/overrides/mods/*.jar). Server manifest files[] is empty so PI is not duplicated via manifest download. Client curseforgeModpackZip stays manifest-only for PI (CurseForge moderation).'
     archiveFileName = "${mod_id}-modpack-${version}-curseforge-server.zip"
     destinationDirectory = layout.buildDirectory.dir('dist')
     duplicatesStrategy = DuplicatesStrategy.WARN
@@ -422,7 +417,7 @@ tasks.register('curseforgeServerPackZip', Zip) {
         exclude { curseforgeServerPackUndistributableModJars.contains(it.name) }
         into 'overrides/mods'
     }
-    from(jarTask.flatMap { it.archiveFile }) {
+    from(tasks.named('jar', org.gradle.api.tasks.bundling.Jar).flatMap { it.archiveFile }) {
         into 'overrides/mods'
     }
 }

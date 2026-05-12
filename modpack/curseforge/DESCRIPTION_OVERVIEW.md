@@ -17,6 +17,7 @@ Survive and build on **procedural floating islands** in an empty overworld. Foll
 #### Highlights
 
 - **Sky-world fantasy** — islands float in the void; no traditional overworld landmass.
+- **Sculpted island undersides** — procedural floating islands drip into multiple **stalactite root** lobes for a more striking skyline (toggle in mod config).
 - **Quest-led onboarding** — FTB Quests includes a **foundation** path plus an **RPG / Skill Tree / Spell Engine** branch after you hit the iron tier.
 - **Loot that respects multiplayer** — **Lootr** for per-player dungeon chests where configured.
 - **Exploration & identity** — **Biomes O’ Plenty**, **Wings Of Fire** mounts, class-flavored RPG mods (archers, rogues, paladins, wizards, etc.—see in-game **JEI**).
@@ -50,7 +51,7 @@ Survive and build on **procedural floating islands** in an empty overworld. Foll
 
 Always install **matching** client + server files from the **same** release.
 
-**Connection errors (“Project Island channel missing on the server”):** the dedicated server must load the **same** **Project Island** mod jar as the client. Use the official **server** additional zip (it merges **`overrides/mods/`**) or copy **`projectisland-*.jar`** from the client profile’s **`mods/`** into the server’s **`mods/`**.
+**Connection errors (“Project Island channel missing on the server”):** the dedicated server must load the **same** **Project Island** mod jar as the client. Use the official **server** additional zip (**`projectisland-*.jar`** is under **`overrides/mods/`**; server **`manifest.json`** **`files`** is empty) or copy **`projectisland-*.jar`** from the client profile’s **`mods/`** (CurseForge launcher download) into the server’s **`mods/`** if you install manually.
 
 ---
 
