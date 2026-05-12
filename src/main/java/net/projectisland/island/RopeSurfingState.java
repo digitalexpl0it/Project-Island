@@ -4,11 +4,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import org.jetbrains.annotations.Nullable;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -85,6 +82,30 @@ public final class RopeSurfingState {
         d.remove(LEGACY_TAG_CD);
     }
 
+    /**
+     * Clears surf state; if the session did not complete successfully on the floating overworld, teleports to a
+     * supported column when the player is still in open air/void so vanilla does not treat a long fall as illegal
+     * flight ({@code allow-flight=false} kicks).
+     */
+    private static void afterRopeSurfClear(ServerPlayer player, ServerLevel level, boolean completedSuccessfully) {
+        if (completedSuccessfully) {
+            clear(player);
+            return;
+        }
+        FloatingIslandVoidRescue.clearLastSafeFeet(player);
+        clear(player);
+        if (player.isCreative() || player.isSpectator()) {
+            return;
+        }
+        if (!ProjectIslandDimensions.isFloatingIslandsGameplay(level)) {
+            return;
+        }
+        if (!FloatingIslandVoidRescue.isSupportedOnIslandSurface(player, level)) {
+            FloatingIslandVoidRescue.rescueToBedStarterOrNearestIsland(player, level);
+            FloatingIslandVoidRescue.stabilizeAfterIslandTeleport(player);
+        }
+    }
+
     public static void setCooldown(ServerPlayer player, ServerLevel level) {
         int cd = Config.ROPE_TRAVERSAL_SURF_COOLDOWN_TICKS.getAsInt();
         if (cd > 0) {
@@ -110,7 +131,7 @@ public final class RopeSurfingState {
         }
         if (isSurfing(player)) {
             if (surfTimedOut(player, level)) {
-                clear(player);
+                afterRopeSurfClear(player, level, false);
             } else {
                 ActionBarToastPayload.send(player, "projectisland.rope.surf.busy");
                 return InteractionResult.FAIL;
@@ -160,6 +181,7 @@ public final class RopeSurfingState {
         // anchor), then snap-back after a knockoff repeats a fall loop.
         FloatingIslandVoidRescue.clearLastSafeFeet(player);
         ActionBarToastPayload.send(player, "projectisland.rope.surf.started");
+        MobRopeSurfState.notifyPlayerStartedRopeSurf(level, player, link.id(), anchorPos);
         return InteractionResult.SUCCESS;
     }
 
@@ -174,7 +196,7 @@ public final class RopeSurfingState {
 
     public static void tick(ServerPlayer player, ServerLevel level) {
         if (!Config.ROPE_TRAVERSAL_SURF_ENABLED.getAsBoolean()) {
-            clear(player);
+            afterRopeSurfClear(player, level, false);
             return;
         }
         CompoundTag d = player.getPersistentData();
@@ -183,11 +205,11 @@ public final class RopeSurfingState {
             return;
         }
         if (surfTimedOut(player, level)) {
-            clear(player);
+            afterRopeSurfClear(player, level, false);
             return;
         }
         if (!ProjectIslandDimensions.isFloatingIslandsGameplay(level)) {
-            clear(player);
+            afterRopeSurfClear(player, level, false);
             return;
         }
         if (player.isShiftKeyDown()) {
@@ -199,13 +221,13 @@ public final class RopeSurfingState {
         FloatingIslandSavedData data = IslandWorld.get(level);
         RopeLink link = data.getRopeLink(lid).orElse(null);
         if (link == null) {
-            clear(player);
+            afterRopeSurfClear(player, level, false);
             return;
         }
         BlockPos other = link.otherAnchor(from);
         if (other == null
                 || (!link.fromAnchorPos().equals(from) && !link.toAnchorPos().equals(from))) {
-            clear(player);
+            afterRopeSurfClear(player, level, false);
             return;
         }
         float minHp = (float) Config.ROPE_TRAVERSAL_SURF_MIN_HEALTH_FRACTION.getAsDouble();
@@ -219,20 +241,22 @@ public final class RopeSurfingState {
         BlockState fs = level.getBlockState(from);
         BlockState os = level.getBlockState(other);
         if (fs.getBlock() != ProjectIslandContent.ROPE_ANCHOR || os.getBlock() != ProjectIslandContent.ROPE_ANCHOR) {
-            clear(player);
+            afterRopeSurfClear(player, level, false);
             return;
         }
 
         double arc = RopeCurveUtil.arcLengthBlocks(from, other);
         if (arc < 1e-3) {
-            clear(player);
+            afterRopeSurfClear(player, level, false);
             return;
         }
         double speed = Config.ROPE_TRAVERSAL_SURF_SPEED_BLOCKS_PER_SECOND.getAsDouble();
         double dt = speed / (arc * 20.0d);
         double t = d.getDouble(TAG_T) + dt;
         if (t >= 1.0) {
-            landAtEnd(player, level, from, other);
+            // Must land synchronously before finish() clears surf tags: deferred teleport runs later and skips when
+            // !isSurfing, which left players short of the end in air and could trigger allow-flight=false kicks.
+            landAtEndSync(player, level, from, other);
             finish(player, level, true);
             return;
         }
@@ -240,50 +264,48 @@ public final class RopeSurfingState {
         Vec3 p = RopeCurveUtil.sagPoint(from, other, t);
         player.fallDistance = 0.0f;
         IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(p.x), Mth.floor(p.z), 2);
-        deferSurfTeleport(level.getServer(), player, level, p, "tick");
+        // Synchronous move: deferring via server.execute stacks under lag (see log "ticks behind") so teleports run
+        // late/out of order vs surf clear → vanilla "floating too long" with allow-flight=false.
+        applySurfPositionSync(player, level, p);
     }
 
-    private static void landAtEnd(ServerPlayer player, ServerLevel level, BlockPos from, BlockPos to) {
+    /** Final sag endpoint applied in the same tick before {@link #finish} clears PDC — not deferred. */
+    private static void landAtEndSync(ServerPlayer player, ServerLevel level, BlockPos from, BlockPos to) {
         Vec3 end = RopeCurveUtil.sagPoint(from, to, 1.0);
         player.fallDistance = 0.0f;
         IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(end.x), Mth.floor(end.z), 2);
-        deferSurfTeleport(level.getServer(), player, level, end, "end");
+        try {
+            player.setDeltaMovement(Vec3.ZERO);
+            player.teleportTo(
+                    level, end.x, end.y, end.z, Set.<RelativeMovement>of(), player.getYRot(), player.getXRot());
+            player.setOnGround(true);
+            FloatingIslandVoidRescue.stabilizeAfterIslandTeleport(player);
+        } catch (Exception e) {
+            ProjectIsland.LOGGER.warn("Rope surf end teleport failed: {}", player, e);
+        }
     }
 
-    private static void deferSurfTeleport(
-            @Nullable MinecraftServer server, ServerPlayer player, ServerLevel level, Vec3 p, String phase) {
-        Runnable apply =
-                () -> {
-                    if (player.isRemoved() || !RopeSurfingState.isSurfing(player)) {
-                        return;
-                    }
-                    if (player.serverLevel() != level) {
-                        return;
-                    }
-                    try {
-                        player.fallDistance = 0.0f;
-                        player.setDeltaMovement(Vec3.ZERO);
-                        player.teleportTo(
-                                level, p.x, p.y, p.z, Set.<RelativeMovement>of(), player.getYRot(), player.getXRot());
-                        player.setOnGround(true);
-                        player.setDeltaMovement(Vec3.ZERO);
-                    } catch (Exception e) {
-                        ProjectIsland.LOGGER.warn("Rope surf teleport failed ({}): clear surf state for {}", phase, player, e);
-                        RopeSurfingState.clear(player);
-                    }
-                };
-        if (server == null) {
-            apply.run();
-        } else {
-            server.execute(apply);
+    private static void applySurfPositionSync(ServerPlayer player, ServerLevel level, Vec3 p) {
+        if (player.isRemoved() || !isSurfing(player)) {
+            return;
+        }
+        if (player.serverLevel() != level) {
+            return;
+        }
+        try {
+            player.fallDistance = 0.0f;
+            player.setDeltaMovement(Vec3.ZERO);
+            player.teleportTo(level, p.x, p.y, p.z, Set.<RelativeMovement>of(), player.getYRot(), player.getXRot());
+            player.setOnGround(true);
+            player.setDeltaMovement(Vec3.ZERO);
+        } catch (Exception e) {
+            ProjectIsland.LOGGER.warn("Rope surf tick teleport failed: clear surf state for {}", player, e);
+            afterRopeSurfClear(player, level, false);
         }
     }
 
     private static void finish(ServerPlayer player, ServerLevel level, boolean completedRun) {
-        if (!completedRun) {
-            FloatingIslandVoidRescue.clearLastSafeFeet(player);
-        }
-        clear(player);
+        afterRopeSurfClear(player, level, completedRun);
         if (completedRun) {
             ProjectIslandAdvancements.tryGrant(player, ProjectIslandAdvancements.ROPE_SURF_COMPLETE);
             setCooldown(player, level);
@@ -292,9 +314,8 @@ public final class RopeSurfingState {
 
     /** Called when the player takes damage: cancel without applying cooldown. */
     public static void cancelOnDamage(ServerPlayer player) {
-        if (isSurfing(player)) {
-            FloatingIslandVoidRescue.clearLastSafeFeet(player);
-            clear(player);
+        if (isSurfing(player) && player.level() instanceof ServerLevel level) {
+            afterRopeSurfClear(player, level, false);
         }
     }
 }

@@ -22,6 +22,7 @@ import net.projectisland.island.IslandHudServerSync;
 import net.projectisland.island.RopeAnchorMining;
 import net.projectisland.island.RopeLinkServerSync;
 import net.projectisland.island.RopeTraversalEvents;
+import net.projectisland.island.StarterSupplyChestProtection;
 import net.projectisland.network.ProjectIslandNetworking;
 import net.projectisland.compat.IslandBiomeModDiagnostics;
 import net.projectisland.compat.RealmRpgTreasureBalloonsFloatingIslandCompat;
@@ -49,6 +50,7 @@ public final class ProjectIsland {
         IslandHudServerSync.register();
         RopeLinkServerSync.register();
         RopeAnchorMining.register();
+        StarterSupplyChestProtection.register();
         RopeTraversalEvents.register();
         FloatingIslandRespawnHandler.register();
         RealmRpgTreasureBalloonsFloatingIslandCompat.register();

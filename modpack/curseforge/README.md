@@ -44,7 +44,7 @@ Both tasks copy **`build/libs/projectisland-<version>.jar`** into **`overrides/m
 
 **Before `curseforgeServerPackZip`:** ensure **`run-server/mods/`** exists and matches what a **dedicated server** should load (see **[`MOD_LIST.md`](../../MOD_LIST.md)** and **`./gradlew runServer`**). The task does **not** strip client-only mods for you — keep **`run-server/mods`** free of JEI, shader loaders, etc. Use **`server-pack-excluded-project-ids.json`** as a **checklist** of Curse **`projectID`s** the *client* manifest lists that typically should **not** appear on a headless server; filenames must match what you actually install under **`run-server/mods`**.
 
-The server zip still **does not** ship **`modlist.html`**, **`resourcepackoverrides.json`**, **`overrides/resourcepacks/`**, or **`overrides/shaderpacks/`**. When you add a mod to **`manifest.json`**, keep **`server-pack-excluded-project-ids.json`** in sync for documentation and client/server parity reviews.
+The server zip still **does not** ship **`modlist.html`**, **`resourcepackoverrides.json`**, **`overrides/resourcepacks/`**, or **`overrides/shaderpacks/`**. It **does** ship **`overrides/SERVER_README.md`** — dedicated host notes and **mods omitted from the zip** (must be installed manually; filenames match **`curseforgeServerPackUndistributableModJars`** in root **`build.gradle`**). When you add a mod to **`manifest.json`**, keep **`server-pack-excluded-project-ids.json`** in sync for documentation and client/server parity reviews.
 
 ## Pack logo / thumbnail
 
@@ -82,7 +82,30 @@ To add another CurseForge-hosted mod:
 3. Append `{ "projectID": …, "fileID": …, "required": true }` to **`manifest.json`** (keep entries sorted by `projectID` if you like clean diffs).
 4. Optionally add a row to **`modlist.html`**.
 
-Helper (optional): `tools/curseforge_pack/resolve_file_id.py`
+Helpers (optional): `tools/curseforge_pack/resolve_file_id.py` · `tools/curseforge_pack/sync_manifest_mods_to_dev_runs.py`
+
+## Refreshing CurseForge pins (latest NeoForge **1.21.1**)
+
+To bump every **`manifest.json`** row to the **newest** CurseForge file whose **`gameVersions`** include **exact** **`1.21.1`** + **`NeoForge`** (by upload date, so newer betas are not downgraded to older “Release” builds):
+
+```bash
+python3 tools/curseforge_pack/bump_manifest_latest_neoforge.py --manifest modpack/curseforge/manifest.json
+python3 tools/curseforge_pack/bump_manifest_latest_neoforge.py --manifest modpack/curseforge/manifest.json --apply
+```
+
+After **`--apply`**: update **[`MOD_LIST.md`](../../MOD_LIST.md)** (and **`run-server/mods/`** / **`run-client/mods/`**) to match new JAR names; if **Waystones** (or another mod on **`curseforgeServerPackUndistributableModJars`**) renames its jar, sync **`build.gradle`** and **`overrides/SERVER_README.md`**.
+
+### Dev `run-server/mods` + `run-client/mods` = manifest pins
+
+Gradle: **`./gradlew syncManifestModJarsToDevRuns`** (Python **`tools/curseforge_pack/sync_manifest_mods_to_dev_runs.py`**) downloads **every** manifest **`fileID`** into **`run-client/mods/`** and into **`run-server/mods/`** except **client-first** pins (currently **Inventory HUD+** **`357540`** — server folder is skipped / stale file removed). Requires **`python3`** and network access. Does **not** delete extra JARs you added manually (e.g. Modrinth-only mods); keep those documented in **`MOD_LIST.md`**.
+
+### NeoForge global version check (`config/fml.toml`)
+
+The pack includes **`overrides/config/fml.toml`** with **`versionCheck = false`** so NeoForge’s optional global update hint system is off ([NeoForge update checker](https://docs.neoforged.net/docs/misc/updatechecker)). That does **not** disable third-party mods’ **own** update logic—those are per-mod **`config/`** files if they exist.
+
+### CurseForge App / launchers
+
+The **manifest** locks versions; the launcher should install **exact** **`fileID`s**. If a launcher offers **per-mod auto-updates**, turn them off for this profile so players stay on the pack’s tested set until you publish a new pack version.
 
 ## Full mod list
 

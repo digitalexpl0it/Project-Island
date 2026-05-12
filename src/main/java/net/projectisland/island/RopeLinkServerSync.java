@@ -24,6 +24,11 @@ public final class RopeLinkServerSync {
 
     private static void onServerTickPost(ServerTickEvent.Post event) {
         MinecraftServer server = event.getServer();
+        for (ServerLevel level : server.getAllLevels()) {
+            if (ProjectIslandDimensions.isFloatingIslandsGameplay(level)) {
+                MobRopeSurfState.tickSurfingMobs(level);
+            }
+        }
         RopeLinkStress.tick(server);
         RopeLinkProgressionUpgrade.tick(server);
         int interval = Math.max(1, Config.ROPE_LINK_SYNC_INTERVAL_TICKS.getAsInt());

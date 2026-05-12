@@ -22,8 +22,10 @@ Sorted by filename. **Not** listed here: anything absent from `run-server/mods/`
 | `BiomesOPlenty-neoforge-1.21.1-21.1.0.13.jar` | **[Biomes O’ Plenty](https://www.curseforge.com/minecraft/mc-mods/biomes-o-plenty)** ([Modrinth](https://modrinth.com/mod/biomes-o-plenty)) — extra overworld biomes (pairs with **TerraBlender**). **CurseForge modpack** pins **`7251965`** for this filename (`manifest.json` **220318**). | **Client + server** |
 | `bundle-api-neoforge-1.1.0.jar` | **[Bundle API](https://modrinth.com/mod/bundle-api)** | **Client + server** |
 | `cloth-config-15.0.140-neoforge.jar` | **Cloth Config** — config UI / API. | **Client + server** |
-| `CNB-1.21.1-neoforge-1.7.0.jar` | **[Creatures and Beasts: Continued](https://www.curseforge.com/minecraft/mc-mods/creatures-and-beasts-continued)** — mod id **`cnb`**. Biome-tied creatures; on floating islands density follows **island biomes** (see BOP note below). Optional **`cnb`** in **`neoforge.mods.toml`**. | **Client + server** |
+| `CNB-1.21.1-neoforge-1.7.8.jar` | **[Creatures and Beasts: Continued](https://www.curseforge.com/minecraft/mc-mods/creatures-and-beasts-continued)** — mod id **`cnb`**. Biome-tied creatures; on floating islands density follows **island biomes** (see BOP note below). Optional **`cnb`** in **`neoforge.mods.toml`**. CurseForge modpack pins **`8066562`** (**`1197295`**). | **Client + server** |
 | `embeddium-1.0.15+mc1.21.1.jar` | **Embeddium** — performance / rendering (normally **client**; safe to omit on a headless dedicated server if you trim rendering mods). | **Usually client** |
+| `FallingTree-1.21.1-1.21.1.11.jar` | **[FallingTree](https://www.curseforge.com/minecraft/mc-mods/falling-tree)** — tree-felling QoL. CurseForge modpack pins **`6835168`** (**`349559`**). | **Client + server** |
+| `ferritecore-7.0.3-neoforge.jar` | **[FerriteCore ((Neo)Forge)](https://www.curseforge.com/minecraft/mc-mods/ferritecore)** — memory / object overhead reductions. CurseForge modpack pins **`7524151`** (**`429235`**). No required dependencies on CurseForge. | **Client + server** |
 | `forgified-fabric-api-0.116.7+2.2.4+1.21.1.jar` | **[Forgified Fabric API](https://modrinth.com/mod/forgified-fabric-api)** | **Client + server** |
 | `friendsandfoes-neoforge-4.0.25+mc1.21.1.jar` | **[Friends&Foes](https://www.curseforge.com/minecraft/mc-mods/friends-and-foes-forge)** — mod id **`friendsandfoes`**. | **Client + server** |
 | `ftb-library-neoforge-2101.1.31.jar` | **FTB Library** | **Client + server** |
@@ -31,11 +33,14 @@ Sorted by filename. **Not** listed here: anything absent from `run-server/mods/`
 | `ftb-teams-neoforge-2101.1.10.jar` | **FTB Teams** | **Client + server** |
 | `ftb-xmod-compat-neoforge-21.1.8.jar` | **FTB XMod Compat** | **Client + server** |
 | `geckolib-neoforge-1.21.1-4.8.4.jar` | **[GeckoLib](https://modrinth.com/mod/geckolib)** | **Client + server** |
+| `gravestone-neoforge-1.21.1-1.0.37.jar` | **[GraveStone Mod](https://www.curseforge.com/minecraft/mc-mods/gravestone-mod)** — death inventory recovery. CurseForge modpack pins **`8056307`** (**`238551`**). | **Client + server** |
 | `GlitchCore-neoforge-1.21.1-2.1.0.0.jar` | **GlitchCore** — dependency for Embeddium / rendering stack. | **Client + server** *(often bundled with client perf mods)* |
+| `inventoryhud.neoforged.1.21.1-3.4.28.jar` | **[Inventory HUD+](https://www.curseforge.com/minecraft/mc-mods/inventory-hud-forge)** — on-screen inventory / effects / equipment HUD. CurseForge modpack pins **`6369797`** (**`357540`**); **ARR** on the mod page. **Dev:** keep under **`run-client/mods`** only (not **`run-server/mods`**); **`sync_manifest_mods_to_dev_runs.py`** skips the server copy for **`357540`**. Omit on dedicated servers (see **`server-pack-excluded-project-ids.json`**). | **Usually client** |
 | `jei-1.21.1-neoforge-19.27.0.340.jar` | **Just Enough Items** | **Client + server** |
 | `jupiter-2.3.7-1.21.1-neoforge.jar` | **Jupiter** — Sodium / Embeddium ecosystem library. Pinned on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/jupiter) (**`7738312`**). | **Usually client** |
 | `libraryferret-neoforge-1.21.1-4.0.0.jar` | **Library Ferret** — dependency (e.g. **Better Villages**). Pinned on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/library-ferret-neoforge) (**`6118136`**). | **Client + server** |
-| `lootr-neoforge-1.21.1-1.11.37.119.jar` | **[Lootr](https://modrinth.com/mod/lootr)** — mod id **`lootr`**. | **Client + server** |
+| `lootr-neoforge-1.21.1-1.11.37.120.jar` | **[Lootr](https://modrinth.com/mod/lootr)** — mod id **`lootr`**. CurseForge modpack pins **`8041234`** (**`361276`**). | **Client + server** |
+| `modernfix-neoforge-5.27.7+mc1.21.1.jar` | **[ModernFix](https://www.curseforge.com/minecraft/mc-mods/modernfix)** — startup / memory / bugfix patches (LGPL on CurseForge). Pin **`8055632`** (**`790626`**). No extra required mods for NeoForge beyond the loader. | **Client + server** |
 | `mowziesmobs-1.21.1-1.8.2.jar` | **[Mowzie’s Mobs](https://modrinth.com/mod/mowzies-mobs)** — mod id **`mowziesmobs`**. | **Client + server** |
 | `neoculus-mc1.21.1-1.8.7.jar` | **Neoculus** — Iris-style shaders for NeoForge ( **client** ). Pinned on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/neoculus) (**`6787071`**). | **Client** |
 | `owo-lib-neoforge-0.12.15.5-beta.1+1.21.jar` | **[oωo (owo-lib)](https://modrinth.com/mod/owo-lib)** ([CurseForge](https://www.curseforge.com/minecraft/mc-mods/owo-lib), pin **`6785734`**) | **Client + server** |
@@ -55,14 +60,15 @@ Sorted by filename. **Not** listed here: anything absent from `run-server/mods/`
 | `structure_pool_api-neoforge-1.2.1+1.21.1.jar` | **[Structure Pool API](https://modrinth.com/mod/structure-pool-api)** | **Client + server** |
 | `takesapillage-neoforge-1.0.10+mc1.21.1.jar` | **[It Takes a Pillage Continuation](https://www.curseforge.com/minecraft/mc-mods/it-takes-a-pillage-continuation)** ([Modrinth](https://modrinth.com/mod/it-takes-a-pillage-continuation)) — mod id **`takesapillage`**; PI has controlled-outpost integration when loaded. CurseForge modpack pins **`7417040`** (not the legacy [**it-takes-a-pillage**](https://www.curseforge.com/minecraft/mc-mods/it-takes-a-pillage) listing). | **Client + server** |
 | `TerraBlender-neoforge-1.21.1-4.1.0.8 (1).jar` | **[TerraBlender](https://modrinth.com/mod/terrablender)** — biome layout for **Biomes O’ Plenty**. Prefer renaming to drop the **` (1)`** duplicate suffix when you next tidy `mods/`. | **Client + server** |
-| `uranus-2.4-1.21.1-neoforge.jar` | **Uranus** — Sodium / Embeddium companion library. Pinned on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/uranus) (**`6979353`**). | **Usually client** |
+| `travelersbackpack-neoforge-1.21.1-10.1.35.jar` | **[Traveler's Backpack](https://www.curseforge.com/minecraft/mc-mods/travelers-backpack)** — upgradeable backpacks (optional **Curios** / **Accessories** on CurseForge relations). CurseForge modpack pins **`8040184`** (**`321117`**). | **Client + server** |
+| `uranus-2.4.1-1.21.1-neoforge.jar` | **Uranus** — Sodium / Embeddium companion library. Pinned on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/uranus) (**`8008516`**). | **Usually client** |
 | `villager-guard-autonomy.jar` | **Mob Conversion** — mod id **`mobconversion`** (villager threat / conversion behavior; pairs with Villager Guards in this pack). | **Client + server** |
 | `villager-guards-v1.1.5-1.21.1.jar` | **[Villager Guards](https://modrinth.com/mod/villager-guards)** — mod id **`mr_villager_guards`** **v1.1.5** (NeoForge **1.21.1** filename). | **Client + server** |
-| `waystones-neoforge-1.21.1-21.1.30.jar` | **[Waystones](https://modrinth.com/mod/waystones)** — mod id **`waystones`**; PI syncs island HUD after activation when loaded. | **Client + server** |
+| `waystones-neoforge-1.21.1-21.1.32.jar` | **[Waystones](https://modrinth.com/mod/waystones)** — mod id **`waystones`**; PI syncs island HUD after activation when loaded. CurseForge modpack pins **`8056467`** (**`245755`**); server zip omits this JAR (see **`build.gradle`** / **`overrides/SERVER_README.md`**). | **Client + server** |
 | `Wings Of Fire V1.0 - NeoForge 1.21.1.jar` | **[Wings Of Fire!](https://www.curseforge.com/minecraft/mc-mods/the-wings-of-fire)** (CurseForge) · [Modrinth](https://modrinth.com/mod/wings-of-fire!) — mod id **`wings_of_fire`** (phoenix mounts / PI loot bridge). Uses slug **`the-wings-of-fire`**, not the unrelated [**wings-of-fire**](https://www.curseforge.com/minecraft/mc-mods/wings-of-fire) project. Pinned in **`modpack/curseforge/manifest.json`**. | **Client + server** |
 | `wizards-neoforge-2.7.1+1.21.1.jar` | **[Wizards (RPG Series)](https://modrinth.com/mod/wizards)** | **Client + server** |
-| `xaerominimap-neoforge-1.21.1-25.3.10.jar` | **Xaero’s Minimap** | **Client + server** |
-| `xaeroworldmap-neoforge-1.21.1-1.40.11.jar` | **Xaero’s World Map** | **Client + server** |
+| `xaerominimap-neoforge-1.21.1-25.3.13.jar` | **Xaero’s Minimap** — CurseForge modpack pins **`8046966`** (**`263420`**). | **Client + server** |
+| `xaeroworldmap-neoforge-1.21.1-1.40.16.jar` | **Xaero’s World Map** — CurseForge modpack pins **`8042208`** (**`317780`**). | **Client + server** |
 | `yet_another_config_lib_v3-3.8.2+1.21.1-neoforge.jar` | **YetAnotherConfigLib (YACL)** — config UI library. | **Client + server** |
 
 ### RPG stack bumps
@@ -98,7 +104,7 @@ Official pack progression still expects mirrored config from **`examples/dev-pro
 
 ## License reminder
 
-Third-party mods keep **their own licenses**. This repository does not redistribute their JARs—only **filenames** for parity.
+Third-party mods keep **their own licenses**. Most third-party JARs are **not** committed here (only **filenames** for parity); exceptions (**Traveler's Backpack**, **GraveStone Mod**, **FallingTree**) are vendored under **`modpack/curseforge/overrides/mods/`** so the **CurseForge server pack** zip always ships matching **`overrides/mods/`**—see **`build.gradle`** **`curseforgeServerPackModsBundledInRepoOverrides`** and **`modpack/curseforge/overrides/mods/README-SUPPLEMENT.md`**.
 
 ## FTB Library: pink “Hello from FTB Library!” in chat
 

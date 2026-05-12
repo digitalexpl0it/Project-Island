@@ -273,13 +273,30 @@ tasks.register('verifyDevProgressionFtbQuests') {
     }
 }
 
+tasks.register('syncManifestModJarsToDevRuns', Exec) {
+    group = 'distribution'
+    description = 'Downloads every CurseForge manifest mod JAR into run-server/mods and run-client/mods (requires python3; public CurseForge + Forge CDN). Run after bumping manifest pins.'
+    workingDir = layout.projectDirectory.asFile
+    commandLine 'python3', 'tools/curseforge_pack/sync_manifest_mods_to_dev_runs.py', '--manifest', 'modpack/curseforge/manifest.json'
+}
+
+// Shipped under modpack/curseforge/overrides/mods/ for curseforgeServerPackZip (fat server overrides/mods).
+// Omitted from curseforgeModpackZip so the CurseForge app does not get duplicate jars alongside manifest pins.
+// Omitted from copyCurseforgeServerModJarsFromRunServer so the server zip does not list the same path twice.
+def curseforgeServerPackModsBundledInRepoOverrides = [
+    'travelersbackpack-neoforge-1.21.1-10.1.35.jar',
+    'gravestone-neoforge-1.21.1-1.0.37.jar',
+    'FallingTree-1.21.1-1.21.1.11.jar',
+].toSet()
+
+// Host-facing list of these filenames + download hints: modpack/curseforge/overrides/SERVER_README.md (bundled in client + server zips under overrides/).
 // Omitted from curseforgeServerPackZip overrides/mods (not redistributable in our server zip; hosts install matching JARs from official sources).
 def curseforgeServerPackUndistributableModJars = [
     'GlitchCore-neoforge-1.21.1-2.1.0.0.jar',
     'TerraBlender-neoforge-1.21.1-4.1.0.8 (1).jar',
     'balm-neoforge-1.21.1-21.0.57.jar',
     'bettervillage-neoforge-1.21.1-3.3.1.jar',
-    'waystones-neoforge-1.21.1-21.1.30.jar',
+    'waystones-neoforge-1.21.1-21.1.32.jar',
 ].toSet()
 
 tasks.register('writeCurseforgeClientManifest') {
@@ -309,6 +326,7 @@ tasks.register('curseforgeModpackZip', Zip) {
     duplicatesStrategy = DuplicatesStrategy.WARN
     from(layout.projectDirectory.dir('modpack/curseforge')) {
         exclude 'manifest.json'
+        curseforgeServerPackModsBundledInRepoOverrides.each { fn -> exclude "overrides/mods/${fn}" }
     }
     from(curseforgeClientManifestOut) {
         rename { 'manifest.json' }
@@ -324,7 +342,7 @@ tasks.register('curseforgeModpackZip', Zip) {
 
 tasks.register('copyCurseforgeServerModJarsFromRunServer') {
     group = 'distribution'
-    description = 'Copies third-party mod JARs from run-server/mods into the server pack staging dir (excludes this mod\'s jar + undistributable filenames; fresh Project Island jar comes from ./gradlew jar). Requires a populated run-server — see MOD_LIST.md / ./gradlew runServer.'
+    description = 'Copies third-party mod JARs from run-server/mods into the server pack staging dir (excludes this mod\'s jar, undistributable filenames, and JARs listed in curseforgeServerPackModsBundledInRepoOverrides — those ship from modpack/curseforge/overrides/mods/). Requires a populated run-server — see MOD_LIST.md / ./gradlew runServer.'
     def srcDir = layout.projectDirectory.dir('run-server/mods')
     def modId = mod_id
     outputs.dir(curseforgeServerModJarsDir)
@@ -343,7 +361,7 @@ tasks.register('copyCurseforgeServerModJarsFromRunServer') {
         }
         def copied = 0
         src.eachFile { f ->
-            if (f.isFile() && f.name.endsWith('.jar') && !f.name.startsWith("${modId}-") && !curseforgeServerPackUndistributableModJars.contains(f.name)) {
+            if (f.isFile() && f.name.endsWith('.jar') && !f.name.startsWith("${modId}-") && !curseforgeServerPackUndistributableModJars.contains(f.name) && !curseforgeServerPackModsBundledInRepoOverrides.contains(f.name)) {
                 java.nio.file.Files.copy(f.toPath(), new File(dest, f.name).toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
                 copied++
             }
@@ -376,7 +394,7 @@ tasks.register('curseforgeServerPackZip', Zip) {
     def jarTask = tasks.named('jar', Jar)
     dependsOn jarTask, tasks.named('writeCurseforgeServerManifest'), tasks.named('copyCurseforgeServerModJarsFromRunServer'), tasks.named('verifyDevProgressionFtbQuests')
     group = 'distribution'
-    description = 'CurseForge dedicated server pack: fat overrides/mods (JARs copied from run-server/mods + fresh Project Island jar), trimmed client-only overrides excluded, manifest files=[] so hosts need not resolve the manifest.'
+    description = 'CurseForge dedicated server pack: fat overrides/mods (JARs from run-server/mods staging + committed modpack/curseforge/overrides/mods/*.jar + Project Island jar). Tree copy excludes overrides/mods/*.jar to avoid duplicates. manifest files=[].'
     archiveFileName = "${mod_id}-modpack-${version}-curseforge-server.zip"
     destinationDirectory = layout.buildDirectory.dir('dist')
     duplicatesStrategy = DuplicatesStrategy.WARN
@@ -387,6 +405,8 @@ tasks.register('curseforgeServerPackZip', Zip) {
         exclude 'overrides/config/resourcepackoverrides.json'
         exclude 'overrides/resourcepacks/**'
         exclude 'overrides/shaderpacks/**'
+        // JARs under overrides/mods/ come from copyCurseforgeServerModJarsFromRunServer + explicit from(...) below (avoid duplicate zip entries).
+        exclude 'overrides/mods/*.jar'
     }
     from(layout.projectDirectory.dir('examples/dev-progression/ftbquests')) {
         into 'overrides/config/ftbquests'

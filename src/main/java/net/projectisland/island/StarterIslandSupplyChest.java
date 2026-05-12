@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.projectisland.Config;
 import net.projectisland.ProjectIsland;
+import net.projectisland.ProjectIslandDimensions;
 import net.projectisland.worldgen.FloatingIslandLayout;
 import net.projectisland.worldgen.FloatingIslandsChunkGenerator;
 
@@ -24,13 +25,38 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 /**
  * Places one loot chest per starter island region (shared hub or per-player), near the procedural island center but
  * offset from the usual spawn column. Uses {@link RandomizableContainerBlockEntity} + {@link #STARTER_SUPPLY_LOOT}; when
- * <strong>Lootr</strong> is installed it can convert the chest on interaction per its config.
+ * <strong>Lootr</strong> is installed it can convert the chest on interaction per its config. Placement position is stored in
+ * {@link FloatingIslandSavedData} so the block resists explosions and survival breaks (creative instabuild can still remove it).
  */
 public final class StarterIslandSupplyChest {
     public static final ResourceKey<LootTable> STARTER_SUPPLY_LOOT =
             ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(ProjectIsland.MOD_ID, "chests/starter_supply"));
 
     private StarterIslandSupplyChest() {}
+
+    /**
+     * {@code true} when this position must not be broken or destroyed by explosions on the floating overworld: unopened
+     * chest still bound to {@link #STARTER_SUPPLY_LOOT}, or a persisted starter column that is still a vanilla {@link ChestBlock}.
+     */
+    public static boolean isSupplyChestProtectedFromRemoval(ServerLevel level, BlockPos pos) {
+        if (!ProjectIslandDimensions.isFloatingIslandsGameplay(level)) {
+            return false;
+        }
+        if (hasStarterLootTable(level, pos)) {
+            return true;
+        }
+        if (!IslandWorld.get(level).isStarterSupplyChestPackedPos(pos.asLong())) {
+            return false;
+        }
+        return level.getBlockState(pos).getBlock() instanceof ChestBlock;
+    }
+
+    private static boolean hasStarterLootTable(ServerLevel level, BlockPos pos) {
+        if (!(level.getBlockEntity(pos) instanceof RandomizableContainerBlockEntity lootable)) {
+            return false;
+        }
+        return lootable.getLootTable() != null && lootable.getLootTable().equals(STARTER_SUPPLY_LOOT);
+    }
 
     public static void placeIfNeeded(ServerLevel level, FloatingIslandSavedData data, FloatingIslandKey island) {
         if (!Config.STARTER_ISLAND_SUPPLY_CHEST_ENABLED.getAsBoolean()) {
@@ -63,7 +89,7 @@ public final class StarterIslandSupplyChest {
         }
         long seed = level.getRandom().nextLong();
         lootable.setLootTable(STARTER_SUPPLY_LOOT, seed);
-        data.addStarterSupplyChest(island);
+        data.addStarterSupplyChest(island, pos);
     }
 
     private static Optional<BlockPos> findChestPos(ServerLevel level, FloatingIslandKey island) {

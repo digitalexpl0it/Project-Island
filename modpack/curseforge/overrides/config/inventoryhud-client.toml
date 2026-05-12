@@ -1,0 +1,6 @@
+# Project Island — pack defaults for Inventory HUD+ (NeoForge client config).
+# Only the inventory strip is off by default; armor and potion HUDs keep the mod's defaults (on).
+
+[inventoryhud]
+# "Toggle on by default" — mod default is true.
+byDefault = false

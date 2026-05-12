@@ -8,17 +8,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The
 
 ---
 
-## [Unreleased]
-
-_Add entries here while developing; merge into `[x.y.z]` when you publish._
-
----
-
-## [0.1.2] — 2026-05-09
+## [0.1.2] — 2026-05-11
 
 ### Added
 
+- **[Inventory HUD+](https://www.curseforge.com/minecraft/mc-mods/inventory-hud-forge)** (**NeoForge 1.21.1** pin **`6369797`**) — HUD overlay mod; **`357540`** added to **`server-pack-excluded-project-ids.json`** as a **client-first** checklist entry (optional on dedicated servers).
+- **[Traveler's Backpack](https://www.curseforge.com/minecraft/mc-mods/travelers-backpack)**, **[GraveStone Mod](https://www.curseforge.com/minecraft/mc-mods/gravestone-mod)**, and **[FallingTree](https://www.curseforge.com/minecraft/mc-mods/falling-tree)** on the CurseForge manifest (NeoForge **1.21.1** pins); **`MOD_LIST.md`** and dev **`run-server/mods`** / **`run-client/mods`** updated to match. The same JARs live under **`modpack/curseforge/overrides/mods/`** for the **server** zip; **`curseforgeModpackZip`** excludes them so the app does not install duplicates next to the manifest.
+- **[ModernFix](https://www.curseforge.com/minecraft/mc-mods/modernfix)** and **[FerriteCore](https://www.curseforge.com/minecraft/mc-mods/ferritecore)** (NeoForge **1.21.1** pins); both ship in the server **`overrides/mods/`** fat pack when present under **`run-server/mods/`** (LGPL / MIT on CurseForge — not on the server-pack omit list). **`overrides/SERVER_README.md`** documents mods hosts must install manually (Gradle **`curseforgeServerPackUndistributableModJars`**).
 - **Starter supply chest** content is documented in the **Project Island** intro quest; loot is provided by the **Project Island** mod (**`projectisland-0.1.2.jar`**) when players receive their starter island.
+
+### Changed
+
+- **Inventory HUD+:** new installs get **`overrides/config/inventoryhud-client.toml`** — the **inventory** HUD strip is **off** by default; armor and potion HUDs stay on (toggle keybind / in-game config still applies).
+- **CurseForge pins** refreshed to latest **NeoForge 1.21.1** uploads (script: **`tools/curseforge_pack/bump_manifest_latest_neoforge.py --apply`**): **Waystones**, **Xaero’s Minimap** / **World Map**, **Lootr**, **Uranus**, **Creatures and Beasts: Continued** — see **`MOD_LIST.md`** for exact JAR names.
+- **`overrides/config/fml.toml`**: **`versionCheck = false`** (NeoForge global update hints off; manifest pins remain authoritative). **`./gradlew syncManifestModJarsToDevRuns`** + **`tools/curseforge_pack/sync_manifest_mods_to_dev_runs.py`** align **`run-server/mods`** and **`run-client/mods`** with **`manifest.json`**.
 
 ### Fixed
 

@@ -46,5 +46,6 @@
   "projectisland.rope.surf.low_health": "Rope too weak to surf.",
   "projectisland.rope.surf.cooldown": "Rope surf cooling down.",
   "projectisland.rope.surf.busy": "Already surfing the rope.",
-  "projectisland.rope.surf.bad_world": "Rope surfing only works in the floating island overworld."
+  "projectisland.rope.surf.bad_world": "Rope surfing only works in the floating island overworld.",
+  "projectisland.rope.surf.mob_nearby_warning": "Watch out — %s is rope surfing!"
 }

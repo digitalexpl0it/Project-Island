@@ -85,15 +85,17 @@ public final class FloatingIslandStarterPlacement {
                 Optional<FloatingIslandKey> atHub = data.tryAssignStarterHomeAtSharedHub(owner, hubOpt.get());
                 if (atHub.isPresent()) {
                     FloatingIslandKey home = atHub.get();
-                    if (teleportToIslandCenter(player, level, home)) {
-                        StarterIslandSupplyChest.placeIfNeeded(level, data, home);
-                        if (Config.DEBUG_LOGGING.getAsBoolean()) {
-                            ProjectIsland.LOGGER.debug(
-                                    "Assigned shared starter hub {} to {}", home, player.getGameProfile().getName());
-                        }
-                        return true;
+                    if (!teleportToIslandCenter(player, level, home)) {
+                        ProjectIsland.LOGGER.warn(
+                                "Shared starter hub {} for {}: initial teleport did not report supported feet — keeping hub mapping; login / void rescue will retry.",
+                                home,
+                                player.getGameProfile().getName());
+                    } else if (Config.DEBUG_LOGGING.getAsBoolean()) {
+                        ProjectIsland.LOGGER.debug(
+                                "Assigned shared starter hub {} to {}", home, player.getGameProfile().getName());
                     }
-                    data.revertStarterHomeMappingOnly(owner);
+                    StarterIslandSupplyChest.placeIfNeeded(level, data, home);
+                    return true;
                 }
             }
         }
@@ -139,18 +141,20 @@ public final class FloatingIslandStarterPlacement {
                     Optional<FloatingIslandKey> claimed = data.tryClaimStarterIsland(key, owner, gameTime);
                     if (claimed.isPresent()) {
                         FloatingIslandKey home = claimed.get();
-                        if (teleportToIslandCenter(player, level, home)) {
-                            StarterIslandSupplyChest.placeIfNeeded(level, data, home);
-                            if (Config.DEBUG_LOGGING.getAsBoolean()) {
-                                ProjectIsland.LOGGER.debug(
-                                        "Assigned starter island {} to {}", home, player.getGameProfile().getName());
-                            }
-                            if (!splitNewPlayers) {
-                                data.setSharedStarterHubKeyIfUnset(home);
-                            }
-                            return true;
+                        if (!teleportToIslandCenter(player, level, home)) {
+                            ProjectIsland.LOGGER.warn(
+                                    "Starter island {} claimed for {} but initial teleport did not report supported feet — keeping assignment; login / void rescue will retry.",
+                                    home,
+                                    player.getGameProfile().getName());
+                        } else if (Config.DEBUG_LOGGING.getAsBoolean()) {
+                            ProjectIsland.LOGGER.debug(
+                                    "Assigned starter island {} to {}", home, player.getGameProfile().getName());
                         }
-                        data.revertStarterIslandClaim(owner, home);
+                        StarterIslandSupplyChest.placeIfNeeded(level, data, home);
+                        if (!splitNewPlayers) {
+                            data.setSharedStarterHubKeyIfUnset(home);
+                        }
+                        return true;
                     }
                 }
             }
@@ -208,6 +212,11 @@ public final class FloatingIslandStarterPlacement {
                     if (top == Integer.MIN_VALUE) {
                         continue;
                     }
+                    BlockPos surface = new BlockPos(wx, top, wz);
+                    BlockState ground = level.getBlockState(surface);
+                    if (ground.getCollisionShape(level, surface).isEmpty()) {
+                        continue;
+                    }
                     BlockPos feet = new BlockPos(wx, top + 1, wz);
                     if (columnTwoBlocksAir(level, feet)) {
                         return Optional.of(new Vec3(wx + 0.5d, feet.getY(), wz + 0.5d));
@@ -224,13 +233,57 @@ public final class FloatingIslandStarterPlacement {
         return f.isAir() && h.isAir();
     }
 
-    /** Feet position near procedural island center for {@code key}, or empty if no clear two-block column was found. */
+    /**
+     * Highest walkable feet in the **loaded world** at ({@code wx}, {@code wz}) — same XZ as island HUD beacons
+     * ({@link FloatingIslandLayout#regionIsland} {@code centerX}/{@code centerZ}). Scans downward inside a vertical band
+     * around {@link FloatingIslandLayout#peakSurfaceYAtIslandCenter} so we prefer the main island deck, not a stray
+     * floating block hundreds of blocks above; falls back to a full-column scan if the band finds nothing.
+     */
+    private static Optional<Vec3> findWalkableFeetScanWorldColumn(
+            ServerLevel level, FloatingIslandKey key, int wx, int wz, int minY, int maxY) {
+        IslandChunkLoader.ensureChunksAroundWorldBlock(level, wx, wz, 5);
+        FloatingIslandLayout.IslandParams params = new FloatingIslandLayout.IslandParams();
+        FloatingIslandLayout.regionIsland(key.regionX(), key.regionZ(), params);
+        int peak = FloatingIslandLayout.peakSurfaceYAtIslandCenter(params);
+        int yHi = Math.min(maxY - 3, peak + 80);
+        int yLo = Math.max(minY + 1, peak - 160);
+        Optional<Vec3> band = scanWorldColumnForWalkableFeet(level, wx, wz, yHi, yLo);
+        if (band.isPresent()) {
+            return band;
+        }
+        return scanWorldColumnForWalkableFeet(level, wx, wz, maxY - 3, minY + 1);
+    }
+
+    private static Optional<Vec3> scanWorldColumnForWalkableFeet(ServerLevel level, int wx, int wz, int yHi, int yLo) {
+        for (int y = yHi; y >= yLo; y--) {
+            BlockPos feet = new BlockPos(wx, y, wz);
+            if (!columnTwoBlocksAir(level, feet)) {
+                continue;
+            }
+            BlockPos below = feet.below();
+            BlockState ground = level.getBlockState(below);
+            if (ground.getCollisionShape(level, below).isEmpty()) {
+                continue;
+            }
+            return Optional.of(new Vec3(wx + 0.5d, y, wz + 0.5d));
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Feet on the starter / HUD horizontal anchor when possible: {@linkplain #findWalkableFeetScanWorldColumn world
+     * column at island center}, else {@linkplain #findOpenFeetNear spiral} from that origin.
+     */
     public static Optional<Vec3> optionalFeetAtIslandCenter(ServerLevel level, FloatingIslandKey key) {
         ChunkGenerator gen = level.getChunkSource().getGenerator();
         int minY = level.getMinBuildHeight();
         int maxY = level.getMaxBuildHeight();
         FloatingIslandLayout.IslandParams params = new FloatingIslandLayout.IslandParams();
         FloatingIslandLayout.regionIsland(key.regionX(), key.regionZ(), params);
+        Optional<Vec3> atHudXZ = findWalkableFeetScanWorldColumn(level, key, params.centerX, params.centerZ, minY, maxY);
+        if (atHudXZ.isPresent()) {
+            return atHudXZ;
+        }
         return findOpenFeetNear(level, gen, params.centerX, params.centerZ, minY, maxY, 64);
     }
 
@@ -267,9 +320,7 @@ public final class FloatingIslandStarterPlacement {
     }
 
     private static boolean applyIslandTeleport(ServerPlayer player, ServerLevel level, Vec3 feet) {
-        IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(feet.x), Mth.floor(feet.z), 3);
-        player.teleportTo(level, feet.x, feet.y, feet.z, player.getYRot(), player.getXRot());
-        FloatingIslandVoidRescue.stabilizeAfterIslandTeleport(player);
-        return FloatingIslandVoidRescue.isSupportedOnIslandSurface(player, level);
+        return FloatingIslandVoidRescue.teleportToFeetWithIslandBboxCheck(
+                player, level, feet.x, feet.y, feet.z, player.getYRot(), player.getXRot());
     }
 }

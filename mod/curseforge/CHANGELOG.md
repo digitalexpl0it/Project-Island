@@ -8,21 +8,19 @@ The repository root [`CHANGELOG.md`](../../CHANGELOG.md) is the full developer l
 
 ---
 
-## [Unreleased]
-
-_Planned changes after **0.1.2**._
-
----
-
-## [0.1.2] — 2026-05-09
+## [0.1.2] — 2026-05-11
 
 ### Added
 
-- **Starter supply chest** on first successful starter-home assignment (loot table **`projectisland:chests/starter_supply`**; config **`starterIslandSupplyChestEnabled`**). **`FloatingIslandSavedData`** persists **`StarterSupplyChests`** per island region.
+- **Mob rope surf:** tagged mobs auto-traverse linked ropes on floating islands; **`RopeLink`** persists **`MobCrossings`** and config-driven wear (see root **`CHANGELOG.md`**).
+- **Starter supply chest** on first successful starter-home assignment (loot table **`projectisland:chests/starter_supply`**; config **`starterIslandSupplyChestEnabled`**). **`FloatingIslandSavedData`** persists **`StarterSupplyChests`** per island region; chest is protected from explosions and survival breaks (creative instabuild can still remove).
 
 ### Fixed
 
-- **FTB Quests (canonical `examples/dev-progression/ftbquests/`):** **WoF** dark/gilded bound lanterns use **`tempered_*_phoenixlantern`** ids (per **Wings Of Fire V1.0**); **Ride the Zipline** rewards use **1.21.1**-valid items (**breeze rod** + **feather**) instead of **wind charge**.
+- **Void rescue / “floating too long” kicks:** real-collision checks under feet stop the rim-supported false positive that caused rescue loops; surf finish, mid-span moves, and rescue teleports now run **synchronously** with relative-movement teleports so clients no longer desync or trip vanilla flying kicks during long void falls or rope surfs. Failed surf clears now relocate via the standard bed/starter/nearest-island chain.
+- **Starter home / HUD alignment:** first-join starter assignment no longer reverts when one-tick footing is missing; spawn column prefers the procedural island center used by the HUD title so the spawned XZ and label match.
+- **Mob rope auto-surf:** mobs near (not only touching) a linked anchor, including those with clear vertical sag-line spans, now reliably start; player-target defer only suppresses crossings that move **away** from the player.
+- **FTB Quests (canonical `examples/dev-progression/ftbquests/`):** **WoF** dark/gilded bound lanterns use **`tempered_*_phoenixlantern`** ids (per **Wings Of Fire V1.0**); **Ride the Zipline** rewards use **1.21.1**-valid items (**breeze rod** + **feather**) instead of **wind charge**; rope-line tasks are tracked by hidden advancements (`rope_surf_complete`, `rope_link_created`) instead of manual checkmarks.
 
 ### Build
 

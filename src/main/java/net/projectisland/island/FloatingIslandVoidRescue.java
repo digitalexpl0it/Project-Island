@@ -1,11 +1,14 @@
 package net.projectisland.island;
 
 import java.util.Optional;
+import java.util.Set;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.RelativeMovement;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -15,14 +18,13 @@ import net.projectisland.ProjectIsland;
 import net.projectisland.ProjectIslandDimensions;
 import net.projectisland.network.ActionBarToastPayload;
 import net.projectisland.worldgen.FloatingIslandLayout;
-import net.projectisland.worldgen.FloatingIslandsChunkGenerator;
 
 /**
- * Void rescue for the floating-islands overworld: {@linkplain #tickVoidRescue(ServerPlayer, ServerLevel) per-tick} can
- * {@linkplain Config#VOID_RESCUE_SNAP_TO_LAST_SAFE_ENABLED snap} you to the last supported feet position mid-fall, then
- * (if needed) when you reach the **void-floor band** (see {@link Config#VOID_RESCUE_TRIGGER_BLOCKS_ABOVE_MIN_Y}) runs bed /
- * starter / nearest island. Join / dimension change still uses {@linkplain #relocatePlayerFromVoid(ServerPlayer, ServerLevel)}
- * when unsupported at any height.
+ * Void rescue for the floating-islands overworld: while unsupported, nothing runs until the **void-floor band** (see
+ * {@link Config#VOID_RESCUE_TRIGGER_BLOCKS_ABOVE_MIN_Y}). There, optional {@linkplain Config#VOID_RESCUE_SNAP_TO_LAST_SAFE_ENABLED
+ * last-safe snap} may run, then {@linkplain #runBedStarterOrRelocate bed → starter home → nearest island}. Join /
+ * dimension change and rope knockoff use {@linkplain #rescueToBedStarterOrNearestIsland(ServerPlayer, ServerLevel)}
+ * (bed / starter / nearest island) when unsupported at any height.
  */
 public final class FloatingIslandVoidRescue {
     private FloatingIslandVoidRescue() {}
@@ -33,6 +35,22 @@ public final class FloatingIslandVoidRescue {
     private static final String TAG_LAST_SAFE_FEET = ProjectIsland.MOD_ID + "_last_safe_feet";
 
     private static final String TAG_LAST_SAFE_SNAP_COOLDOWN = ProjectIsland.MOD_ID + "_last_safe_snap_cd";
+
+    /**
+     * After a floor-band rescue that did **not** move the player meaningfully and they are still unsupported, blocks
+     * {@link #runBedStarterOrRelocate} for a few ticks so we do not teleport every tick (rubber-band with last-safe
+     * cooldown off snap path).
+     */
+    private static final String TAG_FLOOR_RESCUE_APPLY_CD = ProjectIsland.MOD_ID + "_void_floor_rescue_apply_cd";
+
+    private static final int FLOOR_RESCUE_APPLY_TICKS = 18;
+
+    private static final double FLOOR_RESCUE_UNMOVED_EPSILON = 0.35d * 0.35d;
+
+    /** Throttles random rescue action-bar lines so a logic bug cannot spam the client every tick. */
+    private static final String TAG_RESCUE_TOAST_GAME_TIME = ProjectIsland.MOD_ID + "_void_rescue_toast_at";
+
+    private static final int RESCUE_TOAST_MIN_INTERVAL_TICKS = 100;
 
     private static final int MAX_CHUNK_RADIUS = 80;
     /** Matches the island search radius: {@value MAX_CHUNK_RADIUS} chunks → region rings. */
@@ -53,14 +71,119 @@ public final class FloatingIslandVoidRescue {
 
     /** Hotbar-style action bar, same channel as {@link net.projectisland.content.HarpoonGunItem} feedback. */
     public static void showVoidRescueActionBar(ServerPlayer player) {
+        if (!(player.level() instanceof ServerLevel sl)) {
+            return;
+        }
+        long now = sl.getGameTime();
+        CompoundTag d = player.getPersistentData();
+        long last = d.getLong(TAG_RESCUE_TOAST_GAME_TIME);
+        if (now - last < RESCUE_TOAST_MIN_INTERVAL_TICKS) {
+            return;
+        }
+        d.putLong(TAG_RESCUE_TOAST_GAME_TIME, now);
         String key = RESCUE_ACTIONBAR_KEYS[player.getRandom().nextInt(RESCUE_ACTIONBAR_KEYS.length)];
         ActionBarToastPayload.send(player, key);
     }
 
-    /** Clears downward velocity after a rescue/starter teleport so join momentum does not carry through open sky. */
-    public static void stabilizeAfterIslandTeleport(ServerPlayer player) {
+    /** Clears fall velocity after a rescue/starter teleport without forcing {@code onGround} (used before bbox validation). */
+    public static void clearRescueMotionNoGround(ServerPlayer player) {
         player.setDeltaMovement(Vec3.ZERO);
         player.resetFallDistance();
+        player.fallDistance = 0.0f;
+    }
+
+    /** Clears downward velocity after a rescue/starter teleport so join momentum does not carry through open sky. */
+    public static void stabilizeAfterIslandTeleport(ServerPlayer player) {
+        clearRescueMotionNoGround(player);
+        player.setOnGround(true);
+    }
+
+    /**
+     * Same rules as {@link #isSupportedOnIslandSurface} for gameplay ticks, but **without** the {@link Player#onGround()}
+     * shortcut — that flag can be wrong for one tick right after {@code setOnGround(true)}, which made starter / void
+     * teleports report success while still in open air beside an island.
+     */
+    public static boolean hasBboxIslandSurfaceSupport(ServerPlayer player, ServerLevel level) {
+        if (!ProjectIslandDimensions.isFloatingIslandsGameplay(level)) {
+            return true;
+        }
+        if (player.isSpectator()) {
+            return true;
+        }
+        int minY = level.getMinBuildHeight();
+        int maxY = level.getMaxBuildHeight();
+        double ey = player.getY();
+        var feet = player.blockPosition();
+        if (!FloatingIslandSurfaceSupport.columnSupportsFeet(level, feet.getX(), feet.getZ(), ey, minY, maxY)) {
+            return false;
+        }
+        return FloatingIslandSurfaceSupport.bboxSupported(level, player.getBoundingBox(), ey, minY, maxY);
+    }
+
+    /**
+     * Teleports to feet, clears motion, then only sets {@code onGround} if {@link #hasBboxIslandSurfaceSupport} passes.
+     *
+     * @return {@code true} if the player ended on bbox-valid island footing
+     */
+    /** Sub-block Y nudges so thin floors / post-teleport collision probes match vanilla stand height. */
+    private static final double[] TELEPORT_FOOT_Y_NUDGES = {
+        0.0d, 0.0625d, 0.125d, 0.25d, 0.5d, 1.0d, -0.0625d, -0.125d, -0.25d
+    };
+
+    public static boolean teleportToFeetWithIslandBboxCheck(
+            ServerPlayer player, ServerLevel level, double x, double y, double z, float yRot, float xRot) {
+        IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(x), Mth.floor(z), 3);
+        for (double dy : TELEPORT_FOOT_Y_NUDGES) {
+            double tryY = y + dy;
+            player.teleportTo(level, x, tryY, z, Set.<RelativeMovement>of(), yRot, xRot);
+            clearRescueMotionNoGround(player);
+            if (hasBboxIslandSurfaceSupport(player, level)) {
+                player.setOnGround(true);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Absolute teleport with an empty {@link RelativeMovement} set (same pattern as {@link RopeSurfingState} surf moves)
+     * so the server position tracker matches the client, then {@linkplain #stabilizeAfterIslandTeleport stabilization}.
+     */
+    public static void teleportAbsoluteSync(
+            ServerPlayer player, ServerLevel level, double x, double y, double z, float yRot, float xRot) {
+        player.teleportTo(level, x, y, z, Set.<RelativeMovement>of(), yRot, xRot);
+        stabilizeAfterIslandTeleport(player);
+    }
+
+    /**
+     * Vanilla increments {@code aboveGroundTickCount} / {@code clientIsFloating} on the play connection when
+     * {@code allow-flight=false} and the client moves without ground support — long void falls hit
+     * {@code MAXIMUM_FLYING_TICKS} and disconnect ("floating too long" / flying kick). Reset each tick while we know
+     * the player is in intentional unsupported void on the floating overworld.
+     */
+    public static void maybeResetVanillaFloatingPacketCounters(ServerPlayer player, ServerLevel level) {
+        if (!Config.VOID_RESCUE_RESET_VANILLA_FLOATING_PACKET_COUNTERS.getAsBoolean()) {
+            return;
+        }
+        if (!ProjectIslandDimensions.isFloatingIslandsGameplay(level)) {
+            return;
+        }
+        if (player.isCreative() || player.isSpectator() || player.getAbilities().flying) {
+            return;
+        }
+        if (RopeSurfingState.isSurfing(player)) {
+            return;
+        }
+        if (isSupportedOnIslandSurface(player, level)) {
+            return;
+        }
+        if (!(player.connection instanceof ServerGamePacketListenerImpl conn)) {
+            return;
+        }
+        conn.aboveGroundTickCount = 0;
+        conn.aboveGroundVehicleTickCount = 0;
+        conn.clientIsFloating = false;
+        conn.clientVehicleIsFloating = false;
     }
 
     /** Clears saved last-safe feet (e.g. dimension change / respawn). */
@@ -68,11 +191,15 @@ public final class FloatingIslandVoidRescue {
         CompoundTag data = player.getPersistentData();
         data.remove(TAG_LAST_SAFE_FEET);
         data.remove(TAG_LAST_SAFE_SNAP_COOLDOWN);
+        data.remove(ProjectIsland.MOD_ID + "_void_floor_rescue_fail_cd");
+        data.remove(TAG_FLOOR_RESCUE_APPLY_CD);
+        data.remove(TAG_RESCUE_TOAST_GAME_TIME);
     }
 
     /**
-     * While supported, saves feet for {@link #trySnapToLastSafeFeet}. When unsupported: optional last-safe snap, then
-     * when feet enter the **deep void band**, bed → starter → {@link #relocatePlayerFromVoid}.
+     * While supported, saves feet for {@link #trySnapToLastSafeFeet}. When unsupported above the void-floor band,
+     * does nothing (no mid-air snap, no bed/starter/relocate). In the band: optional last-safe snap, then
+     * {@link #runBedStarterOrRelocate}.
      */
     public static void tickVoidRescue(ServerPlayer player, ServerLevel level) {
         if (!Config.VOID_RESCUE_EACH_TICK.getAsBoolean()) {
@@ -91,40 +218,77 @@ public final class FloatingIslandVoidRescue {
         }
         if (isSupportedOnIslandSurface(player, level)) {
             data.remove(TAG_VOID_FALLING);
+            data.remove(TAG_FLOOR_RESCUE_APPLY_CD);
             saveLastSafeFeet(player, data);
+            return;
+        }
+        if (!isDeepVoidDangerZone(player, level)) {
+            data.remove(TAG_VOID_FALLING);
+            data.remove(TAG_FLOOR_RESCUE_APPLY_CD);
             return;
         }
         if (Config.VOID_RESCUE_SNAP_TO_LAST_SAFE_ENABLED.getAsBoolean()
                 && trySnapToLastSafeFeet(player, level, data)) {
             return;
         }
-        if (!isDeepVoidDangerZone(player, level)) {
-            data.remove(TAG_VOID_FALLING);
+        int applyCd = data.getInt(TAG_FLOOR_RESCUE_APPLY_CD);
+        if (applyCd > 0) {
+            data.putInt(TAG_FLOOR_RESCUE_APPLY_CD, applyCd - 1);
             return;
         }
-        data.putBoolean(TAG_VOID_FALLING, true);
+        Vec3 pre = player.position();
+        runBedStarterOrRelocate(player, level, data);
+        if (!isSupportedOnIslandSurface(player, level)
+                && player.position().distanceToSqr(pre) < FLOOR_RESCUE_UNMOVED_EPSILON) {
+            data.putInt(TAG_FLOOR_RESCUE_APPLY_CD, FLOOR_RESCUE_APPLY_TICKS);
+        }
+    }
+
+    /**
+     * {@linkplain #runBedStarterOrRelocate Void-floor rescue} delegates here. **Bed / anchor** in this dimension always
+     * wins: after teleport we do not fall through to starter just because {@link #isSupportedOnIslandSurface} is still
+     * false for a tick (rim / thin floor / bed on non-procedural footing).
+     */
+    public static void rescueToBedStarterOrNearestIsland(ServerPlayer player, ServerLevel level) {
+        if (!ProjectIslandDimensions.isFloatingIslandsGameplay(level)) {
+            return;
+        }
+        if (isSupportedOnIslandSurface(player, level)) {
+            return;
+        }
         Optional<Vec3> bed = FloatingIslandSurfaceSupport.findRespawnStandUp(level, player);
         if (bed.isPresent()) {
             Vec3 p = bed.get();
             IslandChunkLoader.ensureChunksAroundWorldBlock(level, (int) Mth.floor(p.x), (int) Mth.floor(p.z), 3);
-            player.teleportTo(level, p.x, p.y, p.z, player.getYRot(), player.getXRot());
-            stabilizeAfterIslandTeleport(player);
-            if (isSupportedOnIslandSurface(player, level)) {
-                data.remove(TAG_VOID_FALLING);
-                showVoidRescueActionBar(player);
-                return;
-            }
+            teleportAbsoluteSync(player, level, p.x, p.y, p.z, player.getYRot(), player.getXRot());
+            showVoidRescueActionBar(player);
+            return;
         }
         Optional<FloatingIslandKey> home = IslandWorld.get(level).getStarterHome(player.getUUID());
         if (home.isPresent()) {
             if (FloatingIslandStarterPlacement.teleportToIslandCenter(player, level, home.get())) {
-                data.remove(TAG_VOID_FALLING);
                 showVoidRescueActionBar(player);
                 return;
             }
+            // Critical: do not spiral from the player's current XZ (e.g. world spawn / void beside another island) —
+            // that lands them on the wrong island while the HUD still reflects their starter region.
+            relocatePlayerFromVoidAroundStarterHome(player, level, home.get());
+            return;
         }
         relocatePlayerFromVoid(player, level);
-        data.remove(TAG_VOID_FALLING);
+    }
+
+    /**
+     * Bottom-band rescue only: {@link #rescueToBedStarterOrNearestIsland} after optional last-safe snap (same chain as
+     * join / dimension / rope knockoff).
+     */
+    private static void runBedStarterOrRelocate(ServerPlayer player, ServerLevel level, CompoundTag data) {
+        data.putBoolean(TAG_VOID_FALLING, true);
+        try {
+            rescueToBedStarterOrNearestIsland(player, level);
+        } finally {
+            data.remove(TAG_VOID_FALLING);
+        }
     }
 
     private static void saveLastSafeFeet(ServerPlayer player, CompoundTag data) {
@@ -137,9 +301,10 @@ public final class FloatingIslandVoidRescue {
     }
 
     /**
-     * If the player fell far enough below their last saved supported feet Y, teleport back there (void between islands).
+     * Only called from {@link #tickVoidRescue} when the player is already in the void-floor band. If the saved column
+     * is still bad after teleport, {@link #rescueToBedStarterOrNearestIsland} runs only while still in that band.
      *
-     * @return {@code true} if this tick handled rescue (snap or handoff to {@link #relocatePlayerFromVoid}).
+     * @return {@code true} if this tick applied a snap attempt (caller should not also run floor rescue this tick).
      */
     private static boolean trySnapToLastSafeFeet(ServerPlayer player, ServerLevel level, CompoundTag data) {
         if (player.isCreative() || player.isSpectator()) {
@@ -170,20 +335,21 @@ public final class FloatingIslandVoidRescue {
             return false;
         }
         IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(sx), Mth.floor(sz), 3);
-        player.teleportTo(level, sx, sy, sz, yr, player.getXRot());
-        stabilizeAfterIslandTeleport(player);
+        boolean snapOk = teleportToFeetWithIslandBboxCheck(player, level, sx, sy, sz, yr, player.getXRot());
         int cooldown = Config.VOID_RESCUE_SNAP_TO_LAST_SAFE_COOLDOWN_TICKS.getAsInt();
         if (cooldown > 0) {
             data.putInt(TAG_LAST_SAFE_SNAP_COOLDOWN, cooldown);
         }
-        if (isSupportedOnIslandSurface(player, level)) {
+        if (snapOk) {
             showVoidRescueActionBar(player);
             return true;
         }
-        // Snap target was a bad column (e.g. tree canopy / rope rim). Drop it so we never loop snap → fall → snap.
+        // Snap target was a bad column (e.g. tree canopy / rope rim). Only chain into relocate from the void-floor band
+        // so we never yank to an island at overworld height while still under the island / in a structure.
         data.remove(TAG_LAST_SAFE_FEET);
-        relocatePlayerFromVoid(player, level);
-        showVoidRescueActionBar(player);
+        if (isDeepVoidDangerZone(player, level)) {
+            rescueToBedStarterOrNearestIsland(player, level);
+        }
         return true;
     }
 
@@ -197,8 +363,8 @@ public final class FloatingIslandVoidRescue {
     }
 
     /**
-     * {@code true} if any column under the player's horizontal footprint (with margin) has procedural island surface
-     * (including tall structures above that surface) or solid footing from the loaded world.
+     * {@code true} when the player has real ground under their feet column and the usual footprint probe passes (see
+     * {@link #hasBboxIslandSurfaceSupport}), or vanilla-style {@code onGround} while not flying (thin floors / stairs).
      */
     public static boolean isSupportedOnIslandSurface(ServerPlayer player, ServerLevel level) {
         if (!ProjectIslandDimensions.isFloatingIslandsGameplay(level)) {
@@ -211,11 +377,7 @@ public final class FloatingIslandVoidRescue {
         if (!player.getAbilities().flying && player.onGround()) {
             return true;
         }
-        ChunkGenerator generator = level.getChunkSource().getGenerator();
-        int minY = level.getMinBuildHeight();
-        int maxY = level.getMaxBuildHeight();
-        double ey = player.getY();
-        return FloatingIslandSurfaceSupport.bboxSupported(level, generator, player.getBoundingBox(), ey, minY, maxY);
+        return hasBboxIslandSurfaceSupport(player, level);
     }
 
     /**
@@ -253,17 +415,37 @@ public final class FloatingIslandVoidRescue {
     }
 
     /**
-     * Prefer each region’s procedural island center (same anchor as the starter / HUD) — edge samples in
-     * {@link #fallbackRelocateToChunkSamplePoints} often land on rims where the next tick still looks “unsupported”,
-     * causing fall → rescue loops and disconnects.
+     * Same as {@link #relocatePlayerFromVoid} but the region spiral is anchored on the player’s **starter home**
+     * region (then neighbors), not their current position — used when {@code teleportToIslandCenter} failed so we do
+     * not send them to “nearest land from world spawn”.
      */
-    private static boolean tryTeleportToRegionCenterRescue(ServerPlayer player, ServerLevel level, int dRegionX, int dRegionZ) {
-        int chunkX = Mth.floorDiv(Mth.floor(player.getX()), 16);
-        int chunkZ = Mth.floorDiv(Mth.floor(player.getZ()), 16);
-        int rcx = Mth.floorDiv(chunkX, FloatingIslandLayout.REGION_CHUNKS);
-        int rcz = Mth.floorDiv(chunkZ, FloatingIslandLayout.REGION_CHUNKS);
-        int rx = rcx + dRegionX;
-        int rz = rcz + dRegionZ;
+    private static void relocatePlayerFromVoidAroundStarterHome(
+            ServerPlayer player, ServerLevel level, FloatingIslandKey home) {
+        if (isSupportedOnIslandSurface(player, level)) {
+            return;
+        }
+        int crx = home.regionX();
+        int crz = home.regionZ();
+        for (int r = 0; r <= MAX_REGION_CHEBYSHEV; r++) {
+            for (int drx = -r; drx <= r; drx++) {
+                for (int drz = -r; drz <= r; drz++) {
+                    if (Math.max(Math.abs(drx), Math.abs(drz)) != r) {
+                        continue;
+                    }
+                    if (tryTeleportToIslandRegionCenter(player, level, crx + drx, crz + drz)) {
+                        return;
+                    }
+                }
+            }
+        }
+        relocatePlayerFromVoid(player, level);
+    }
+
+    /**
+     * Teleport to procedural center feet for island region ({@code rx},{@code rz}) if a valid column exists and bbox
+     * footing passes.
+     */
+    private static boolean tryTeleportToIslandRegionCenter(ServerPlayer player, ServerLevel level, int rx, int rz) {
         if (!FloatingIslandLayout.regionHasIsland(rx, rz)) {
             return false;
         }
@@ -273,14 +455,24 @@ public final class FloatingIslandVoidRescue {
             return false;
         }
         Vec3 f = feet.get();
-        IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(f.x), Mth.floor(f.z), 3);
-        player.teleportTo(level, f.x, f.y, f.z, player.getYRot(), player.getXRot());
-        stabilizeAfterIslandTeleport(player);
-        if (isSupportedOnIslandSurface(player, level)) {
+        if (teleportToFeetWithIslandBboxCheck(player, level, f.x, f.y, f.z, player.getYRot(), player.getXRot())) {
             showVoidRescueActionBar(player);
             return true;
         }
         return false;
+    }
+
+    /**
+     * Prefer each region’s procedural island center (same anchor as the starter / HUD) — edge samples in
+     * {@link #fallbackRelocateToChunkSamplePoints} often land on rims where the next tick still looks “unsupported”,
+     * causing fall → rescue loops and disconnects.
+     */
+    private static boolean tryTeleportToRegionCenterRescue(ServerPlayer player, ServerLevel level, int dRegionX, int dRegionZ) {
+        int chunkX = Mth.floorDiv(Mth.floor(player.getX()), 16);
+        int chunkZ = Mth.floorDiv(Mth.floor(player.getZ()), 16);
+        int rcx = Mth.floorDiv(chunkX, FloatingIslandLayout.REGION_CHUNKS);
+        int rcz = Mth.floorDiv(chunkZ, FloatingIslandLayout.REGION_CHUNKS);
+        return tryTeleportToIslandRegionCenter(player, level, rcx + dRegionX, rcz + dRegionZ);
     }
 
     private static void fallbackRelocateToChunkSamplePoints(
@@ -311,10 +503,8 @@ public final class FloatingIslandVoidRescue {
                             continue;
                         }
                         Vec3 p = clear.get();
-                        IslandChunkLoader.ensureChunksAroundWorldBlock(level, Mth.floor(p.x), Mth.floor(p.z), 3);
-                        player.teleportTo(level, p.x, p.y, p.z, player.getYRot(), player.getXRot());
-                        stabilizeAfterIslandTeleport(player);
-                        if (isSupportedOnIslandSurface(player, level)) {
+                        if (teleportToFeetWithIslandBboxCheck(
+                                player, level, p.x, p.y, p.z, player.getYRot(), player.getXRot())) {
                             showVoidRescueActionBar(player);
                             return;
                         }
@@ -357,9 +547,7 @@ public final class FloatingIslandVoidRescue {
                     }
                     Optional<Vec3> o = FloatingIslandStarterPlacement.optionalFeetAtIslandCenter(
                             level, new FloatingIslandKey(arx, arz));
-                    if (o.isPresent()
-                            && columnFeetPlausible(
-                                    level, generator, o.get(), minY, maxY)) {
+                    if (o.isPresent() && columnFeetPlausible(level, o.get(), minY, maxY)) {
                         return o;
                     }
                 }
@@ -384,8 +572,7 @@ public final class FloatingIslandVoidRescue {
                         Optional<Vec3> clear =
                                 FloatingIslandStarterPlacement.findOpenFeetNear(
                                         level, generator, wx, wz, minY, maxY, 24);
-                        if (clear.isPresent()
-                                && columnFeetPlausible(level, generator, clear.get(), minY, maxY)) {
+                        if (clear.isPresent() && columnFeetPlausible(level, clear.get(), minY, maxY)) {
                             return clear;
                         }
                     }
@@ -395,9 +582,8 @@ public final class FloatingIslandVoidRescue {
         return Optional.empty();
     }
 
-    private static boolean columnFeetPlausible(
-            ServerLevel level, ChunkGenerator generator, Vec3 feet, int minY, int maxY) {
+    private static boolean columnFeetPlausible(ServerLevel level, Vec3 feet, int minY, int maxY) {
         return FloatingIslandSurfaceSupport.columnSupportsFeet(
-                level, generator, Mth.floor(feet.x), Mth.floor(feet.z), feet.y, minY, maxY);
+                level, Mth.floor(feet.x), Mth.floor(feet.z), feet.y, minY, maxY);
     }
 }

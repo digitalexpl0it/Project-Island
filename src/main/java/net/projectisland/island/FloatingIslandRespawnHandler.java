@@ -49,12 +49,11 @@ public final class FloatingIslandRespawnHandler {
         FloatingIslandVoidRescue.showVoidRescueActionBar(player);
     }
 
-    /** True if no column in a small neighborhood supports the respawn feet (procedural top + tall allowance, or solid footing). */
+    /** True if no column in a small neighborhood has standable collision within a few dozen blocks below the feet. */
     static boolean isUnsafeFloatingSpawn(ServerLevel level, Vec3 pos) {
         if (!ProjectIslandDimensions.isFloatingIslandsGameplay(level)) {
             return false;
         }
-        var gen = level.getChunkSource().getGenerator();
         int minY = level.getMinBuildHeight();
         int maxY = level.getMaxBuildHeight();
         int bx = Mth.floor(pos.x);
@@ -62,7 +61,7 @@ public final class FloatingIslandRespawnHandler {
         double ey = pos.y;
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
-                if (FloatingIslandSurfaceSupport.columnSupportsFeet(level, gen, bx + dx, bz + dz, ey, minY, maxY)) {
+                if (FloatingIslandSurfaceSupport.columnSupportsFeet(level, bx + dx, bz + dz, ey, minY, maxY)) {
                     return false;
                 }
             }

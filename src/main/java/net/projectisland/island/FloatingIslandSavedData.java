@@ -37,6 +37,7 @@ public final class FloatingIslandSavedData extends SavedData {
     private static final String TAG_SHARED_STARTER_HUB = "SharedStarterHub";
     private static final String TAG_WAYSTONE_ISLAND_HITS = "WaystoneIslandHits";
     private static final String TAG_STARTER_SUPPLY_CHESTS = "StarterSupplyChests";
+    private static final String TAG_STARTER_SUPPLY_CHEST_POS = "StarterSupplyChestPos";
     private static final int CURRENT_VERSION = 2;
 
     private final Map<FloatingIslandKey, IslandRecord> islands = new HashMap<>();
@@ -56,6 +57,8 @@ public final class FloatingIslandSavedData extends SavedData {
     private final Map<UUID, HashSet<Long>> playerWaystoneIslandHits = new HashMap<>();
     /** Island regions where a starter supply chest was successfully placed (one per region). */
     private final HashSet<FloatingIslandKey> starterSupplyChestIslands = new HashSet<>();
+    /** Packed {@link BlockPos#asLong()} for each placed chest — used with vanilla {@link ChestBlock} check for break/explosion immunity after loot is generated. */
+    private final HashSet<Long> starterSupplyChestPackedPositions = new HashSet<>();
 
     public FloatingIslandSavedData() {}
 
@@ -78,6 +81,7 @@ public final class FloatingIslandSavedData extends SavedData {
         sharedStarterHubKey = null;
         playerWaystoneIslandHits.clear();
         starterSupplyChestIslands.clear();
+        starterSupplyChestPackedPositions.clear();
         if (root.contains(TAG_ISLANDS)) {
             CompoundTag sec = root.getCompound(TAG_ISLANDS);
             for (String key : sec.getAllKeys()) {
@@ -138,7 +142,10 @@ public final class FloatingIslandSavedData extends SavedData {
                     float maxHp = t.contains("MaxHealth") ? t.getFloat("MaxHealth") : (float) Config.ROPE_LINK_MAX_HEALTH.getAsDouble();
                     float hp = t.contains("Health") ? t.getFloat("Health") : maxHp;
                     hp = Math.min(Math.max(0f, hp), maxHp);
-                    ropeLinks.put(id, new RopeLink(id, owner, fromKey.get(), toKey.get(), fromPos, toPos, maxLen, hp, maxHp));
+                    int mobCross = t.contains("MobCrossings") ? t.getInt("MobCrossings") : 0;
+                    mobCross = Math.max(0, mobCross);
+                    ropeLinks.put(
+                            id, new RopeLink(id, owner, fromKey.get(), toKey.get(), fromPos, toPos, maxLen, hp, maxHp, mobCross));
                 } catch (IllegalArgumentException ignored) {
                     // skip malformed uuid
                 }
@@ -166,16 +173,32 @@ public final class FloatingIslandSavedData extends SavedData {
                 FloatingIslandKey.parseStorageKey(list.getString(i)).ifPresent(starterSupplyChestIslands::add);
             }
         }
+        if (root.contains(TAG_STARTER_SUPPLY_CHEST_POS)) {
+            for (long packed : root.getLongArray(TAG_STARTER_SUPPLY_CHEST_POS)) {
+                starterSupplyChestPackedPositions.add(packed);
+            }
+        }
     }
 
     public synchronized boolean hasStarterSupplyChest(FloatingIslandKey island) {
         return starterSupplyChestIslands.contains(island);
     }
 
-    public synchronized void addStarterSupplyChest(FloatingIslandKey island) {
+    public synchronized void addStarterSupplyChest(FloatingIslandKey island, BlockPos chestPos) {
+        boolean dirty = false;
         if (starterSupplyChestIslands.add(island)) {
+            dirty = true;
+        }
+        if (starterSupplyChestPackedPositions.add(chestPos.asLong())) {
+            dirty = true;
+        }
+        if (dirty) {
             setDirty();
         }
+    }
+
+    public synchronized boolean isStarterSupplyChestPackedPos(long packedPos) {
+        return starterSupplyChestPackedPositions.contains(packedPos);
     }
 
     /** Starter island granted on first join, if any. */
@@ -392,6 +415,9 @@ public final class FloatingIslandSavedData extends SavedData {
             t.putDouble("MaxLen", link.maxLengthBlocks());
             t.putFloat("Health", link.health());
             t.putFloat("MaxHealth", link.maxHealth());
+            if (link.mobCrossingsCompleted() != 0) {
+                t.putInt("MobCrossings", link.mobCrossingsCompleted());
+            }
             rl.put(e.getKey().toString(), t);
         }
         root.put(TAG_ROPE_LINKS, rl);
@@ -410,6 +436,10 @@ public final class FloatingIslandSavedData extends SavedData {
                 list.add(StringTag.valueOf(k.toStorageKey()));
             }
             root.put(TAG_STARTER_SUPPLY_CHESTS, list);
+        }
+        if (!starterSupplyChestPackedPositions.isEmpty()) {
+            long[] arr = starterSupplyChestPackedPositions.stream().mapToLong(Long::longValue).toArray();
+            root.putLongArray(TAG_STARTER_SUPPLY_CHEST_POS, arr);
         }
         return root;
     }

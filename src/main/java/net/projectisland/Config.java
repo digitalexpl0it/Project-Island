@@ -693,36 +693,43 @@ public final class Config {
                     "After a player's **first** starter-home assignment succeeds, place **one** loot chest on that island region (near the procedural center, offset from the spawn column).",
                     "Loot table: **`projectisland:chests/starter_supply`** (harpoon, elytra, food, torches, basic tools, etc.).",
                     "With **Lootr** installed, behavior follows Lootr's conversion rules for vanilla loot chests.",
-                    "Persisted per region in **`FloatingIslandSavedData`** so each starter island (hub or per-player) gets at most one chest.")
+                    "Persisted per region and block position in **`FloatingIslandSavedData`** so each starter island (hub or per-player) gets at most one chest; that chest resists **explosions** and **survival** mining (creative **instabuild** can still remove it).")
             .define("starterIslandSupplyChestEnabled", true);
 
     public static final ModConfigSpec.BooleanValue VOID_RESCUE_EACH_TICK = BUILDER
             .comment(
-                    "When true, the server watches floating-islands overworld players in the void: optional **last-safe** mid-fall snap (voidRescueSnapToLastSafe*), then **once per fall** near the world minimum Y (voidRescueTriggerBlocksAboveMinY).",
+                    "When true, the server watches floating-islands overworld players in the void: **bed / starter / relocate** and optional **last-safe** snap (voidRescueSnapToLastSafe*) run only inside the **void-floor band** (**minBuildHeight** + **voidRescueTriggerBlocksAboveMinY**; see **FloatingIslandVoidRescue**) — not while you are only a few blocks under an island.",
                     "Join / dimension change still runs immediate void relocation when you are not on a surface.")
             .define("voidRescueEachTick", true);
 
     public static final ModConfigSpec.IntValue VOID_RESCUE_TRIGGER_BLOCKS_ABOVE_MIN_Y = BUILDER
             .comment(
                     "With voidRescueEachTick: when feet Y is at or below (minBuildHeight + this value), run rescue if still not supported.",
-                    "This is the **void-floor band** only — keep it small so dungeons / stairs far above the world minimum are not mistaken for the void. Vanilla overworld min is -64; 12 ⇒ rescue at Y≤-52 unless you raise this.",
-                    "Join / dimension relocate still runs when unsupported at any height (see FloatingIslandVoidRescue).")
-            .defineInRange("voidRescueTriggerBlocksAboveMinY", 12, 0, 512);
+                    "This must stay a **narrow band near the world minimum** — large values (e.g. 200) treat mid-air under islands as “void” and cause **last-safe + floor rescue every tick** (rubber-band / teleport loops). Vanilla overworld min is **-64**; **12** ⇒ rescue at **Y≤-52**.",
+                    "Hard-capped at **64** so the void-floor band cannot swallow normal overworld heights. Join / dimension relocate still runs when unsupported at any height (see FloatingIslandVoidRescue).")
+            .defineInRange("voidRescueTriggerBlocksAboveMinY", 12, 0, 64);
 
     public static final ModConfigSpec.BooleanValue VOID_RESCUE_SNAP_TO_LAST_SAFE_ENABLED = BUILDER
             .comment(
-                    "While falling through open void (no island support), teleport you back to the last feet position that was on solid / island surface once you drop voidRescueSnapToLastSafeMinFallBlocks below that Y.",
-                    "Shortens long void falls that can trigger vanilla 'Flying is not enabled on this server' with allow-flight=false.")
+                    "In the **void-floor band** only (same Y rule as bed/starter/relocate): optionally teleport you back to the last feet position that was on solid / island surface once you drop voidRescueSnapToLastSafeMinFallBlocks below that Y.",
+                    "Does **not** run high under islands — avoids snap/relocate thrash and vanilla “Flying is not enabled” when voidRescueSnapToLastSafeMinFallBlocks is small.")
             .define("voidRescueSnapToLastSafeEnabled", true);
 
     public static final ModConfigSpec.IntValue VOID_RESCUE_SNAP_TO_LAST_SAFE_MIN_FALL_BLOCKS = BUILDER
             .comment(
-                    "Vertical gap below the saved last-safe Y before the mid-void snap runs. Lower = sooner rescue (safer vs flight kick); too low can feel harsh on intentional drops.")
+                    "Used only inside the void-floor band: vertical gap below the saved last-safe Y before the snap runs.",
+                    "Very small values only affect behavior near the world bottom, not a few blocks under an island.")
             .defineInRange("voidRescueSnapToLastSafeMinFallBlocks", 20, 4, 256);
 
     public static final ModConfigSpec.IntValue VOID_RESCUE_SNAP_TO_LAST_SAFE_COOLDOWN_TICKS = BUILDER
             .comment("Ticks after a last-safe snap before another mid-void snap can run (prevents thrash if the spot is no longer valid).")
             .defineInRange("voidRescueSnapToLastSafeCooldownTicks", 40, 0, 200);
+
+    public static final ModConfigSpec.BooleanValue VOID_RESCUE_RESET_VANILLA_FLOATING_PACKET_COUNTERS = BUILDER
+            .comment(
+                    "On the **floating-islands overworld**, while **`FloatingIslandVoidRescue`** considers you **unsupported** (open void / rim gaps, etc.), each tick resets vanilla's move-packet floating accumulators on your connection.",
+                    "Prevents **Disconnected: Flying is not enabled** / **kicked for floating too long** on long falls and void rescue when **`allow-flight`** is **false** in **`server.properties`**. Set **false** if you want vanilla's strict checks even in the void.")
+            .define("voidRescueResetVanillaFloatingPacketCounters", true);
 
     public static final ModConfigSpec.BooleanValue ROPE_LINK_SYNC_ENABLED = BUILDER
             .comment(
@@ -848,6 +855,116 @@ public final class Config {
                     "Safety cap: if rope surfing lasts longer than this (ticks), the server clears surf state.",
                     "Prevents a stuck \"already surfing\" session if movement packets desync.")
             .defineInRange("ropeTraversalSurfMaxDurationTicks", 2400, 40, 120_000);
+
+    public static final ModConfigSpec.BooleanValue MOB_ROPE_SURF_ENABLED = BUILDER
+            .comment(
+                    "When true, entity types in **`data/projectisland/tags/entity_types/rope_surfing_mobs.json`** can auto-start rope surfing on linked anchors in the floating-islands overworld (server curve motion + link wear).")
+            .define("mobRopeSurfEnabled", true);
+
+    public static final ModConfigSpec.DoubleValue MOB_ROPE_SURF_DEFER_AUTO_WHEN_PLAYER_TARGET_WITHIN_BLOCKS = BUILDER
+            .comment(
+                    "When **> 0**, a mob with **`getTarget()`** on a **living player** in the **same level** within this **spherical** distance (blocks) defers auto-surf **only** when the **far** anchor is horizontally **farther** from that player than the anchor the mob is touching (chase on the rim / hallway — avoids riding away from the fight).",
+                    "If the far anchor is **closer** to the player than the near anchor, auto-surf is **not** deferred so mobs can cross toward you. Defer is **off** while the target is player rope surfing. Set **0** to always allow auto-surf.")
+            .defineInRange("mobRopeSurfDeferAutoWhenPlayerTargetWithinBlocks", 40.0d, 0.0d, 512.0d);
+
+    public static final ModConfigSpec.DoubleValue MOB_ROPE_SURF_SPEED_BLOCKS_PER_SECOND = BUILDER
+            .comment("Mob rope-surf speed along the sag curve (blocks per second), same integration as player surf.")
+            .defineInRange("mobRopeSurfSpeedBlocksPerSecond", 12.0d, 0.5d, 80.0d);
+
+    public static final ModConfigSpec.DoubleValue MOB_ROPE_DAMAGE_PER_COMPLETED_CROSSING = BUILDER
+            .comment(
+                    "Hit points removed from the shared **RopeLink** when a mob **finishes** one crossing (primary wear lever).",
+                    "Stacks with **mobRopeDamagePerAdvanceDuringCrossing** while moving.")
+            .defineInRange("mobRopeDamagePerCompletedCrossing", 28.0d, 0.0d, 1_000_000.0d);
+
+    public static final ModConfigSpec.IntValue MOB_ROPE_MAX_CROSSINGS_BEFORE_SEVER = BUILDER
+            .comment(
+                    "If **> 0**, the link is severed when **mob crossings completed** reaches this count (both anchors), even if HP would remain.",
+                    "**0** disables this cap (HP-only sever).")
+            .defineInRange("mobRopeMaxCrossingsBeforeSever", 0, 0, 1_000_000);
+
+    public static final ModConfigSpec.DoubleValue MOB_ROPE_DAMAGE_PER_ADVANCE_DURING_CROSSING = BUILDER
+            .comment(
+                    "Optional extra **RopeLink** HP removed **each server tick** while a mob is actively surfing (**0** = completion damage only).")
+            .defineInRange("mobRopeDamagePerAdvanceDuringCrossing", 0.0d, 0.0d, 10_000.0d);
+
+    public static final ModConfigSpec.IntValue MOB_ROPE_SURF_MAX_DURATION_TICKS = BUILDER
+            .comment("Safety cap (ticks) for an active mob rope surf session before the server clears surf state.")
+            .defineInRange("mobRopeSurfMaxDurationTicks", 2400, 40, 120_000);
+
+    public static final ModConfigSpec.IntValue MOB_ROPE_AUTO_TRY_COOLDOWN_TICKS = BUILDER
+            .comment(
+                    "Minimum ticks between **auto-start** attempts for the same mob near anchors (reduces thrash when blocked).")
+            .defineInRange("mobRopeAutoTryCooldownTicks", 40, 0, 1200);
+
+    public static final ModConfigSpec.IntValue MOB_ROPE_AUTO_START_HORIZONTAL_CHEB_BLOCKS = BUILDER
+            .comment(
+                    "Auto-start: mob **feet** may be up to this **horizontal** Chebyshev distance (blocks) from an anchor and still try that link (default **10** — ~6–10 block “radius” on the island).",
+                    "**0** = legacy: only a small box around feet plus **touch** (collision / slight inflate) on the anchor counts.")
+            .defineInRange("mobRopeAutoStartHorizontalChebBlocks", 10, 0, 64);
+
+    public static final ModConfigSpec.IntValue MOB_ROPE_AUTO_START_VERTICAL_BLOCKS = BUILDER
+            .comment(
+                    "With **mobRopeAutoStartHorizontalChebBlocks** > **0**: max **vertical** |feet Y − anchor Y| (default **128**). **0** = treat as **128** when horizontal mode is on.")
+            .defineInRange("mobRopeAutoStartVerticalBlocks", 128, 0, 384);
+
+    public static final ModConfigSpec.BooleanValue MOB_ROPE_ANCHOR_NAVIGATION_GOAL_ENABLED = BUILDER
+            .comment(
+                    "When true, **PathfinderMob** types in **`rope_surfing_mobs`** (e.g. zombie, skeleton) get an AI goal to **walk toward** the nearest legal rope anchor within the auto-start radii, then **`tryStart`** (bypasses player-target defer used by bump auto-start).",
+                    "Non-**PathfinderMob** tag members (e.g. pillager) still use tick bump detection only. Set **false** to rely on bump auto-start alone.")
+            .define("mobRopeAnchorNavigationGoalEnabled", true);
+
+    public static final ModConfigSpec.IntValue MOB_ROPE_GOAL_PRIORITY = BUILDER
+            .comment(
+                    "Lower = higher AI priority (vanilla). Default **6** — below melee (**~2**) so close combat wins, above random stroll (**~8**) so crossing is preferred when out of melee.")
+            .defineInRange("mobRopeGoalPriority", 6, 1, 15);
+
+    public static final ModConfigSpec.IntValue MOB_ROPE_POST_CROSSING_COOLDOWN_TICKS = BUILDER
+            .comment(
+                    "After a mob **finishes** a rope surf, ticks before that mob may auto-start or goal-start again (**default 200** ≈ **10** s at 20 TPS) — reduces ping-pong loops on the same link.")
+            .defineInRange("mobRopePostCrossingCooldownTicks", 200, 0, 6000);
+
+    public static final ModConfigSpec.DoubleValue MOB_ROPE_GOAL_ANCHOR_START_DIST_BLOCKS = BUILDER
+            .comment(
+                    "Navigation goal: when the mob is within this **Euclidean** distance (blocks) of the anchor block center, **`tryStart`** runs (default **2.75**).")
+            .defineInRange("mobRopeGoalAnchorStartDistBlocks", 2.75d, 0.5d, 12.0d);
+
+    public static final ModConfigSpec.IntValue MOB_ROPE_GOAL_REPATH_INTERVAL_TICKS = BUILDER
+            .comment("Navigation goal: refresh **`moveTo`** toward the anchor every this many ticks while chasing the anchor (default **40**).")
+            .defineInRange("mobRopeGoalRepathIntervalTicks", 40, 5, 200);
+
+    public static final ModConfigSpec.IntValue MOB_ROPE_MAX_SURFING_PER_LINK = BUILDER
+            .comment(
+                    "Max **concurrent** mob surfers per **RopeLink** id (**0** = unlimited). Starts beyond this cap are rejected until someone finishes or clears.")
+            .defineInRange("mobRopeMaxSurfingPerLink", 0, 0, 64);
+
+    public static final ModConfigSpec.BooleanValue MOB_ROPE_FOLLOW_PLAYER_SURF_ENABLED = BUILDER
+            .comment(
+                    "When true, **rope_surfing_mobs** that **target** a **ServerPlayer** receive a short **follow intent** when that player **starts** rope surfing from an anchor: they prefer that **departure** anchor for the navigation goal / bump auto-start (same link the player took).",
+                    "Requires **mobRopeSurfEnabled**. Set **false** to disable chase-follow onto the rope.")
+            .define("mobRopeFollowPlayerSurfEnabled", true);
+
+    public static final ModConfigSpec.DoubleValue MOB_ROPE_FOLLOW_PLAYER_SURF_ASSIGN_RANGE_BLOCKS = BUILDER
+            .comment(
+                    "When assigning follow intent: mobs whose **AABB** intersects this **axis-aligned** expansion of the player’s bounding box (± blocks on each axis) and have **getTarget() ==** that player are eligible.",
+                    "**0** disables assigning new intents (existing intents still expire normally).")
+            .defineInRange("mobRopeFollowPlayerSurfAssignRangeBlocks", 32.0d, 0.0d, 128.0d);
+
+    public static final ModConfigSpec.IntValue MOB_ROPE_FOLLOW_PLAYER_SURF_INTENT_TICKS = BUILDER
+            .comment(
+                    "How long (ticks) follow intent lasts after the player starts surfing — the mob prefers that departure anchor until expiry, target change, or invalid link.",
+                    "Minimum **20** when applied.")
+            .defineInRange("mobRopeFollowPlayerSurfIntentTicks", 400, 20, 6000);
+
+    public static final ModConfigSpec.BooleanValue MOB_ROPE_NEARBY_PLAYER_WARNING_ENABLED = BUILDER
+            .comment(
+                    "When true, **ServerPlayer** clients within **`mobRopeNearbyPlayerWarningRangeBlocks`** of a mob that **starts** rope surfing receive an action-bar toast ( **`projectisland.rope.surf.mob_nearby_warning`** ).")
+            .define("mobRopeNearbyPlayerWarningEnabled", true);
+
+    public static final ModConfigSpec.DoubleValue MOB_ROPE_NEARBY_PLAYER_WARNING_RANGE_BLOCKS = BUILDER
+            .comment(
+                    "Spherical **inflate** radius (blocks) around the mob’s position when broadcasting the nearby-player rope-surf warning (**0** = no toast).")
+            .defineInRange("mobRopeNearbyPlayerWarningRangeBlocks", 24.0d, 0.0d, 128.0d);
 
     static final ModConfigSpec SPEC = BUILDER.build();
 

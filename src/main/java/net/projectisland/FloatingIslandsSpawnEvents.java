@@ -4,6 +4,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
@@ -12,8 +13,9 @@ import net.projectisland.island.FloatingIslandVoidRescue;
 
 /**
  * When a player is in the floating-islands overworld and their feet are over void (first join, bad spawn, or
- * fixed teleport Y), move them onto the nearest procedural island column. Mid-void {@linkplain net.projectisland.island.FloatingIslandVoidRescue
- * last-safe snap} plus floor-band rescue reduce long falls that can trigger vanilla “flying” kicks with {@code allow-flight=false}.
+ * fixed teleport Y), run {@linkplain net.projectisland.island.FloatingIslandVoidRescue#rescueToBedStarterOrNearestIsland
+ * bed → starter → nearest island}. Mid-void {@linkplain net.projectisland.island.FloatingIslandVoidRescue last-safe snap}
+ * plus floor-band rescue reduce long falls that can trigger vanilla “flying” kicks with {@code allow-flight=false}.
  */
 public final class FloatingIslandsSpawnEvents {
     private FloatingIslandsSpawnEvents() {}
@@ -23,6 +25,7 @@ public final class FloatingIslandsSpawnEvents {
         NeoForge.EVENT_BUS.addListener(FloatingIslandsSpawnEvents::onPlayerLoggedIn);
         NeoForge.EVENT_BUS.addListener(FloatingIslandsSpawnEvents::onPlayerRespawn);
         NeoForge.EVENT_BUS.addListener(FloatingIslandsSpawnEvents::onPlayerTickPre);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, FloatingIslandsSpawnEvents::onPlayerTickPostLast);
     }
 
     private static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
@@ -41,6 +44,20 @@ public final class FloatingIslandsSpawnEvents {
         FloatingIslandVoidRescue.tickVoidRescue(player, player.serverLevel());
     }
 
+    /**
+     * After vanilla player logic so move-packet floating counters can be cleared before the connection tick that may
+     * disconnect for "floating too long".
+     */
+    private static void onPlayerTickPostLast(PlayerTickEvent.Post event) {
+        if (event.getEntity().level().isClientSide()) {
+            return;
+        }
+        if (!(event.getEntity() instanceof ServerPlayer player)) {
+            return;
+        }
+        FloatingIslandVoidRescue.maybeResetVanillaFloatingPacketCounters(player, player.serverLevel());
+    }
+
     private static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) {
             return;
@@ -49,7 +66,7 @@ public final class FloatingIslandsSpawnEvents {
         if (FloatingIslandStarterPlacement.handlePlayerLoggedIn(player, level)) {
             return;
         }
-        FloatingIslandVoidRescue.relocatePlayerFromVoid(player, level);
+        FloatingIslandVoidRescue.rescueToBedStarterOrNearestIsland(player, level);
     }
 
     private static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
@@ -68,6 +85,6 @@ public final class FloatingIslandsSpawnEvents {
         if (level == null) {
             return;
         }
-        FloatingIslandVoidRescue.relocatePlayerFromVoid(player, level);
+        FloatingIslandVoidRescue.rescueToBedStarterOrNearestIsland(player, level);
     }
 }

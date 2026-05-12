@@ -8,21 +8,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). **`
 
 ---
 
-## [Unreleased]
-
-_Add entries here while developing; merge into `[x.y.z]` when you publish._
-
-### Changed
-
-- **`curseforgeServerPackZip`** omits certain third-party **`.jar`** filenames from **`overrides/mods/`** (not redistributable in our server zip); they are still expected under **`run-server/mods/`** for local dev but hosts must obtain those mods separately. Filenames are listed in root **`build.gradle`** (`curseforgeServerPackUndistributableModJars`).
-
----
-
-## [0.1.2] — 2026-05-09
+## [0.1.2] — 2026-05-11
 
 ### Added
 
+- **Inventory HUD+** on the client manifest (optional on headless servers — **`server-pack-excluded-project-ids.json`** **`357540`**).
+- **Traveler's Backpack**, **GraveStone Mod**, and **FallingTree:** manifest pins plus **committed** JARs under **`modpack/curseforge/overrides/mods/`** so **`curseforgeServerPackZip`** always places them in **`overrides/mods/`**; Gradle skips re-staging those filenames from **`run-server/mods`** and omits them from **`curseforgeModpackZip`** to avoid duplicate installs.
+- **`overrides/SERVER_README.md`** in the server zip: lists JARs omitted from **`overrides/mods/`** (see **`curseforgeServerPackUndistributableModJars`**) for manual host install. **ModernFix** and **FerriteCore** are included when built from a populated **`run-server/mods/`** (same as other redistributable mods).
 - Same **FTB Quests** SNBT as the client pack; **`curseforgeServerPackZip`** depends on **`verifyDevProgressionFtbQuests`** so a missing **`examples/dev-progression/ftbquests/`** tree fails the build.
+
+### Changed
+
+- **CurseForge manifest pins** aligned with latest **1.21.1** + **NeoForge** file uploads where newer JARs exist (Waystones, Xaero map mods, Lootr, Uranus, CNB); **`MOD_LIST.md`**, **`build.gradle`** (Waystones omit filename), and **`SERVER_README.md`** updated.
+- **`overrides/config/fml.toml`** (**`versionCheck = false`**) and maintainer workflow **`syncManifestModJarsToDevRuns`** / **`sync_manifest_mods_to_dev_runs.py`** for dev **`run-*/mods`** parity with **`manifest.json`**.
+- **`curseforgeServerPackZip`** omits certain third-party **`.jar`** filenames from **`overrides/mods/`** (not redistributable in our server zip); they are still expected under **`run-server/mods/`** for local dev but hosts must obtain those mods separately. Filenames are listed in root **`build.gradle`** (`curseforgeServerPackUndistributableModJars`).
 
 ### Fixed
 
