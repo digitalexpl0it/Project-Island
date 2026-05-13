@@ -5,10 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] — 2026-05-12
+
+### Changed
+
+- **Mod + CurseForge pack version** set to **`1.3.0`**: **`gradle.properties`** **`mod_version`**, template **`modpack/curseforge/manifest.json`** **`version`**, and built artifacts **`projectisland-1.3.0.jar`** / **`projectisland-modpack-1.3.0-*-curseforge*.zip`** (runtime manifest **`version`** still comes from **`writeCurseforgeClientManifest`**).
+- **Inventory HUD+** pack default **`overrides/config/inventoryhud-client.toml`**: full armor / potion / position profile for fresh installs (inventory strip remains off until toggled — **`byDefault = false`**).
+- **Xaero’s Minimap / World Map:** pack defaults **`overrides/config/xaerominimap-common.txt`** and **`overrides/config/xaeroworldmap-common.txt`** (server profile blocks: world map **`ProjectIsland`**, minimap **`Default`**; same files ship in the **server** zip **`overrides/config/`** tree).
+
+### Release / versioning
+
+- **CurseForge Mods file:** after you upload **`build/libs/projectisland-1.3.0.jar`**, update **`modpack/curseforge/manifest.json`** **`files`** entry for **`projectID` `1534225`** with the new **`fileID`** so the client pack resolves the correct JAR.
+
 ## [0.1.2] — 2026-05-11
 
 ### Added
 
+- **CurseForge modpack:** **[Curios API](https://www.curseforge.com/minecraft/mc-mods/curios)** (**NeoForge 1.21.1** pin **`6529130`**, project **`309927`**) so **Traveler's Backpack** can use the **Curios back / body** slot; **`MOD_LIST.md`** and **`manifest.json`** updated (run **`./gradlew syncManifestModJarsToDevRuns`** after pulling). **`curios-neoforge-9.5.1+1.21.1.jar`** is **committed** under **`modpack/curseforge/overrides/mods/`** and listed in **`curseforgeServerPackModsBundledInRepoOverrides`** so **`curseforgeServerPackZip`** always ships Curios on the dedicated server without depending on a local **`run-server/mods/`** copy.
 - **Mob rope surfing:** on the **floating-islands overworld**, entity types tagged **`projectisland:rope_surfing_mobs`** (default **zombie**, **skeleton**, **pillager** in **`data/projectisland/tags/entity_types/rope_surfing_mobs.json`**) can surf along linked anchors; motion uses the same sag curve as players. Each **finished** crossing increments persisted **`MobCrossings`** on **`RopeLink`** and applies **`mobRopeDamagePerCompletedCrossing`**; optional **`mobRopeMaxCrossingsBeforeSever`** forces sever after N crossings; optional per-tick **`mobRopeDamagePerAdvanceDuringCrossing`** while riding. Common config: **`mobRopeSurfEnabled`**, speed / max duration / auto-try cooldown / **`mobRopeMaxSurfingPerLink`**.
 - **Mob rope anchor navigation goal:** **`PathfinderMob`** tag members (e.g. **zombie**, **skeleton**) register **`MobRopeAnchorSurfGoal`** on **`EntityJoinLevelEvent`**: walk toward the nearest anchor that passes **`canTryStartAtAnchor`**, then **`tryStart`** within **`mobRopeGoalAnchorStartDistBlocks`** — **no** bump-only **`mobRopeSurfDeferAutoWhenPlayerTargetWithinBlocks`** gate (so chasing a player or idle roaming can still commit to a crossing). **`mobRopePostCrossingCooldownTicks`** after a **completed** crossing reduces ping-pong loops. Toggle **`mobRopeAnchorNavigationGoalEnabled`**, tune **`mobRopeGoalPriority`** (default **6**), **`mobRopeGoalRepathIntervalTicks`**. **Pillagers** are not **PathfinderMob**; they keep tick **bump** auto-start only.
 - **Mob follow player rope surf:** when a **ServerPlayer** **starts** rope surfing from an anchor, **`rope_surfing_mobs`** in range whose **`getTarget()`** is that player receive a short **follow intent** on the same **departure** anchor and **link** (config: **`mobRopeFollowPlayerSurfEnabled`**, **`mobRopeFollowPlayerSurfAssignRangeBlocks`**, **`mobRopeFollowPlayerSurfIntentTicks`**). **`pickNearestSurfableAnchor`** prefers that anchor for the navigation goal; bump auto-start tries it when the mob enters proximity. Mobs already within **`mobRopeGoalAnchorStartDistBlocks` × 2** of the anchor center may **`tryStart`** immediately. Bump **player-target defer** does not apply when the touched anchor is the **active follow** departure.

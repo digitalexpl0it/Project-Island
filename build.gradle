@@ -287,6 +287,7 @@ def curseforgeServerPackModsBundledInRepoOverrides = [
     'travelersbackpack-neoforge-1.21.1-10.1.35.jar',
     'gravestone-neoforge-1.21.1-1.0.37.jar',
     'FallingTree-1.21.1-1.21.1.11.jar',
+    'curios-neoforge-9.5.1+1.21.1.jar',
 ].toSet()
 
 // Host-facing list of these filenames + download hints: modpack/curseforge/overrides/SERVER_README.md (bundled in client + server zips under overrides/).

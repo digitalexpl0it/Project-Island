@@ -8,10 +8,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). **`
 
 ---
 
+## [1.3.0] — 2026-05-12
+
+### Changed
+
+- **Pack version** **`1.3.0`**; server zip still ships **`overrides/mods/projectisland-1.3.0.jar`** from **`./gradlew jar`** plus vendored third-party JARs under **`overrides/mods/`**.
+- **Xaero’s Minimap / World Map:** same **`overrides/config/xaerominimap-common.txt`** and **`xaeroworldmap-common.txt`** defaults as the client pack (merge **`overrides/`** into the server instance so **`config/`** picks them up on first run).
+
 ## [0.1.2] — 2026-05-11
 
 ### Added
 
+- **Curios API** on the client manifest (**NeoForge 1.21.1** pin **`6529130`**) — **required on the dedicated server** for **Traveler's Backpack**’s **Curios back** slot (slot data is **server-authoritative**). The **server pack** zip now **always** ships **`curios-neoforge-9.5.1+1.21.1.jar`** from **`modpack/curseforge/overrides/mods/`** (same **vendored** pattern as Traveler's Backpack / GraveStone / FallingTree; **`curseforgeServerPackModsBundledInRepoOverrides`** in **`build.gradle`**).
 - **Inventory HUD+** on the client manifest (optional on headless servers — **`server-pack-excluded-project-ids.json`** **`357540`**).
 - **Traveler's Backpack**, **GraveStone Mod**, and **FallingTree:** manifest pins plus **committed** JARs under **`modpack/curseforge/overrides/mods/`** so **`curseforgeServerPackZip`** always places them in **`overrides/mods/`**; Gradle skips re-staging those filenames from **`run-server/mods`** and omits them from **`curseforgeModpackZip`** to avoid duplicate installs.
 - **`overrides/SERVER_README.md`** in the server zip: lists JARs omitted from **`overrides/mods/`** (see **`curseforgeServerPackUndistributableModJars`**) for manual host install. **ModernFix** and **FerriteCore** are included when built from a populated **`run-server/mods/`** (same as other redistributable mods).

@@ -1,0 +1,15 @@
+# Project Island — default Xaero's Minimap server profile (merged into instance config/ on install).
+# Keys match the mod’s server settings export (NeoForge 1.21.1).
+# entity_radar_categories is omitted here — the mod stores that data under the entity_radar_categories/ subfolder when edited in-game.
+
+############
+## Server Config Profile "default"
+##
+
+profile_name = Default
+display_minimap = true
+minimap_lighting = true
+minimap_cave_mode_extra_zoom = 1
+minimap_frame = 1
+minimap_shape = 1
+minimap_compass_location = 1

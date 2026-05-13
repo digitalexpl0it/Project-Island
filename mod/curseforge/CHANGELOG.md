@@ -8,6 +8,12 @@ The repository root [`CHANGELOG.md`](../../CHANGELOG.md) is the full developer l
 
 ---
 
+## [1.3.0] — 2026-05-12
+
+### Changed
+
+- **Mod version** **`1.3.0`** (**`gradle.properties`** **`mod_version`**); output **`build/libs/projectisland-1.3.0.jar`**.
+
 ## [0.1.2] — 2026-05-11
 
 ### Added

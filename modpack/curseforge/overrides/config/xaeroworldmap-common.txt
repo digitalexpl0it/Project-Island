@@ -1,0 +1,24 @@
+# Project Island — default Xaero's World Map server profile (merged into instance config/ on install).
+# Keys match the mod’s server settings export (NeoForge 1.21.1).
+
+############
+## Server Config Profile "default"
+##
+
+profile_name = ProjectIsland
+load_new_chunks = true
+lighting = true
+terrain_depth = true
+footsteps = false
+update_chunks = true
+display_coordinates = true
+block_colors = 0
+waypoints = true
+waypoint_backgrounds = true
+display_minimap_radar = true
+biome_blending = true
+render_waypoints = true
+display_flowers = false
+display_stained_glass = false
+display_opac_claims = true
+display_tracked_players = true
