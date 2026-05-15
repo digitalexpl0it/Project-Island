@@ -6,6 +6,8 @@ This folder matches what the **CurseForge** launcher expects when you upload a *
 
 **Pack release notes (paste into CurseForge file changelogs):** **[`CHANGELOG_CLIENT.md`](CHANGELOG_CLIENT.md)** · **[`CHANGELOG_SERVER.md`](CHANGELOG_SERVER.md)**.
 
+**CurseForge upload blurb (client vs server summary for the file / project update box):** **[`CURSEFORGE_UPDATE.md`](CURSEFORGE_UPDATE.md)** — refresh when **`manifest.json`** pins change or **`curseforgeServerPackZip`** layout changes.
+
 **CurseForge page body (overview description):** **[`DESCRIPTION_OVERVIEW.md`](DESCRIPTION_OVERVIEW.md)**.
 
 ## Versions

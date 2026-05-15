@@ -12,7 +12,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). **`
 
 ### Changed
 
-- **Pack version** **`1.3.0`**; server zip still ships **`overrides/mods/projectisland-1.3.0.jar`** from **`./gradlew jar`** plus vendored third-party JARs under **`overrides/mods/`**. Client **`manifest.json`** pins the same mod release as **`fileID` `8090568`** on CurseForge **Mods**.
+- **Pack version** **`1.3.0`**; server zip still ships **`overrides/mods/projectisland-1.3.0.jar`** from **`./gradlew jar`** plus vendored third-party JARs under **`overrides/mods/`**. Client **`manifest.json`** pins the same mod release as **`fileID` `8090568`** on CurseForge **Mods**. **Realm RPG: Treasure Balloons** manifest pin **`8073660`** (**`realmrpg_balloons-1.0.0-neoforge-1.21.1.jar`**). Upload blurb template: **`modpack/curseforge/CURSEFORGE_UPDATE.md`**.
 - **Xaero’s Minimap / World Map:** same **`overrides/config/xaerominimap-common.txt`** and **`xaeroworldmap-common.txt`** defaults as the client pack (merge **`overrides/`** into the server instance so **`config/`** picks them up on first run).
 
 ## [0.1.2] — 2026-05-11

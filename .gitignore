@@ -31,6 +31,27 @@ bin/
 ### VS Code ###
 .vscode/
 
+### Cursor (IDE) — public repo: do not track local workspace junk ###
+# Keep shared rules under `.cursor/rules/` committed; ignore other `.cursor/` paths if created.
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
+
+### Secrets & local env (never commit) ###
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+
+### OS / editor noise ###
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*~
+*.swp
+*.swo
+
 ### Mac OS ###
 .DS_Store
 

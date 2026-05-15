@@ -17,7 +17,7 @@ This repository is a **NeoForge** Minecraft **mod + modpack + dedicated server**
 
 ## Research and reuse
 
-When implementing or designing systems, **use public examples**: other **mods**, **datapacks**, **modpacks**, and **GitHub** repos (MDKs, ship mods, progression packs). Always verify **license compatibility** and **pin** dependency versions; document inspiration and hard dependencies in [README.md](README.md).
+When implementing or designing systems, **use public examples**: other **mods**, **datapacks**, **modpacks**, and **GitHub** repos (MDKs, ship mods, progression packs). Always verify **license compatibility** and **pin** dependency versions; document inspiration and hard dependencies in [README.md](README.md) (and [docs/TECHNICAL_REFERENCE.md](docs/TECHNICAL_REFERENCE.md) for long-form worldgen/config detail).
 
 ## Integrations
 
@@ -25,7 +25,8 @@ When implementing or designing systems, **use public examples**: other **mods**,
 
 ## Where to look
 
-- [README.md](README.md) — pillars, propulsion table, pinned toolchain, `./gradlew` commands, external-examples policy.
+- [README.md](README.md) — overview, quick start, links to modpack and `MOD_LIST.md`.
+- [docs/TECHNICAL_REFERENCE.md](docs/TECHNICAL_REFERENCE.md) — worldgen, config keys, architecture, dev-server OP notes.
 - [TODO.md](TODO.md) — phased roadmap (**Phase 6** moving-island propulsion is **shelved**).
 - [CHANGELOG.md](CHANGELOG.md) — notable changes.
 

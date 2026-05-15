@@ -16,6 +16,10 @@ Usage::
 After changing ``manifest.json`` (e.g. ``bump_manifest_latest_neoforge.py --apply``), run
 this (or ``./gradlew syncManifestModJarsToDevRuns``) then refresh ``MOD_LIST.md`` if
 filenames changed.
+
+This script **does not delete** other ``.jar`` files in ``run-*/mods``. When CurseForge
+changes a mod's **filename** between pins (e.g. two ``balm-neoforge-*`` versions), remove
+the stale jar manually so NeoForge does not load duplicates.
 """
 from __future__ import annotations
 

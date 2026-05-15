@@ -2,7 +2,7 @@
 
 Use this when creating or refreshing the **Project Island** **Modpack** listing on CurseForge. UI labels change occasionally; treat this as a field-by-field checklist.
 
-**Related:** pack layout and Gradle zips — [`README.md`](README.md). **Logo file:** [`branding/README.md`](branding/README.md) (`Project_Island_logo.png`; upload on the site — it is not applied from the zip).
+**Related:** pack layout and Gradle zips — [`README.md`](README.md). **Logo file:** [`branding/README.md`](branding/README.md) (`Project_Island_logo.png`; upload on the site — it is not applied from the zip). **Per-release CurseForge copy text:** [`CURSEFORGE_UPDATE.md`](CURSEFORGE_UPDATE.md).
 
 ---
 

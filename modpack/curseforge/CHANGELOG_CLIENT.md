@@ -12,7 +12,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The
 
 ### Changed
 
-- **Pack version** **`1.3.0`** (from **`gradle.properties`** **`mod_version`**); built **`manifest.json`** **`version`** matches. **CurseForge client manifest:** **Project Island** (**`projectID` `1534225`**) pins **`fileID` `8090568`** (**`projectisland-1.3.0.jar`**).
+- **Pack version** **`1.3.0`** (from **`gradle.properties`** **`mod_version`**); built **`manifest.json`** **`version`** matches. **CurseForge client manifest:** **Project Island** (**`projectID` `1534225`**) pins **`fileID` `8090568`** (**`projectisland-1.3.0.jar`**). **Realm RPG: Treasure Balloons** pin bumped to **`fileID` `8073660`** (**`realmrpg_balloons-1.0.0-neoforge-1.21.1.jar`**). Maintainer copy-paste summary for uploads: **`modpack/curseforge/CURSEFORGE_UPDATE.md`**.
 - **Inventory HUD+:** **`overrides/config/inventoryhud-client.toml`** now ships full pack defaults (armor / potion HUD layout, positions, scales — inventory hotbar strip still **`byDefault = false`** until players toggle it on).
 - **Xaero’s Minimap / World Map:** **`overrides/config/xaerominimap-common.txt`** and **`overrides/config/xaeroworldmap-common.txt`** — server-side profile defaults (**`Default`** minimap profile, **`ProjectIsland`** world map profile). Fresh installs merge from the pack; existing **`config/`** files are not overwritten.
 

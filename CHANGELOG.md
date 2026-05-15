@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **README:** shortened for players and light modding; long technical sections moved to **`docs/TECHNICAL_REFERENCE.md`**. **`.gitignore`:** ignore local **Cursor** paths except **`.cursor/rules/`**; add common secret/OS noise patterns. **`MOD_LIST.md`:** Balm row matches CurseForge pin **`7420963`** (**`21.0.56`**) and warns against duplicate **`balm-*.jar`** files. **`sync_manifest_mods_to_dev_runs.py`:** docstring notes sync does not prune stale JARs.
+
 ## [1.3.0] — 2026-05-12
 
 ### Added
@@ -21,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Release / versioning
 
 - **CurseForge client manifest:** **`projectID` `1534225`** pins **`fileID` `8090568`** (**`projectisland-1.3.0.jar`**) so the modpack matches the published **Mods** file on CurseForge.
+- **CurseForge modpack manifest:** **Realm RPG: Treasure Balloons** (**`projectID` `1385248`**) bumped to **`fileID` `8073660`** (**`realmrpg_balloons-1.0.0-neoforge-1.21.1.jar`**); other pins already matched latest **NeoForge 1.21.1** files at bump time. **`MOD_LIST.md`** row updated. Maintainer **CurseForge paste** template: **`modpack/curseforge/CURSEFORGE_UPDATE.md`** (client vs server sections).
 
 ## [0.1.2] — 2026-05-11
 
