@@ -5,11 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### Changed
-
-- **Public repo layout:** removed **`.cursor/rules/`** and **`.github/workflows/`** from version control; contributor/agent guidance is in root **`AGENTS.md`**. **`.gitignore`** ignores **`.cursor/`** and **`.github/workflows/`** so local Cursor rules and private CI YAML are not pushed by mistake.
 - **README:** shortened for players and light modding; long technical sections moved to **`docs/TECHNICAL_REFERENCE.md`**. **`.gitignore`:** add common secret/OS noise patterns. **`MOD_LIST.md`:** Balm row matches CurseForge pin **`7420963`** (**`21.0.56`**) and warns against duplicate **`balm-*.jar`** files. **`sync_manifest_mods_to_dev_runs.py`:** docstring notes sync does not prune stale JARs.
 
 ## [1.3.0] — 2026-05-12
