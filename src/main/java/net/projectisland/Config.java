@@ -1017,6 +1017,33 @@ public final class Config {
                     "Spherical **inflate** radius (blocks) around the mob’s position when broadcasting the nearby-player rope-surf warning (**0** = no toast).")
             .defineInRange("mobRopeNearbyPlayerWarningRangeBlocks", 24.0d, 0.0d, 128.0d);
 
+    public static final ModConfigSpec.BooleanValue DRAGON_RESET_ENABLED = BUILDER
+            .comment(
+                    "When **true**, the first **Ender Dragon** death in **the End** starts a **scheduled respawn**: after every player who was **in the End at kill time** has left the dimension, wait **`dragonResetDelayTicks`**, then respawn the dragon.",
+                    "Shows a **top-of-screen countdown** on clients and optional **sounds** / toasts. Does **not** wipe End terrain — only respawns the boss fight (same as vanilla respawn mechanics).")
+            .define("dragonResetEnabled", true);
+
+    public static final ModConfigSpec.IntValue DRAGON_RESET_DELAY_TICKS = BUILDER
+            .comment(
+                    "Ticks to wait **after** the last **witness** (player in the End when the dragon died) leaves **the End**, before **`respawnDragon`** runs (**20** ticks = **1** second).",
+                    "Default **24000** = **20** minutes.")
+            .defineInRange("dragonResetDelayTicks", 24000, 200, 2_000_000);
+
+    public static final ModConfigSpec.BooleanValue DRAGON_RESET_CANCEL_ON_WITNESS_REENTER = BUILDER
+            .comment(
+                    "When **true**, if any **witness** re-enters **the End** while the post-leave countdown is running, the countdown **pauses** until everyone leaves again (timer restarts from full **`dragonResetDelayTicks`** when the End is empty of witnesses).")
+            .define("dragonResetCancelOnWitnessReenter", true);
+
+    public static final ModConfigSpec.BooleanValue DRAGON_RESET_PLAY_SOUNDS = BUILDER
+            .comment("When **true**, play a short **sound** when the post-leave countdown **starts** and when the dragon **respawns**.")
+            .define("dragonResetPlaySounds", true);
+
+    public static final ModConfigSpec.BooleanValue DRAGON_BOSS_BAR_HIDE_UNTIL_FIRST_DAMAGE = BUILDER
+            .comment(
+                    "When **true**, the vanilla **Ender Dragon** boss bar stays **hidden** until the dragon **loses health from damage** once this fight.",
+                    "Re-arms when a **new** dragon appears (**vanilla crystal respawn** or Project Island **scheduled respawn**). After a **server restart**, if a damaged dragon already exists, the bar shows immediately (avoids a stuck-hidden bar).")
+            .define("dragonBossBarHideUntilFirstDamage", true);
+
     static final ModConfigSpec SPEC = BUILDER.build();
 
     private Config() {

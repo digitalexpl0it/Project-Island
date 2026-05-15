@@ -7,15 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.3.0] — 2026-05-12
 
+### Added
+
+- **Ender Dragon scheduled respawn:** after the dragon dies, once every player who was **in the End at kill time** has left the dimension, wait **`dragonResetDelayTicks`** (default **20** minutes, **`projectisland-common.toml`**) then **respawns** the dragon via vanilla **`EndDragonFight`** (access transformer on **`respawnDragon`**). Clients see a **top-of-screen countdown**; optional **sounds** and action-bar **toast**; **`dragonResetCancelOnWitnessReenter`** pauses the countdown if a witness re-enters the End early.
+
 ### Changed
 
+- **Ender Dragon boss bar:** optional **`dragonBossBarHideUntilFirstDamage`** (default **true**) keeps the vanilla dragon **boss bar hidden** until the dragon **loses health from damage** once; re-arms when a **new** dragon spawns (crystal ritual or scheduled respawn). Access transformer exposes **`EndDragonFight#dragonEvent`** for **`ServerBossEvent#setVisible`**.
 - **Mod + CurseForge pack version** set to **`1.3.0`**: **`gradle.properties`** **`mod_version`**, template **`modpack/curseforge/manifest.json`** **`version`**, and built artifacts **`projectisland-1.3.0.jar`** / **`projectisland-modpack-1.3.0-*-curseforge*.zip`** (runtime manifest **`version`** still comes from **`writeCurseforgeClientManifest`**).
 - **Inventory HUD+** pack default **`overrides/config/inventoryhud-client.toml`**: full armor / potion / position profile for fresh installs (inventory strip remains off until toggled — **`byDefault = false`**).
 - **Xaero’s Minimap / World Map:** pack defaults **`overrides/config/xaerominimap-common.txt`** and **`overrides/config/xaeroworldmap-common.txt`** (server profile blocks: world map **`ProjectIsland`**, minimap **`Default`**; same files ship in the **server** zip **`overrides/config/`** tree).
 
 ### Release / versioning
 
-- **CurseForge Mods file:** after you upload **`build/libs/projectisland-1.3.0.jar`**, update **`modpack/curseforge/manifest.json`** **`files`** entry for **`projectID` `1534225`** with the new **`fileID`** so the client pack resolves the correct JAR.
+- **CurseForge client manifest:** **`projectID` `1534225`** pins **`fileID` `8090568`** (**`projectisland-1.3.0.jar`**) so the modpack matches the published **Mods** file on CurseForge.
 
 ## [0.1.2] — 2026-05-11
 

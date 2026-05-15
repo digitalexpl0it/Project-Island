@@ -1,89 +1,96 @@
 # Project Island
 
-> **NeoForge 1.21.1** — **Floating-island world generator** for a **void overworld** of procedural islands. Island rules and sync are **server-driven**.
+**Survival in the sky** — a **void overworld** of **procedural floating islands** to explore, settle, and connect with **harpoons and ropes**. Built for **NeoForge 1.21.1**; world rules stay **fair in multiplayer** because the **server** is the source of truth.
 
 ---
 
-## At a glance
+## Quick facts
 
 | | |
-|---|---|
+|:---|:---|
 | **Minecraft** | **1.21.1** |
-| **Loader** | **NeoForge** (match the file you download) |
-| **Sides** | **Client + dedicated server** — use the **same** JAR everywhere |
+| **Mod loader** | **NeoForge** (use the file that matches your game) |
+| **Where it runs** | **Single-player, LAN, and dedicated servers** — same mod on client and server |
 
 ---
 
-## What you get
+## About
 
-**Project Island** replaces the usual overworld with **floating islands** over the void: each island is procedural terrain you can explore, build on, and wire together with **rope** systems. World layout, starters, links, and HUD data are handled **authoritatively on the server** so multiplayer stays consistent.
+Forget the endless flat overworld. **Project Island** generates **floating islands** over the **void**: each island is its own chunk of terrain and biomes, ready for bases, farms, and adventure. Jump between peaks, bridge the gaps, or **ride the ropes** you and your friends string between anchors.
+
+Whether you play solo or on a server, **islands, starters, rope links, and navigation hints** stay in sync so everyone sees the **same world** — no client-only ghost islands.
 
 ---
 
 ## Features
 
-- **Void sky overworld** — islands as the main survival surface; void below.
-- **Sculpted island silhouettes** — each procedural island grows a small set of **stalactite root** spikes under its rounded body for a more dramatic skyline; one toggle (**`floatingIslandBottomSpikesEnabled`**) restores the legacy smooth bottom.
-- **Harpoon + rope anchors** — link anchors, manage span and rope health, **rope surfing**, **public** zipline-style links between anchors (no per-player “claim” layer in current design).
-- **Island HUD** — server-synced hints for navigation; smoother play when [Waystones](https://www.curseforge.com/minecraft/mc-mods/waystones) or [Xaero’s Minimap](https://www.curseforge.com/minecraft/mc-mods/xaeros-minimap) are installed (optional).
-- **Tuning** — hundreds of knobs live in **`projectisland-common.toml`** and **`projectisland-client.toml`**; see **Configuration** for what you can change without digging blindly.
-- **Optional mod hooks** — extra behavior when you install other mods yourself. **None** of these are bundled inside the Project Island JAR; grab compatible **1.21.1 / NeoForge** builds from their own pages:
-  - [Lootr](https://www.curseforge.com/minecraft/mc-mods/lootr)
-  - [Wings Of Fire!](https://www.curseforge.com/minecraft/mc-mods/the-wings-of-fire) (not the unrelated `wings-of-fire` slug on CurseForge)
-  - [Realm RPG: Treasure Balloons](https://www.curseforge.com/minecraft/mc-mods/realm-rpg-treasure-balloons)
-  - [Friends&Foes](https://www.curseforge.com/minecraft/mc-mods/friends-and-foes-forge)
-  - [Creatures and Beasts: Continued](https://www.curseforge.com/minecraft/mc-mods/creatures-and-beasts-continued)
-  - **RPG-style stack (examples):** [Skill Tree](https://www.curseforge.com/minecraft/mc-mods/skill-tree), [Spell Engine](https://www.curseforge.com/minecraft/mc-mods/spell-engine), [Spell Power Attributes](https://www.curseforge.com/minecraft/mc-mods/spell-power), [Pufferfish's Skills](https://www.curseforge.com/minecraft/mc-mods/puffish-skills), [Archers](https://www.curseforge.com/minecraft/mc-mods/archers), [Paladins & Priests](https://www.curseforge.com/minecraft/mc-mods/paladins-and-priests), [Rogues & Warriors](https://www.curseforge.com/minecraft/mc-mods/rogues-and-warriors), [Wizards](https://www.curseforge.com/minecraft/mc-mods/wizards)
-- **Built-in look (client)** — **Unshaded Blocks** (flat block shading, CC0) ships inside the jar as a **resource pack** entry; enable it under **Options → Resource packs** if you want that style.
+### Islands & world
+
+- **Void overworld** — the overworld is **sky and islands**, not an infinite sea-level plane.
+- **Procedural islands** — varied terrain and biomes per island; good footing for building and exploring.
+- **Dramatic undersides** — islands can grow **root-like spikes** under the main mass for a sharper silhouette (hosts can turn this off for a classic smooth look in config).
+
+### Harpoons, ropes & travel
+
+- **Harpoon + anchors** — shoot anchors, **link** them with rope, and manage **span and wear**.
+- **Rope surfing** — speed along linked lines for **zipline-style** travel.
+- **Public rope links** — built for **shared** crossings, not a per-player land-claim layer.
+
+### Help while you explore
+
+- **Island HUD** — **server-synced** hints so you can tell where you are above the void. Works even better if you add **[Waystones](https://www.curseforge.com/minecraft/mc-mods/waystones)** or **[Xaero’s Minimap](https://www.curseforge.com/minecraft/mc-mods/xaeros-minimap)** (optional).
+
+### Endgame & polish
+
+- **Void rescue** — configurable safety net when players fall too far; hosts decide how forgiving it is.
+- **Optional Ender Dragon flow** — server-tunable **respawn / countdown** style behavior for groups who want the End to stay lively (see the mod changelog for details).
+
+### Look & feel (client)
+
+- **Unshaded Blocks** — a **built-in resource pack** (flatter block shading, **CC0**) ships with the jar. Enable it under **Options → Resource packs** if you like that look.
 
 ---
 
-## Configuration
+## Works great with (optional)
 
-After the first run you get:
+These mods are **not** inside the Project Island jar. Install **NeoForge 1.21.1** builds from their own pages if you want the extras:
 
-| File | Who reads it |
-|------|----------------|
-| **`config/projectisland-common.toml`** | **Server** (including integrated single-player). Worldgen, spawn, ropes, rescue, HUD **sync rates**, starters, compat. |
-| **`config/projectisland-client.toml`** | **Client only**. How the HUD and ropes **draw** on your machine; ignored on a headless dedicated server. |
+**Exploration & loot**
 
-Every option has a **comment in the TOML** next to the key. Use the tables below as a **map**; names are stable across releases unless a changelog calls out a rename.
+- [Lootr](https://www.curseforge.com/minecraft/mc-mods/lootr) — per-player chests
+- [Wings Of Fire!](https://www.curseforge.com/minecraft/mc-mods/the-wings-of-fire) — use this listing (**not** the unrelated *wings-of-fire* project on CurseForge)
+- [Realm RPG: Treasure Balloons](https://www.curseforge.com/minecraft/mc-mods/realm-rpg-treasure-balloons)
 
-### `projectisland-common.toml` — topic map
+**Creatures & structures**
 
-| Topic | What you can adjust (representative keys) |
-|-------|---------------------------------------------|
-| **Structures & settlements** | Per-region weights for dungeons, trials, pyramids, mineshafts (`islandRegionRareStructureWeight*`), controlled villages/outposts (`floatingIslandsControlledSettlementPlacement`, `controlledSettlementWeight*`, `controlledSettlementPlaceTryChance`, anchor jitter/tries), snapping rare structures to island columns (`floatingIslandsSnapRareStructuresToIslandColumn`, `floatingIslandsRareStructurePlacementMode`, …), **It Takes a Pillage** outpost branch (`floatingIslandsTakesapillageControlledOutpost`), `/locate` search cap (`floatingIslandsLocateStructureMaxRingRadius`). |
-| **Carving & caves** | Masked overworld carvers inside islands (`floatingIslandsEnableMaskedOverworldCarvers`, `floatingIslandsMaskedCarverNeighborChunkRadius`, …). |
-| **Island shape & biomes** | How often an 8×8 region rolls an island (`floatingIslandRegionSpawnChance`), vanilla-style **surface biome** weights (`islandBiomeWeightPlains`, `islandBiomeWeightRiver`, …), **mod biome** surfaces such as [Biomes O’ Plenty](https://www.curseforge.com/minecraft/mc-mods/biomes-o-plenty) (`islandBiomeModIntegrationEnabled`, `islandBiomeModDiscoverAllRegistered`, weighted id lines), plateau width (`floatingIslandHorizontalRadiusBonus`, `floatingIslandHorizontalRadiusVillageExtraBlocks`, …), generator sea level (`floatingIslandsChunkGeneratorSeaLevel`). |
-| **Decoration & resources** | Extra surface trees, snow trees, water pools, stripping exterior fluids, stronghold/mineshaft overlap rules, **ore vein density multipliers** (`floatingIslandsOreMultiplierCoal` through `floatingIslandsOreMultiplierEmerald`). |
-| **Mob spawning** | Global thinning toggle (`floatingIslandsSpawnTuningEnabled`), keep chances for monsters/illagers/creepers/creatures/ambient/villagers, creature multiplier, **daytime passive spawn boost** on island tops (`floatingIslandsDaytimeCreatureSpawnBoost*`), **pack spawn boost** (`floatingIslandsPackSpawnBoost*`), namespaces that **skip** thinning (`floatingIslandsSpawnTuningBypassEntityNamespaces`). |
-| **Optional third-party compat** | e.g. **Realm RPG: Treasure Balloons** spawn fix when that mod is present (`floatingIslandsRealmrpgBalloons*`). |
-| **Island HUD (server)** | Send HUD/beacon updates (`islandHudSyncEnabled`, `islandHudSyncIntervalTicks`, `islandHudRegionScanRadius`, `islandHudHeightAbovePeakBlocks`, …), Waystone-driven titles (`islandHudWaystoneTitleWhenLoaded`, …). |
-| **Starter placement** | Auto-assign, shared hub vs split, search origin and radius, min region separation, kick message (`starterIsland*`). |
-| **Void rescue** | Rescue tick mode, trigger depth, snap-back-to-last-safe (`voidRescue*`). |
-| **Ropes & harpoon** | Shot reach vs max span (`ropeLinkRaycastRangeBlocks`, `ropeLinkMaxLengthBlocks`), rope HP, strain/stress damage, anchor mining vs link HP, server→client rope packets (`ropeLinkSync*`), tier upgrades (`ropeProgressionUpgradeExistingLinks`, …), topology caps for how graphs may grow (`ropeTopology*`, `ropeMainDirectSpokeCap`, `ropeSisterOutboundCap`, …), **rope surfing** speed/cooldown/duration (`ropeTraversalSurf*`). |
-| **Diagnostics** | `debugLogging` plus a few subsystem debug flags (e.g. masked carver logging). |
+- [Friends&Foes](https://www.curseforge.com/minecraft/mc-mods/friends-and-foes-forge)
+- [Creatures and Beasts: Continued](https://www.curseforge.com/minecraft/mc-mods/creatures-and-beasts-continued)
 
-### `projectisland-client.toml` — topic map
+**RPG-style gameplay (examples)**
 
-| Topic | What you can adjust (representative keys) |
-|-------|---------------------------------------------|
-| **Island HUD appearance** | Show world labels (`islandHudShow`), scale, see-through text, night color boost, title color mode (`islandHudTitleColorMode`), panel opacity/outline, void “navigation” multi-label mode (`islandHudWorldBillboardVoidNavigation`). |
-| **Xaero mirrors** | Mirror HUD beacons to waypoints (`islandHudXaeroWaypointSync`), temporary gray pins vs persistent gold after waystone use (`islandHudXaeroWaypointTemporary`), color enum names (`islandHudXaeroWaypointColorDefault`, `islandHudXaeroWaypointColorHit`). |
-| **Rope rendering** | Draw rope segments and anchor health bars (`ropeLinksShow`, `ropeLinkHealthBarsShow`). |
+- [Skill Tree](https://www.curseforge.com/minecraft/mc-mods/skill-tree), [Spell Engine](https://www.curseforge.com/minecraft/mc-mods/spell-engine), [Spell Power Attributes](https://www.curseforge.com/minecraft/mc-mods/spell-power), [Pufferfish's Skills](https://www.curseforge.com/minecraft/mc-mods/puffish-skills)
+- [Archers](https://www.curseforge.com/minecraft/mc-mods/archers), [Paladins & Priests](https://www.curseforge.com/minecraft/mc-mods/paladins-and-priests), [Rogues & Warriors](https://www.curseforge.com/minecraft/mc-mods/rogues-and-warriors), [Wizards](https://www.curseforge.com/minecraft/mc-mods/wizards)
+
+**World variety**
+
+- [Biomes O’ Plenty](https://www.curseforge.com/minecraft/mc-mods/biomes-o-plenty) — extra surface biomes on islands when the mod is present (host-tunable).
 
 ---
 
-## Installation
+## Mod config files
 
-1. Install **NeoForge** for **Minecraft 1.21.1** (same build band as the JAR release).
-2. Drop **`projectisland-<version>.jar`** into the **`mods`** folder on **every client** and on the **dedicated server**.
-3. **Version match matters** — mismatched mod or game versions are the most common cause of disconnect or “missing channel” errors.
+After the first launch you get two TOML files in **`config/`**. **Every setting has an inline comment** next to it — that’s the full reference for names and defaults.
+
+| File | Who uses it | What it’s for |
+|:---|:---|:---|
+| **`projectisland-common.toml`** | **Server** (including the host in single-player) | **World generation** — island size and frequency, biomes (including modded surfaces), structures and villages, ores and decoration, **mob spawn tuning**, **starter islands**, **void rescue**, **rope rules** (length, health, surfing, limits), **HUD sync** to clients, and optional hooks when other mods are installed. |
+| **`projectisland-client.toml`** | **Your game client only** | **How things look** — island HUD style, optional **Xaero’s** waypoint mirroring, **rope line** and health-bar drawing. Ignored on a headless dedicated server. |
+
+**Tip for hosts:** change **`common`** when you want the **world** or **rules** to change for everyone. Change **`client`** when you only want to adjust **your own** overlays and visuals.
 
 ---
 
 ## License
 
-- **Project Island** mod code: **MIT**
+- **Project Island** (mod code): **MIT**
 - **Unshaded Blocks** (bundled resource pack assets): **CC0**

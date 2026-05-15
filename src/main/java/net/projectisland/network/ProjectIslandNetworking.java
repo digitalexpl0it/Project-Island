@@ -19,5 +19,9 @@ public final class ProjectIslandNetworking {
                 RopeLinkSyncPayload.TYPE, RopeLinkSyncPayload.STREAM_CODEC, RopeLinkSyncPayload::handleOnClient);
         registrar.playToClient(
                 ActionBarToastPayload.TYPE, ActionBarToastPayload.STREAM_CODEC, ActionBarToastPayload::handleClientbound);
+        registrar.playToClient(
+                DragonCountdownSyncPayload.TYPE,
+                DragonCountdownSyncPayload.STREAM_CODEC,
+                DragonCountdownSyncPayload::handleClientbound);
     }
 }

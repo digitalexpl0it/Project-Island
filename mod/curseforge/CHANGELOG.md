@@ -13,6 +13,7 @@ The repository root [`CHANGELOG.md`](../../CHANGELOG.md) is the full developer l
 ### Changed
 
 - **Mod version** **`1.3.0`** (**`gradle.properties`** **`mod_version`**); output **`build/libs/projectisland-1.3.0.jar`**.
+- **Ender Dragon:** optional **scheduled respawn** after the boss dies (see root **`CHANGELOG.md`**): countdown HUD, sounds, **`projectisland-common.toml`** toggles **`dragonReset*`**.
 
 ## [0.1.2] — 2026-05-11
 

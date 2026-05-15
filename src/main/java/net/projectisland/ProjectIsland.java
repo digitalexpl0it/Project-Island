@@ -14,6 +14,8 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.projectisland.content.ProjectIslandContent;
+import net.projectisland.end.DragonBossBarSupport;
+import net.projectisland.end.DragonResetHandler;
 import net.projectisland.worldgen.FloatingIslandLayoutSeed;
 import net.projectisland.island.FloatingIslandDisplayNameReloader;
 import net.projectisland.island.FloatingIslandRespawnHandler;
@@ -53,6 +55,8 @@ public final class ProjectIsland {
         StarterSupplyChestProtection.register();
         RopeTraversalEvents.register();
         FloatingIslandRespawnHandler.register();
+        DragonResetHandler.register();
+        DragonBossBarSupport.register();
         RealmRpgTreasureBalloonsFloatingIslandCompat.register();
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
         modContainer.registerConfig(ModConfig.Type.CLIENT, ClientConfig.SPEC);
