@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **README:** shortened for players and light modding; long technical sections moved to **`docs/TECHNICAL_REFERENCE.md`**. **`.gitignore`:** ignore local **Cursor** paths except **`.cursor/rules/`**; add common secret/OS noise patterns. **`MOD_LIST.md`:** Balm row matches CurseForge pin **`7420963`** (**`21.0.56`**) and warns against duplicate **`balm-*.jar`** files. **`sync_manifest_mods_to_dev_runs.py`:** docstring notes sync does not prune stale JARs.
+- **Public repo layout:** removed **`.cursor/rules/`** and **`.github/workflows/`** from version control; contributor/agent guidance is in root **`AGENTS.md`**. **`.gitignore`** ignores **`.cursor/`** and **`.github/workflows/`** so local Cursor rules and private CI YAML are not pushed by mistake.
+- **README:** shortened for players and light modding; long technical sections moved to **`docs/TECHNICAL_REFERENCE.md`**. **`.gitignore`:** add common secret/OS noise patterns. **`MOD_LIST.md`:** Balm row matches CurseForge pin **`7420963`** (**`21.0.56`**) and warns against duplicate **`balm-*.jar`** files. **`sync_manifest_mods_to_dev_runs.py`:** docstring notes sync does not prune stale JARs.
 
 ## [1.3.0] — 2026-05-12
 
@@ -157,7 +158,7 @@ _Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24*
 
 - **Dev-progression FTB Quests chapter:** [`examples/dev-progression/ftbquests/quests/chapters/project_island.snbt`](examples/dev-progression/ftbquests/quests/chapters/project_island.snbt) now uses **flexible** chapter progression with two branches after the intro — a detailed **Wings Of Fire** chain (any petrified egg → inferno cradle → warmed egg → tempered lantern → bound lantern → summon checkmark) and the existing **harpoon + rope tier** line — copy aligned with **public ziplines** (no island claiming). Removed obsolete **Expand** quest and **`pi_island_expansion`** ProgressiveStages stub.
 
-- **Pack positioning + mod summary:** README pillars and **Roadmap → Current focus** describe the stack as a **high-fantasy mythical RPG** on floating islands (quests, Lootr, mounts, optional magic/classes); **`neoforge.mods.toml`** description matches. Propulsion table is **design reference** (not VS / Aeronautics–led). **Cursor rule** [`.cursor/rules/project-island.mdc`](.cursor/rules/project-island.mdc) updated for the same product intent.
+- **Pack positioning + mod summary:** README pillars and **Roadmap → Current focus** describe the stack as a **high-fantasy mythical RPG** on floating islands (quests, Lootr, mounts, optional magic/classes); **`neoforge.mods.toml`** description matches. Propulsion table is **design reference** (not VS / Aeronautics–led). Contributor/agent context: **[`AGENTS.md`](AGENTS.md)** (replaces historical **`.cursor/rules/project-island.mdc`**).
 
 - **Flight / moving assemblies:** official **[MOD_LIST.md](MOD_LIST.md)** drops **Sable** and **Create Aeronautics**; docs state **Valkyrien Skies** is also **not** in the current stack. **Create** remains for kinetic/contraption RPG tech. [TODO.md](TODO.md) **Phase 6** collapsed to a **shelved** stub (whole-island propulsion / airship tech tree not planned ATM).
 
@@ -375,7 +376,7 @@ _Documentation pass: **2026-04-22**._ _Phase 2 overworld + pregen: **2026-04-24*
 - **Phase 2 (prototype):** `FloatingIslandsChunkGenerator` (void + ellipsoid islands, temperature-based tops) and overworld dimension override via datapack. Chunk generator codec registered on the mod bus (`ProjectIslandWorldgen`).
 - NeoForge **ModDevGradle** project for **Minecraft 1.21.1** / **NeoForge 21.1.227**: `build.gradle`, Gradle wrapper, `net.projectisland` entrypoint, generated `neoforge.mods.toml` from templates, GitHub Actions build workflow.
 - Initial project documentation: `README.md`, `TODO.md`, and this changelog.
-- Cursor project rule `.cursor/rules/project-island.mdc` for consistent AI and contributor context.
+- Root **`AGENTS.md`** for AI / contributor product context (replaces committed **`.cursor/rules`**).
 - README: **game pillars**, **propulsion tier table** (sails / propellers / jets), **tech tree** intent, architecture diagram nodes for unlocks and propulsion, and **Learning from existing work** (mods, datapacks, modpacks, GitHub; licenses and pinning).
 - TODO: **Phase 6** (propulsion, advancement tree, parallel tech tracks, fuel), clarified Phase 5 travel vs **airship** core loop, renumbered later phases; pointer to use online examples when researching.
 - Cursor rule: airship capture loop, **server-side unlocks**, explicit encouragement to reuse **mods / datapacks / modpacks / GitHub** with license awareness.

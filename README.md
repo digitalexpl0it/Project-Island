@@ -15,6 +15,7 @@ This repo contains the **mod source** and the **CurseForge modpack** layout. You
 | **Tweak** quests / progression in dev | [examples/dev-progression/](examples/dev-progression/) — Gradle copies the FTB Quests tree into `run-client` / `run-server` when you use `./gradlew runClient` or `runServer`. |
 | **Build** the mod or pack from source | [Building](#building) below. JDK **21** required. |
 | **Go deep** on worldgen, every config key, ropes, biomes | [docs/TECHNICAL_REFERENCE.md](docs/TECHNICAL_REFERENCE.md) (long-form maintainer doc). |
+| **AI / Cursor** (coding agents, local rules) | [AGENTS.md](AGENTS.md) — product intent and conventions. **`.cursor/rules/`** is **gitignored**; copy or symlink there locally if you want Cursor “rules as files”. |
 
 ---
 

@@ -1,13 +1,10 @@
----
-description: Project Island — NeoForge floating-islands modpack, fantasy RPG + optional island mobility
-alwaysApply: true
----
+# Project Island — agent & contributor context
 
-# Project Island
-
-This repository is a **NeoForge** Minecraft **mod + modpack + dedicated server** effort: **high-fantasy mythical RPG** on **procedural floating islands** in the void (quests, loot, mounts, room for magic/classes), **no portal lobby** as the primary entry, and **server-authoritative** island and progression state.
+This file replaces committed **`.cursor/rules`** for a **public** repo: keep Cursor-specific copies under **`.cursor/rules/`** locally (that path is **gitignored**). Many coding agents also read **`AGENTS.md`** at the repo root.
 
 ## Product intent
+
+This repository is a **NeoForge** Minecraft **mod + modpack + dedicated server** effort: **high-fantasy mythical RPG** on **procedural floating islands** in the void (quests, loot, mounts, room for magic/classes), **no portal lobby** as the primary entry, and **server-authoritative** island and progression state.
 
 - **Core loop (modpack):** **FTB Quests** (**Project Island** + **RPG Series** chapters in dev-progression), staged unlocks (**ProgressiveStages**), exploration and dungeons (**Lootr** when pinned), **Skill Tree (RPG Series)** + **Spell Engine** when pinned ([MOD_LIST.md](MOD_LIST.md)), mythical mounts (e.g. **Wings Of Fire**), **public rope ziplines**, shared **starter hub** data.
 - **Travel:** **ropes**, **mounts**, **Create** contraptions, optional dimensions — **not** **Create Aeronautics** or **Valkyrien Skies** in the current official pack. Whole-island propulsion is **shelved** ([TODO.md](TODO.md)).
@@ -17,7 +14,7 @@ This repository is a **NeoForge** Minecraft **mod + modpack + dedicated server**
 
 ## Research and reuse
 
-When implementing or designing systems, **use public examples**: other **mods**, **datapacks**, **modpacks**, and **GitHub** repos (MDKs, ship mods, progression packs). Always verify **license compatibility** and **pin** dependency versions; document inspiration and hard dependencies in [README.md](README.md) (and [docs/TECHNICAL_REFERENCE.md](docs/TECHNICAL_REFERENCE.md) for long-form worldgen/config detail).
+When implementing or designing systems, **use public examples**: other **mods**, **datapacks**, **modpacks**, and **GitHub** repos (MDKs, ship mods, progression packs). Always verify **license compatibility** and **pin** dependency versions; document inspiration and hard dependencies in [README.md](README.md) and [docs/TECHNICAL_REFERENCE.md](docs/TECHNICAL_REFERENCE.md) where appropriate.
 
 ## Integrations
 
@@ -25,7 +22,7 @@ When implementing or designing systems, **use public examples**: other **mods**,
 
 ## Where to look
 
-- [README.md](README.md) — overview, quick start, links to modpack and `MOD_LIST.md`.
+- [README.md](README.md) — overview, quick start, modpack links.
 - [docs/TECHNICAL_REFERENCE.md](docs/TECHNICAL_REFERENCE.md) — worldgen, config keys, architecture, dev-server OP notes.
 - [TODO.md](TODO.md) — phased roadmap (**Phase 6** moving-island propulsion is **shelved**).
 - [CHANGELOG.md](CHANGELOG.md) — notable changes.
@@ -59,3 +56,7 @@ If the texture is correct but you still see “X-ray” gaps (neighbor blocks di
   - Override `getOcclusionShape(...)` to `Shapes.empty()` if neighbors are being culled incorrectly.
 - **Selection + collision shape**
   - Override `getShape(...)` and `getCollisionShape(...)` to match the actual model (e.g. base is 10px tall + a loop on top).
+
+## Optional CI (not in this public tree)
+
+To run the same check GitHub Actions used to run: **JDK 21** + `./gradlew build`. Add your own **`.github/workflows/*.yml`** locally if you want Actions on a fork or private remote; **`/.github/workflows/`** is **gitignored** here so workflow files are not published on the default public repo.

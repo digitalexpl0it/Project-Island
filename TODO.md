@@ -26,13 +26,13 @@ When researching features, use **mods, datapacks, modpacks, and GitHub** as exam
 - [x] Define mod id, Maven coordinates, and Java package namespace.
 - [x] Author `mods.toml` (metadata, dependency block when integrations exist).
 - [x] Verify `./gradlew build` from a clean clone (`runClient` / `runServer` available; run locally as needed).
-- [x] (Optional) Minimal CI (Gradle build on push) — `.github/workflows/build.yml`.
+- [x] (Optional) Minimal CI — run **`./gradlew build`** locally or add **`.github/workflows/*.yml`** on a fork; the public repo **gitignores** **`/.github/workflows/`** (see [AGENTS.md](AGENTS.md)).
 
 ## Phase 2 — Worldgen
 
 - [x] Void-style world: no sea-level continent; islands suspended over void — **`minecraft:overworld`** uses `FloatingIslandsChunkGenerator` via built-in datapack (`data/minecraft/dimension/overworld.json`).
 - [x] Procedural **floating islands** with spacing and size variance (tunable) — ellipsoid islands on a region grid (`FloatingIslandsChunkGenerator`).
-- [x] **Biome-aware** surfaces: grass, sand, snow from biome **temperature**; trees/ores from vanilla **feature** step where it triggers; overworld datapack still uses **`minecraft:multi_noise`** preset **`minecraft:overworld`**, while **island land** biomes are **weighted per `FloatingIslandKey`** (see [README — Island biome weights](README.md#island-biome-weights-common-config) and `islandBiomeWeight*` in `config/projectisland-common.toml`), not vanilla climate sectors.
+- [x] **Biome-aware** surfaces: grass, sand, snow from biome **temperature**; trees/ores from vanilla **feature** step where it triggers; overworld datapack still uses **`minecraft:multi_noise`** preset **`minecraft:overworld`**, while **island land** biomes are **weighted per `FloatingIslandKey`** (see [docs — Island biome weights](docs/TECHNICAL_REFERENCE.md#island-biome-weights-common-config) and `islandBiomeWeight*` in `config/projectisland-common.toml`), not vanilla climate sectors.
 - [x] No mandatory **portal**: players join **overworld** directly with floating-island terrain (Nether/End unchanged).
 - [x] (Optional) **Spawn pregen:** common config `spawnPregenChunkRadius` (0 = off) + `spawnPregenChunksPerTick` — `FloatingIslandsSpawnPregen` loads a Chebyshev chunk neighborhood around shared spawn after level load.
 - [x] **Void spawn mitigation:** `FloatingIslandsSpawnEvents` on **dimension change to overworld** and **player login** — nearest procedural island surface from XZ (`FloatingIslandsChunkGenerator.islandSurfaceBlockY`).
@@ -93,7 +93,7 @@ _Not on the active roadmap._ The pack targets **RPG + floating islands** with **
 ## Phase 7 — Integrations (optional)
 
 - [ ] **Pin + smoke-test** whatever optional mods you ship beyond [MOD_LIST.md](MOD_LIST.md) (**Create** stays; **not** VS / Aeronautics unless direction changes).
-- [x] **Biomes O' Plenty:** optional weighted **`biomesoplenty:*`** island biomes when mod **`biomesoplenty`** is present — **`islandBiomeModIntegrationEnabled`**, **`islandBiomeModWeightedEntries`** ([README — Island biome weights](README.md#island-biome-weights-common-config)).
+- [x] **Biomes O' Plenty:** optional weighted **`biomesoplenty:*`** island biomes when mod **`biomesoplenty`** is present — **`islandBiomeModIntegrationEnabled`**, **`islandBiomeModWeightedEntries`** ([docs — Island biome weights](docs/TECHNICAL_REFERENCE.md#island-biome-weights-common-config)).
 - [ ] **README:** compatibility matrix + known issues for whatever you ship.
 - [ ] **Defer** heavy optional integration until Phases **2–5** and **modpack** milestones feel stable.
 

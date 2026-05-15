@@ -31,11 +31,11 @@ bin/
 ### VS Code ###
 .vscode/
 
-### Cursor (IDE) — public repo: do not track local workspace junk ###
-# Keep shared rules under `.cursor/rules/` committed; ignore other `.cursor/` paths if created.
-.cursor/*
-!.cursor/rules/
-!.cursor/rules/**
+### Cursor (IDE) — local only; not published ###
+.cursor/
+
+### GitHub Actions — optional; keep workflow YAML out of public default tree ###
+.github/workflows/
 
 ### Secrets & local env (never commit) ###
 .env
