@@ -1,85 +1,76 @@
 # CurseForge description — paste-ready overview
 
-Copy everything **below the horizontal rule** into your modpack’s **Description** field on CurseForge (skip repo-only notes above the rule). If headers break in their editor, flatten `####` to bold lines.
+Copy everything **below the horizontal rule** into your modpack’s **Description** field on [Project Islands Sky Bound](https://www.curseforge.com/minecraft/modpacks/project-islands-sky-bound).
 
-Keep this file in sync when you change the pack; use **[`CHANGELOG_CLIENT.md`](CHANGELOG_CLIENT.md)** and **[`CHANGELOG_SERVER.md`](CHANGELOG_SERVER.md)** for per-release **Files** tab changelogs.
+**Short summary** (field next to the project title): paste from **[`CURSEFORGE_SUMMARY.md`](CURSEFORGE_SUMMARY.md)** (below its horizontal rule).
 
----
-
-### Project Islands: Sky Bound
-
-**Void islands · quests · RPG progression · NeoForge 1.21.1**
-
-Survive and build on **procedural floating islands** in an empty overworld. Follow guided chapters in **FTB Quests**, unlock **skills and spells**, explore richer biomes, and travel with **Waystones**—solo or with friends. Built around the **Project Island** mod (worldgen + pack-aware QoL).
+Keep this file in sync when you change the pack. Per-release notes for the **Files** tab: **[`CHANGELOG_CLIENT.md`](CHANGELOG_CLIENT.md)** and **[`CHANGELOG_SERVER.md`](CHANGELOG_SERVER.md)**.
 
 ---
 
-#### Highlights
+## Project Islands: Sky Bound
 
-- **Sky-world fantasy** — islands float in the void; no traditional overworld landmass.
-- **Sculpted island undersides** — procedural floating islands drip into multiple **stalactite root** lobes for a more striking skyline (toggle in mod config).
-- **Quest-led onboarding** — FTB Quests includes a **foundation** path plus an **RPG / Skill Tree / Spell Engine** branch after you hit the iron tier.
-- **Loot that respects multiplayer** — **Lootr** for per-player dungeon chests where configured.
-- **Exploration & identity** — **Biomes O’ Plenty**, **Wings Of Fire** mounts, class-flavored RPG mods (archers, rogues, paladins, wizards, etc.—see in-game **JEI**).
-- **Travel & utility** — **Waystones**; optional performance/visual stack on **client** (Embeddium ecosystem, shader-ready stack—see client manifest).
+**Minecraft 1.21.1 · NeoForge**
+
+Survive in a **sky-world** where the overworld is **void and floating islands** — not an endless flat map. Build bases on drifting landmasses, follow **FTB Quests** from your first day, grow into **skills and spells**, tame **mythical mounts**, and zip between peaks with **harpoons and ropes**. Made for **solo play and friends** on the same world.
 
 ---
 
-#### Install — client
+## What you’ll do
 
-1. Open the **CurseForge App** (or compatible launcher), find **this pack**, install for **Minecraft 1.21.1** + **NeoForge**.
-2. Allocate enough RAM for a medium RPG pack (often **6–8 GB** client as a starting point; tune for your machine).
-3. **First launch:** open the **Quests** book—quest data ships with the pack. If something looks empty, confirm you updated to the latest **primary** file.
-
----
-
-#### Install — dedicated server
-
-1. On **Files**, open the same release version.
-2. Download the **Additional file**: **`projectisland-modpack-<version>-curseforge-server.zip`** (not the primary client zip).
-3. That archive uses a **trimmed manifest** (no JEI, minimap/world map, Embeddium/NeOculus stack, or Resource Pack Overrides—pure headless friendly).
-4. Match **Minecraft** and **NeoForge** versions **exactly** to what the client pack uses for that release.
+- **Explore** — each island is its own patch of terrain and biome; **Biomes O’ Plenty** adds variety as you travel.
+- **Progress** — quest chapters walk you through the pack; unlock the **RPG branch** (Skill Tree, Spell Engine, class-style mods) as you advance.
+- **Fight & loot** — dungeons and structures on island tops; **Lootr** gives **your own** chest loot in multiplayer (no fighting over one inventory).
+- **Travel** — **Waystones**, maps, and **rope surfing** between anchors; optional **shader-friendly** visuals on the client.
+- **Look up** — islands can show dramatic **root-like undersides** under the main mass (part of the **Project Island** world mod).
 
 ---
 
-#### Version & compatibility
+## Good to know before you start
 
 | | |
-|--|--|
+|---|---|
 | **Minecraft** | **1.21.1** |
-| **Loader** | **NeoForge** (see file label for exact loader build) |
+| **Mod loader** | **NeoForge** (install what the launcher offers for this pack) |
+| **RAM** | Start around **6–8 GB** for the client; add more if you use shaders or a large render distance |
+| **Quest book** | Open **FTB Quests** on first join — the pack ships the chapters; update the pack if the book looks empty |
 
-Always install **matching** client + server files from the **same** release.
-
-**Connection errors (“Project Island channel missing on the server”):** the dedicated server must load the **same** **Project Island** mod jar as the client. Use the official **server** additional zip (**`projectisland-*.jar`** is under **`overrides/mods/`**; server **`manifest.json`** **`files`** is empty) or copy **`projectisland-*.jar`** from the client profile’s **`mods/`** (CurseForge launcher download) into the server’s **`mods/`** if you install manually.
-
----
-
-#### Changelog
-
-- **Client pack:** repo file **`modpack/curseforge/CHANGELOG_CLIENT.md`** (canonical bullets—mirror into each **primary** file changelog on CurseForge when you publish).
-- **Server pack:** repo file **`modpack/curseforge/CHANGELOG_SERVER.md`** (same for the **Additional file**).
-
-Players usually read changelogs on the **Files** tab per download; keep those short and dated.
+**Stay on the pack version:** don’t update individual mods in the launcher unless you know what you’re doing — mismatched versions are the usual cause of “can’t join server” errors.
 
 ---
 
-#### License & attribution
+## Install (players)
 
-- **Project Island** mod (bundled jar): source licensed **MIT** — see the project repository **`LICENSE`** if linked.
-- **This modpack listing** curates third-party mods from **CurseForge** via **`manifest.json`**; each mod remains **© its authors** under **their** licenses. Nothing here relicenses those mods.
-- Redistributing extra jars under **`overrides/mods/`** is subject to each author’s terms and CurseForge rules.
-
----
-
-#### Bugs & feedback
-
-Use your linked **Issues** / Discord / forum thread for pack bugs (link them in the project sidebar). For **crash logs**, attach **`latest.log`** from the failing side (client or server) and note **pack version** + **launcher**.
+1. Install **Project Islands Sky Bound** in the **CurseForge App** (or any launcher that supports this pack) for **1.21.1** + **NeoForge**.
+2. Create a world or join a server — you spawn into the **floating-island overworld**.
+3. Open the **Quests** book and start the **Project Island** chapter.
 
 ---
 
-### Credits
+## Playing with friends (hosts)
 
-**Project Island** — world concept, mod, and pack maintenance.
+1. On this project’s **Files** tab, pick the **same version** as your players.
+2. Download the **Additional file**: **`projectisland-modpack-<version>-curseforge-server.zip`** (not the main client zip).
+3. Set up a **NeoForge 1.21.1** dedicated server and merge the zip like a normal modpack server install.
+4. Everyone must use the **matching client pack version**.
 
-**Mod authors** — thank you for the libraries and content mods that make this pack possible; support them on their CurseForge pages.
+**Can’t connect / “channel missing”?** The server needs the **Project Island** mod (and the same pack version as clients). Use the official **server** zip for that release so mods match.
+
+Some mods may need to be installed manually on the server — check **`SERVER_README.md`** inside the server zip if the host doc mentions extra JARs.
+
+---
+
+## Need help?
+
+- **Crashes or weird worldgen:** note your **pack version** and attach **`latest.log`** from `.minecraft/logs` (client) or the server folder.
+- **Questions & bugs:** use the **Issues** link on this project (GitHub) if enabled in the sidebar.
+
+---
+
+## Credits
+
+**Project Island** — world, core mod, and pack.
+
+**Mod authors** — libraries and content mods from CurseForge; support them on their own pages.
+
+**License:** the **Project Island** mod source is **MIT**. Other mods keep **their own** licenses; this listing does not relicense them.

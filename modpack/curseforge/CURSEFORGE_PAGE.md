@@ -37,17 +37,15 @@ Pick reasonable **tags** (examples): `NeoForge`, `Multiplayer`, `Quests`, `RPG`,
 
 ## Summary (short blurb)
 
-CurseForge often shows a **short summary** next to the title. One or two sentences; sell the hook, not the manifest.
+CurseForge shows a **short summary** next to the title (keep it player-facing, not manifest jargon).
 
-**Example:**
-
-> **Sky-bound fantasy for NeoForge 1.21.1** — procedural **floating islands**, **FTB Quests**, Skill Tree & Spell Engine RPG progression, **Lootr**, **Waystones**, and **Biomes O’ Plenty**. **Server pack** on **Files → Additional files**.
+**Canonical copy:** **[`CURSEFORGE_SUMMARY.md`](CURSEFORGE_SUMMARY.md)** — paste the block below its horizontal rule into the **Summary** field (Markdown with **bold** hooks; plain fallback is in that file if CF strips formatting).
 
 ---
 
 ## Description / overview (main page body)
 
-**Canonical copy:** **[`DESCRIPTION_OVERVIEW.md`](DESCRIPTION_OVERVIEW.md)** — structured sections (hook, highlights, client/server install, version table, changelog pointers, license, bugs, credits). Paste from below that file’s horizontal rule into CurseForge.
+**Canonical copy:** **[`DESCRIPTION_OVERVIEW.md`](DESCRIPTION_OVERVIEW.md)** — player-oriented sections (what you’ll do, install, multiplayer hosting, help). Paste from below that file’s horizontal rule into CurseForge **Description**.
 
 **Why replace a thin page:** a strong listing uses **short paragraphs**, **bullet highlights**, **clear client vs server steps**, explicit **changelog** / **license** blocks, and **screenshots**—not one wall of prose. Refresh **`DESCRIPTION_OVERVIEW.md`** when positioning or mods change.
 
