@@ -8,6 +8,36 @@ The repository root [`CHANGELOG.md`](../../CHANGELOG.md) is the full developer l
 
 ---
 
+## [1.4.2] — 2026-05-25
+
+### Changed
+
+- **Mod version** **`1.4.2`**; same Levite optional worldgen as **1.4.1**. Official **modpack** drops Levite / Aeronautics / Sable / Biolith pins.
+
+## [1.4.1] — 2026-05-25
+
+### Added
+
+- **Create: Levite Fields (`levmod`) — optional:** when the mod is installed, **`islandLeviteFieldsPlacement`** (**`void_only`** / **`island_only`** / **`both`**), void belt width, **`islandLeviteFieldsVoidBiomeChance`** (default **0.35**). Not shipped on the official modpack (**1.4.2**+).
+
+### Fixed
+
+- **Void rescue:** no per-tick floor rescue for **creative** / **spectator** players (fixes rubber-banding while flying in creative).
+
+### Removed
+
+- **Bluedude Dragons (`bdd`)** optional dependency and controlled nest placement (mod shelved from pack).
+
+### Changed
+
+- **Mod version** **`1.4.1`**; output **`build/libs/projectisland-1.4.1.jar`**.
+
+## [1.4.0] — 2026-05-16
+
+### Changed
+
+- **Mod version** **`1.4.0`** (**`gradle.properties`** **`mod_version`**); output **`build/libs/projectisland-1.4.0.jar`**. No gameplay changes beyond **`1.3.0`** unless noted elsewhere — aligns with **modpack `1.4.0`** (default resource packs on the client pack).
+
 ## [1.3.0] — 2026-05-12
 
 ### Changed

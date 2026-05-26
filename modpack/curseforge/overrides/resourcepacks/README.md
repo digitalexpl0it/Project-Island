@@ -6,7 +6,13 @@ Drop **`.zip`** resource packs here so **`./gradlew curseforgeModpackZip`** incl
 
 A pack that only replaces **title panorama**, **logo**, or **splash** text is still a normal resource pack: same **`pack.mcmeta`**, **`assets/minecraft/…`** layout.
 
-**Default-on (CurseForge pack):** ship it as **`Project_Island_menu_assets.zip`** in this folder (exact name). The bundled **[Resource Pack Overrides](https://www.curseforge.com/minecraft/mc-mods/resource-pack-overrides)** config enables that file on first launch; change the filename in **`../config/resourcepackoverrides.json`** if you prefer another name.
+**Default-on (CurseForge pack):**
+
+- **Bundled override:** **`Project_Island_menu_assets.zip`** in this folder (exact name).
+- **Manifest downloads:** **[Dramatic Skys](https://www.curseforge.com/minecraft/texture-packs/dramatic-skys)** and **[Mandala's GUI - Dark mode](https://www.curseforge.com/minecraft/texture-packs/mandalas-gui-dark-mode)** are listed in **`manifest.json`**; the CurseForge app installs their zips into **`resourcepacks/`** (not the server pack).
+- **[Resource Pack Overrides](https://www.curseforge.com/minecraft/mc-mods/resource-pack-overrides)** (**`../config/resourcepackoverrides.json`**) enables all three on first launch. If you bump a manifest **`fileID`**, update the **`file/…zip`** ids in that config to match the new **`fileName`** from CurseForge.
+
+**Local dev:** **`./gradlew syncManifestModJarsToDevRuns`** downloads the two manifest zips into **`run-client/resourcepacks/`** and copies **`Project_Island_menu_assets.zip`** from this folder.
 
 ## Redistribution
 

@@ -4,15 +4,17 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import net.neoforged.neoforge.common.ModConfigSpec;
+import net.projectisland.worldgen.LeviteFieldsPlacementMode;
 
 public final class Config {
     private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
     /**
-     * Optional per-id weight overrides when {@link #ISLAND_BIOME_MOD_DISCOVER_ALL_REGISTERED} lists every BOP biome;
-     * leave empty to weight them all equally ({@link #ISLAND_BIOME_MOD_DISCOVERED_DEFAULT_WEIGHT}).
+     * Optional per-id weight overrides when {@link #ISLAND_BIOME_MOD_DISCOVER_ALL_REGISTERED} lists every discoverable
+     * mod biome; leave empty to weight them all equally ({@link #ISLAND_BIOME_MOD_DISCOVERED_DEFAULT_WEIGHT}).
+     * Used when {@link #leviteFieldsPlacementMode()} is **island_only** or **both** (see {@link #ISLAND_LEVITE_FIELDS_PLACEMENT}).
      */
-    private static final List<String> DEFAULT_ISLAND_BIOME_MOD_WEIGHTED_ENTRIES = List.of();
+    private static final List<String> DEFAULT_ISLAND_BIOME_MOD_WEIGHTED_ENTRIES = List.of("levmod:levitite_fields=35");
 
     private static final Pattern ISLAND_BIOME_MOD_WEIGHTED_ENTRY =
             Pattern.compile("^[a-z0-9_.-]+:[a-z0-9_.-]+=[1-9][0-9]{0,6}$");
@@ -28,6 +30,16 @@ public final class Config {
 
     private static boolean validateSpawnTuningBypassEntityNamespace(Object o) {
         return o instanceof String s && SPAWN_TUNING_BYPASS_ENTITY_NAMESPACE.matcher(s).matches();
+    }
+
+    private static boolean validateLeviteFieldsPlacement(Object o) {
+        if (!(o instanceof String s)) {
+            return false;
+        }
+        return switch (s.trim().toLowerCase(java.util.Locale.ROOT)) {
+            case "void_only", "void", "island_only", "island", "islands", "both", "all" -> true;
+            default -> false;
+        };
     }
 
     public static final ModConfigSpec.BooleanValue DEBUG_LOGGING = BUILDER
@@ -265,16 +277,38 @@ public final class Config {
                     "Weight for minecraft:snowy_taiga (0 = exclude). Improves **minecraft:igloo** eligibility alongside snowy_plains.")
             .defineInRange("islandBiomeWeightSnowyTaiga", 6, 0, 1000);
 
+    public static final ModConfigSpec.ConfigValue<String> ISLAND_LEVITE_FIELDS_PLACEMENT = BUILDER
+            .comment(
+                    "Where **{@code levmod:levitite_fields}** applies when Create: Levite Fields is loaded:",
+                    "**void_only** — open void near islands only (default; island surfaces use **islandBiomeWeight*** / BOP);",
+                    "**island_only** — Levite can roll on island regions via **islandBiomeModWeightedEntries** / discover-all; void stays normal;",
+                    "**both** — void belt **and** island rolls can include Levite.")
+            .define("islandLeviteFieldsPlacement", "void_only", Config::validateLeviteFieldsPlacement);
+
+    public static final ModConfigSpec.DoubleValue ISLAND_LEVITE_FIELDS_VOID_MAX_HORIZ_BEYOND_EDGE = BUILDER
+            .comment(
+                    "With **void_only** or **both**: max horizontal ellipsoid ratio beyond the nearest island edge.",
+                    "**1.0** = just outside the island footprint; **2.75** = wide void belt between nearby islands; higher = more empty sky.",
+                    "Columns with no island stone and ratio above this use the normal void biome (**minecraft:plains** placeholder).")
+            .defineInRange("islandLeviteFieldsVoidMaxHorizBeyondEdge", 2.0d, 1.0d, 8.0d);
+
+    public static final ModConfigSpec.DoubleValue ISLAND_LEVITE_FIELDS_VOID_BIOME_CHANCE = BUILDER
+            .comment(
+                    "With **void_only** or **both**: after a void column passes the horiz belt test, probability it rolls **levmod:levitite_fields** instead of the normal void biome.",
+                    "**1.0** = every eligible column (legacy dense sky); **0.35** (default) ≈ sparse patches — fewer Levite clusters and less decoration load when flying through void.",
+                    "**0** disables Levite in void (same as setting placement to **island_only** without island rolls).")
+            .defineInRange("islandLeviteFieldsVoidBiomeChance", 0.35d, 0.0d, 1.0d);
+
     public static final ModConfigSpec.BooleanValue ISLAND_BIOME_MOD_INTEGRATION_ENABLED = BUILDER
             .comment(
-                    "When **true** and **Biomes O' Plenty** is installed ({@code biomesoplenty}), merge **islandBiomeModWeightedEntries** into the",
-                    "per-island biome pool next to **islandBiomeWeight***. When BOP is absent, those entries are ignored and behavior matches vanilla-only pools.",
+                    "When **true** and **Biomes O' Plenty** ({@code biomesoplenty}) is installed, merge **islandBiomeModWeightedEntries**",
+                    "into per-**island** biome rolls. **Levite Fields** on islands uses **islandLeviteFieldsPlacement** (**island_only** / **both**).",
                     "Entries that do not resolve in the biome registry are skipped at runtime.")
             .define("islandBiomeModIntegrationEnabled", true);
 
     public static final ModConfigSpec.DoubleValue ISLAND_BIOME_MOD_PREFERRED_ROLL_FRACTION = BUILDER
             .comment(
-                    "Used only when **Biomes O' Plenty** is loaded, **islandBiomeModIntegrationEnabled**, and the mod biome pool is non-empty.",
+                    "Used only when a supported biome mod is loaded, **islandBiomeModIntegrationEnabled**, and the mod biome pool is non-empty.",
                     "**Default 0.7** — **70%** of island regions roll **only** among mod biomes; **30%** roll **only** among **islandBiomeWeight*** (vanilla).",
                     "**0** — single combined pool (legacy): vanilla and mod weights compete by raw totals.",
                     "**1** — always mod subset when it is non-empty (no vanilla-only regions).")
@@ -282,21 +316,21 @@ public final class Config {
 
     public static final ModConfigSpec.BooleanValue ISLAND_BIOME_MOD_DISCOVER_ALL_REGISTERED = BUILDER
             .comment(
-                    "When **true** (default) and BOP is loaded: every **`biomesoplenty:*`** biome in the biome registry is eligible on the mod branch",
-                    "(overworld / nether / end ids BOP registers — disabled BOP biomes are usually absent from the registry).",
+                    "When **true** (default) and BOP is loaded: every registered **`biomesoplenty:*`** biome is eligible on the island mod branch.",
                     "**islandBiomeModWeightedEntries** then acts as **per-id weight overrides**; ids not listed use **islandBiomeModDiscoveredDefaultWeight**.",
                     "When **false**: only lines in **islandBiomeModWeightedEntries** are used (pack-maker curated list).")
             .define("islandBiomeModDiscoverAllRegistered", true);
 
     public static final ModConfigSpec.IntValue ISLAND_BIOME_MOD_DISCOVERED_DEFAULT_WEIGHT = BUILDER
             .comment(
-                    "Used when **islandBiomeModDiscoverAllRegistered** is **true**: relative weight for each discovered **biomesoplenty:*** biome",
+                    "Used when **islandBiomeModDiscoverAllRegistered** is **true**: relative weight for each discovered mod biome",
                     "that does not appear in **islandBiomeModWeightedEntries**.")
             .defineInRange("islandBiomeModDiscoveredDefaultWeight", 5, 1, 1000);
 
     public static final ModConfigSpec.ConfigValue<List<? extends String>> ISLAND_BIOME_MOD_WEIGHTED_ENTRIES = BUILDER
             .comment(
-                    "When **islandBiomeModDiscoverAllRegistered** is **true**: optional **`biomesoplenty:path=weight`** overrides (empty = equal weights via **islandBiomeModDiscoveredDefaultWeight**).",
+                    "When **islandBiomeModDiscoverAllRegistered** is **true**: optional **`namespace:path=weight`** overrides (empty = equal weights via **islandBiomeModDiscoveredDefaultWeight**).",
+                    "For **levmod**, use **islandLeviteFieldsPlacement** (**island_only** / **both**) — ignored on islands when **void_only**.",
                     "When **false**: required explicit list of **`namespace:path=weight`** lines for mod island biomes (**empty** = no mod biomes).",
                     "Format: weight **1**–**9999999**. Unresolved ids are skipped.")
             .defineListAllowEmpty(
@@ -450,12 +484,12 @@ public final class Config {
             .comment(
                     "After normal biome decoration, try to place this many extra trees on grass / sand / mycelium island tops per chunk.",
                     "Attempts pick random **surface columns that have land** (void columns are skipped), so small islands still get coverage.")
-            .defineInRange("floatingIslandsExtraSurfaceTreesPerChunk", 8, 0, 64);
+            .defineInRange("floatingIslandsExtraSurfaceTreesPerChunk", 4, 0, 64);
 
     public static final ModConfigSpec.IntValue FLOATING_ISLANDS_EXTRA_SURFACE_TREES_SNOW_PER_CHUNK = BUILDER
             .comment(
                     "Same as floatingIslandsExtraSurfaceTreesPerChunk but for snow-block tops (cold islands). Usually higher than grass so taiga-style islands are not bare.")
-            .defineInRange("floatingIslandsExtraSurfaceTreesSnowPerChunk", 14, 0, 64);
+            .defineInRange("floatingIslandsExtraSurfaceTreesSnowPerChunk", 6, 0, 64);
 
     public static final ModConfigSpec.DoubleValue FLOATING_ISLANDS_SURFACE_WATER_POOL_CHUNK_CHANCE = BUILDER
             .comment(
@@ -1045,6 +1079,20 @@ public final class Config {
             .define("dragonBossBarHideUntilFirstDamage", true);
 
     static final ModConfigSpec SPEC = BUILDER.build();
+
+    public static LeviteFieldsPlacementMode leviteFieldsPlacementMode() {
+        return LeviteFieldsPlacementMode.fromConfig(ISLAND_LEVITE_FIELDS_PLACEMENT.get());
+    }
+
+    public static boolean leviteFieldsOnIslandSurfaces() {
+        LeviteFieldsPlacementMode mode = leviteFieldsPlacementMode();
+        return mode == LeviteFieldsPlacementMode.ISLAND_ONLY || mode == LeviteFieldsPlacementMode.BOTH;
+    }
+
+    public static boolean leviteFieldsInVoidBetweenIslands() {
+        LeviteFieldsPlacementMode mode = leviteFieldsPlacementMode();
+        return mode == LeviteFieldsPlacementMode.VOID_ONLY || mode == LeviteFieldsPlacementMode.BOTH;
+    }
 
     private Config() {
     }

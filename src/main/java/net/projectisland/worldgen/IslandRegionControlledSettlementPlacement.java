@@ -232,7 +232,8 @@ public final class IslandRegionControlledSettlementPlacement {
      * {@link JigsawStructure} uses anchored {@link JigsawPlacement}; other types (e.g. {@code takesapillage:pillager_structure}) use
      * {@link Structure#findValidGenerationPoint}.
      */
-    private static boolean attachControlledStructureStart(
+    /** Shared by controlled settlement placement helpers. */
+    static boolean attachControlledStructureStart(
             Structure structure,
             FloatingIslandsChunkGenerator generator,
             RegistryAccess registryAccess,

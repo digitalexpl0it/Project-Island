@@ -275,7 +275,7 @@ tasks.register('verifyDevProgressionFtbQuests') {
 
 tasks.register('syncManifestModJarsToDevRuns', Exec) {
     group = 'distribution'
-    description = 'Downloads every CurseForge manifest mod JAR into run-server/mods and run-client/mods (requires python3; public CurseForge + Forge CDN). Run after bumping manifest pins.'
+    description = 'Downloads CurseForge manifest JARs into run-*/mods and manifest .zip resource packs + overrides/resourcepacks into run-client/resourcepacks (python3; public CurseForge + Forge CDN). Run after bumping manifest pins.'
     workingDir = layout.projectDirectory.asFile
     commandLine 'python3', 'tools/curseforge_pack/sync_manifest_mods_to_dev_runs.py', '--manifest', 'modpack/curseforge/manifest.json'
 }

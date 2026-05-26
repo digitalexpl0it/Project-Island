@@ -139,6 +139,43 @@ public final class FloatingIslandLayout {
         return Optional.of(new FloatingIslandKey(bestRx, bestRz));
     }
 
+    /**
+     * Smallest horizontal ellipsoid ratio {@code (dx²+dz²)/hr²} among procedural islands in the 3×3 region
+     * neighborhood. Empty when no {@link #regionHasIsland} exists in that neighborhood. Values below {@code 1.0}
+     * lie inside an island’s horizontal footprint; values above {@code 1.0} are open void relative to the nearest mass.
+     */
+    public static Optional<Double> closestProceduralIslandHoriz(int wx, int wz) {
+        int chunkX = Mth.floorDiv(wx, 16);
+        int chunkZ = Mth.floorDiv(wz, 16);
+        int rcx = Mth.floorDiv(chunkX, REGION_CHUNKS);
+        int rcz = Mth.floorDiv(chunkZ, REGION_CHUNKS);
+
+        double min = Double.MAX_VALUE;
+        IslandParams params = new IslandParams();
+
+        for (int drx = -1; drx <= 1; drx++) {
+            for (int drz = -1; drz <= 1; drz++) {
+                int rx = rcx + drx;
+                int rz = rcz + drz;
+                if (!regionHasIsland(rx, rz)) {
+                    continue;
+                }
+                regionIsland(rx, rz, params);
+
+                double dx = (wx + 0.5d) - params.centerX;
+                double dz = (wz + 0.5d) - params.centerZ;
+                double hrEff = params.hr * hrSmoothScale(wx, wz, params.shapeSalt);
+                double horiz = (dx * dx + dz * dz) / (hrEff * hrEff);
+                min = Math.min(min, horiz);
+            }
+        }
+
+        if (min == Double.MAX_VALUE) {
+            return Optional.empty();
+        }
+        return Optional.of(min);
+    }
+
     public static int columnTopY(int wx, int wz, int minY, int maxY) {
         int chunkX = Mth.floorDiv(wx, 16);
         int chunkZ = Mth.floorDiv(wz, 16);

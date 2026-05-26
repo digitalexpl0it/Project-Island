@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-"""Download every CurseForge-pinned mod JAR from modpack/curseforge/manifest.json into dev runs.
+"""Download CurseForge manifest pins into dev runs (mods + client resource packs).
 
-Writes manifest JARs into ``run-client/mods/`` for every pin, and into ``run-server/mods/``
-for all pins **except** a small **client-only dev** set (Inventory HUD+ — CurseForge
-**``357540``** / HUD overlay) so ``runServer`` matches a minimal dedicated layout. Gradle
-``runClient`` still gets every client manifest mod.
+Writes manifest **``.jar``** files into ``run-client/mods/`` for every pin, and into
+``run-server/mods/`` for all pins **except** a small **client-only dev** set (Inventory
+HUD+ — CurseForge **``357540``** / HUD overlay) so ``runServer`` matches a minimal
+dedicated layout. Gradle ``runClient`` still gets every client manifest mod.
+
+Writes manifest **``.zip``** resource packs into ``run-client/resourcepacks/`` only (never
+the server tree). Also copies ``modpack/curseforge/overrides/resourcepacks/*.zip`` (e.g.
+``Project_Island_menu_assets.zip``) into that folder when present.
 
 Uses the public CurseForge file API + Forge CDN (no API key). URL-encodes ``+`` in
 filenames for ``mediafiles.forgecdn.net``.
@@ -20,19 +24,29 @@ filenames changed.
 This script **does not delete** other ``.jar`` files in ``run-*/mods``. When CurseForge
 changes a mod's **filename** between pins (e.g. two ``balm-neoforge-*`` versions), remove
 the stale jar manually so NeoForge does not load duplicates.
+
+**Optional Levite Fields testing:** ``levmod`` is not manifest-pinned; add it and its deps manually
+if needed. **Sable** / Veil conflict with Embeddium — see ``docs/TECHNICAL_REFERENCE.md``.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 import time
 import urllib.parse
 import urllib.request
 from pathlib import Path
 
-# Do not place these ``projectID`` JARs under ``run-server/mods`` (client-first HUD / UI).
-MANIFEST_DEV_SERVER_SKIP_PROJECT_IDS = frozenset({357540})
+# Do not place these ``projectID`` JARs under ``run-server/mods`` (client-only HUD / rendering).
+# Embeddium is not manifest-pinned; omit it from ``run-server/mods`` manually when testing Sable/Veil.
+MANIFEST_DEV_SERVER_SKIP_PROJECT_IDS = frozenset({
+    357540,  # Inventory HUD+
+    1010827,  # Uranus (Embeddium / Sodium companion)
+    1072905,  # Jupiter (Embeddium / Sodium companion)
+    1200907,  # NeOculus (requires Embeddium; shaders are client-only)
+})
 
 
 def api_file(project_id: int, file_id: int) -> dict:
@@ -73,6 +87,11 @@ def main() -> int:
 
     server_mods = root / "run-server" / "mods"
     client_mods = root / "run-client" / "mods"
+    client_resourcepacks = root / "run-client" / "resourcepacks"
+    overrides_resourcepacks = root / "modpack" / "curseforge" / "overrides" / "resourcepacks"
+
+    jar_count = 0
+    zip_count = 0
 
     for row in rows:
         pid = int(row["projectID"])
@@ -80,10 +99,20 @@ def main() -> int:
         time.sleep(max(0.0, args.sleep))
         meta = api_file(pid, fid)
         name = meta.get("fileName") or ""
-        if not name.endswith(".jar"):
-            print(f"skip (not jar)\t{pid}\t{fid}\t{name}", file=sys.stderr)
+        if name.endswith(".zip"):
+            print(f"resourcepack\t{pid}\t{fid}\t{name}")
+            zip_count += 1
+            if args.dry_run:
+                continue
+            client_resourcepacks.mkdir(parents=True, exist_ok=True)
+            blob = download_bytes(fid, name)
+            (client_resourcepacks / name).write_bytes(blob)
             continue
-        print(f"{pid}\t{fid}\t{name}")
+        if not name.endswith(".jar"):
+            print(f"skip\t{pid}\t{fid}\t{name}", file=sys.stderr)
+            continue
+        print(f"jar\t{pid}\t{fid}\t{name}")
+        jar_count += 1
         if args.dry_run:
             continue
         client_mods.mkdir(parents=True, exist_ok=True)
@@ -97,11 +126,27 @@ def main() -> int:
             server_mods.mkdir(parents=True, exist_ok=True)
             (server_mods / name).write_bytes(blob)
 
+    override_zip_count = 0
+    if overrides_resourcepacks.is_dir():
+        for src in sorted(overrides_resourcepacks.glob("*.zip")):
+            override_zip_count += 1
+            print(f"override resourcepack\t\t\t{src.name}")
+            if args.dry_run:
+                continue
+            client_resourcepacks.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, client_resourcepacks / src.name)
+
     if args.dry_run:
-        print(f"Dry-run: would sync {len(rows)} manifest row(s).", file=sys.stderr)
+        print(
+            f"Dry-run: would sync {jar_count} JAR(s), {zip_count} manifest resource pack(s), "
+            f"{override_zip_count} override resource pack(s).",
+            file=sys.stderr,
+        )
     else:
         print(
-            f"Synced {len(rows)} JAR(s) to {client_mods} (and to {server_mods} except projectIDs {sorted(MANIFEST_DEV_SERVER_SKIP_PROJECT_IDS)}).",
+            f"Synced {jar_count} JAR(s) to {client_mods} "
+            f"(and to {server_mods} except projectIDs {sorted(MANIFEST_DEV_SERVER_SKIP_PROJECT_IDS)}). "
+            f"Synced {zip_count} manifest + {override_zip_count} override resource pack(s) to {client_resourcepacks}.",
             file=sys.stderr,
         )
     return 0

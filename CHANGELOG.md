@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **README:** shortened for players and light modding; long technical sections moved to **`docs/TECHNICAL_REFERENCE.md`**. **`.gitignore`:** add common secret/OS noise patterns. **`MOD_LIST.md`:** Balm row matches CurseForge pin **`7420963`** (**`21.0.56`**) and warns against duplicate **`balm-*.jar`** files. **`sync_manifest_mods_to_dev_runs.py`:** docstring notes sync does not prune stale JARs.
 
+## Unreleased
+
+## [1.4.2] — 2026-05-25
+
+### Removed
+
+- **Create: Levite Fields** and its test stack (**Create Aeronautics**, **Sable**, **Biolith**) from **`modpack/curseforge/manifest.json`** — official pack no longer ships them. **Project Island** still supports **`levmod`** when players add it manually (**`islandLeviteFields*`** in **`projectisland-common.toml`**).
+
+### Changed
+
+- **Modpack version** **`1.4.2`**; pack override drops Levite-only **`projectisland-common.toml`** keys.
+
+## [1.4.1] — 2026-05-25
+
+### Added
+
+- **Create: Levite Fields (`levmod`) — mod integration (optional):** when installed, configurable **`islandLeviteFieldsPlacement`** (**`void_only`** / **`island_only`** / **`both`**), void belt width, **`islandLeviteFieldsVoidBiomeChance`** (default **0.35**). Was briefly pinned on the modpack manifest for testing; removed in **1.4.2**.
+
+### Fixed
+
+- **Void rescue in creative:** per-tick floor-band rescue no longer teleports **creative** / **spectator** players (avoids rubber-banding while flying in creative over the void floor).
+
+### Removed
+
+- **Bluedude Dragons (`bdd`) + BlueLib:** removed from modpack manifest, optional dependency, and all Project Island nest/variant compat (alpha mod; unstable split-client rendering). **Wings Of Fire** unchanged for quest mounts. Revisit when BDD stabilizes.
+
+### Changed
+
+- **Mod + CurseForge pack version** **`1.4.1`**: **`gradle.properties`** **`mod_version`**, **`modpack/curseforge/manifest.json`** **`version`**, artifacts **`projectisland-1.4.1.jar`** / **`projectisland-modpack-1.4.1-*-curseforge*.zip`**.
+
+## [1.4.0] — 2026-05-16
+
+### Added
+
+- **Bluedude Dragons compat (`bdd`):** when the mod is loaded, controlled **dragon nest** jigsaw placement on floating islands (**`floatingIslandsControlledBluedudeDragonNestPlacement`**, **`controlledDragonNestPlaceTryChance`**, **`islandRegionDragonNestStructureWeightAllow/Deny`**). Scattered nest starts are stripped; nests skip void land-contact removal and aggressive above-surface trim. Entity namespace **`bdd`** added to default **`floatingIslandsSpawnTuningBypassEntityNamespaces`**.
+- **CurseForge client modpack — default resource packs:** **[Dramatic Skys](https://www.curseforge.com/minecraft/texture-packs/dramatic-skys)** (**`231821`** / **`7886728`**) and **[Mandala's GUI - Dark mode](https://www.curseforge.com/minecraft/texture-packs/mandalas-gui-dark-mode)** (**`664719`** / **`7564643`**) on **`manifest.json`**; **`resourcepackoverrides.json`** enables them with **`Project_Island_menu_assets.zip`** (client zip only).
+
+### Changed
+
+- **Mod + CurseForge pack version** **`1.4.0`**: **`gradle.properties`** **`mod_version`**, template **`modpack/curseforge/manifest.json`** **`version`**, artifacts **`projectisland-1.4.0.jar`** / **`projectisland-modpack-1.4.0-*-curseforge*.zip`**. Bump **Mods** manifest **`fileID`** when **`projectisland-1.4.0.jar`** is published (client pin may still reference **`1.3.0`** until then).
+
 ## [1.3.0] — 2026-05-12
 
 ### Added

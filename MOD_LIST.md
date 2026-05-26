@@ -72,6 +72,16 @@ Sorted by filename. **Not** listed here: anything absent from `run-server/mods/`
 | `xaeroworldmap-neoforge-1.21.1-1.40.16.jar` | **Xaero’s World Map** — CurseForge modpack pins **`8042208`** (**`317780`**). | **Client + server** |
 | `yet_another_config_lib_v3-3.8.2+1.21.1-neoforge.jar` | **YetAnotherConfigLib (YACL)** — config UI library. | **Client + server** |
 
+## Client manifest resource packs (`.zip`, not in `run-server/mods`)
+
+CurseForge installs these from **`modpack/curseforge/manifest.json`** into the instance **`resourcepacks/`** folder. **`./gradlew syncManifestModJarsToDevRuns`** downloads manifest **`.zip`** pins and copies **`modpack/curseforge/overrides/resourcepacks/*.zip`** into **`run-client/resourcepacks/`**. **Resource Pack Overrides** default list: **`modpack/curseforge/overrides/config/resourcepackoverrides.json`** (dev run loads **`run-client/config/`** from your instance — copy or symlink that JSON if needed).
+
+| Zip (exact `fileName` on CurseForge) | Role | Side |
+|--------------------------------------|------|------|
+| `Dramatic Skys Demo 1.5.3.36.3.zip` | **[Dramatic Skys](https://www.curseforge.com/minecraft/texture-packs/dramatic-skys)** — sky / cloud visuals (**ARR**; author notes a skybox-capable mod may be needed for full effect on some loaders). Pin **`7886728`** (**`231821`**). | **Client** |
+| `MandalasGUI+Dakmode_1.21.8_v2.5.zip` | **[Mandala's GUI - Dark mode](https://www.curseforge.com/minecraft/texture-packs/mandalas-gui-dark-mode)** — dark UI. Pin **`7564643`** (**`664719`**). | **Client** |
+| `Project_Island_menu_assets.zip` | Pack-bundled title / menu assets under **`modpack/curseforge/overrides/resourcepacks/`** (not a separate CurseForge project). | **Client** |
+
 ### RPG stack bumps
 
 Update **Skill Tree** first, then re-resolve **required** Modrinth versions for sibling mods (**Spell Engine**, **Pufferfish's Skills**, class mods) so **1.21.1** + NeoForge stay aligned.

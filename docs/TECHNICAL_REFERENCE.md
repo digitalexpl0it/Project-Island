@@ -144,11 +144,11 @@ After changing weights, **restart** the server or client session so worldgen rea
 | `islandBiomeWeightDarkForest` | `minecraft:dark_forest` (woodland mansions need this biome on land) |
 | `islandBiomeWeightSnowyTaiga` | `minecraft:snowy_taiga` (with snowy plains, helps igloos) |
 
-| `islandBiomeModIntegrationEnabled` | **boolean** — use BOP island biome pool when **`biomesoplenty`** is loaded |
-| `islandBiomeModDiscoverAllRegistered` | **boolean** — **true** = every **`biomesoplenty:*`** biome in the registry (default); **false** = only **`islandBiomeModWeightedEntries`** lines |
-| `islandBiomeModDiscoveredDefaultWeight` | **1–1000** — weight for discovered BOP biomes not listed in overrides (default **5**) |
+| `islandBiomeModIntegrationEnabled` | **boolean** — use mod island biome pool when **`biomesoplenty`** and/or **`levmod`** (Create: Levite Fields) is loaded |
+| `islandBiomeModDiscoverAllRegistered` | **boolean** — **true** = every discoverable **`biomesoplenty:*`** and overworld **`levmod:*`** biome (default); **false** = only **`islandBiomeModWeightedEntries`** lines |
+| `islandBiomeModDiscoveredDefaultWeight` | **1–1000** — weight for discovered mod biomes not listed in overrides (default **5**) |
 | `islandBiomeModPreferredRollFraction` | **0.0–1.0** — mod-only branch probability (default **0.7**); **0** = single combined pool with vanilla |
-| `islandBiomeModWeightedEntries` | **list** — optional **`biomesoplenty:path=weight`** overrides when discover-all is on; required curated list when discover-all is **false** |
+| `islandBiomeModWeightedEntries` | **list** — optional **`namespace:path=weight`** overrides when discover-all is on (default includes **`levmod:levitite_fields=28`**); required curated list when discover-all is **false** |
 
 #### Biomes O' Plenty (optional)
 
@@ -164,7 +164,27 @@ When the NeoForge mod **`biomesoplenty`** is present **and** **`islandBiomeModIn
 
 **Third-party mob mods (e.g. [Mowzie's Mobs](https://modrinth.com/mod/mowzies-mobs)) on BOP islands:** floating islands can use **`biomesoplenty:*`** surface biomes when BOP is installed. Mods that register **natural spawns** only for **vanilla** biome holders or tags may still spawn on **vanilla-tagged** islands but appear rare or absent on **pure BOP** rolls — that comes from **each mod’s spawn/biome rules**, not from Project Island stripping mobs. **`floatingIslandsSpawnTuningBypassEntityNamespaces`** (default includes **`mowziesmobs`**) only disables PI’s **spawn keep-chance thinning** for those namespaces; it does not add biomes to another mod’s spawn list. Use the content mod’s **config/datapacks** (or a pack datapack extending biome tags) if you want Mowzie-style mobs on specific BOP biomes.
 
-**How to tell if it is working:** on server start, check **`Floating-island biome merge (Biomes O' Plenty)`** — discover-all mode logs counts of registered vs resolvable ids; curated mode logs accepted vs missing override lines. In-game **F3** on **new** island terrain should show many different **`biomesoplenty:…`** ids over distance. **`/locate biome`** can still fail within its search radius on sparse rolls.
+**How to tell if it is working:** on server start, check **`Floating-island biome merge`** log lines per namespace — discover-all mode logs counts of registered vs resolvable ids; curated mode logs accepted vs missing override lines. In-game **F3** on **new** island terrain should show many different **`biomesoplenty:…`** / **`levmod:…`** ids over distance. **`/locate biome`** can still fail within its search radius on sparse rolls.
+
+#### Create: Levite Fields (optional — not on official modpack)
+
+CurseForge **[Create: Levite Fields](https://www.curseforge.com/minecraft/mc-mods/create-levite-fields)** uses mod id **`levmod`**. The **Project Island** mod integrates when **`levmod`** is present; the **official modpack manifest does not pin** Levite (or **Create Aeronautics** / **Sable** / **Biolith**). Add those mods manually if you want Levite in a world.
+
+Overworld biome **`levmod:levitite_fields`** is rolled on floating islands when the mod is installed and **`islandBiomeModIntegrationEnabled`** is **true**. **`levmod:end_*`** biomes are never auto-discovered for overworld islands. Default **`islandBiomeModWeightedEntries`** in the mod JAR can boost **`levmod:levitite_fields`** on island rolls when placement allows.
+
+**`levmod` hard deps (upstream):** **[Create](https://www.curseforge.com/minecraft/mc-mods/create)**, **[Create Aeronautics](https://www.curseforge.com/minecraft/mc-mods/create-aeronautics)**, **[Sable](https://www.curseforge.com/minecraft/mc-mods/sable)**, **[Biolith](https://www.curseforge.com/minecraft/mc-mods/biolith)** — install together if you add Levite outside the pack.
+
+**Placement (`islandLeviteFieldsPlacement`, default **`void_only`**):** when **`levmod`** is loaded:
+
+- **`void_only`** — **`levmod:levitite_fields`** only in **open void** near islands (horiz **1.0**–**`islandLeviteFieldsVoidMaxHorizBeyondEdge`**, default **2.0**). Island surfaces use normal **`islandBiomeWeight*`** / BOP.
+- **`island_only`** — Levite rolls on **island regions** via **`islandBiomeModWeightedEntries`** / BOP discover-all (default line **`levmod:levitite_fields=35`**). Void stays the normal placeholder biome.
+- **`both`** — void belt **and** island rolls can include Levite.
+
+**Void density:** **`islandLeviteFieldsVoidBiomeChance`** (default **0.35**) — only this fraction of horiz-eligible void columns roll Levite; the rest use the normal void biome (**`minecraft:plains`** placeholder). **1.0** = every eligible column (dense sky); **0** = no Levite in void. Cluster count inside Levite columns is still **`levmod`**’s own features.
+
+Levite **clusters** (mod features, ~**Y 86–136**) generate where the biome column is Levite — fly **between** islands for **void_only**/**both**, or check **F3 on island tops** for **island_only**/**both**. **New chunks only.** Aliases: **`void`**, **`island`**, **`all`**.
+
+**Dev / optional add-on testing:** **`levmod`** is an optional NeoForge dependency (**`versionRange [0,)`** for beta jars). To test Levite locally, add **`levmod`** and its upstream stack to **`run-client/mods`** / **`run-server/mods`** manually (not via **`manifest.json`**). **Sable** pulls **Veil**, which conflicts with **Embeddium** — remove Embeddium/NeOculus/Jupiter/Uranus from dev **`mods/`** while testing Aeronautics, or use the normal PI client stack without Levite.
 
 #### It Takes a Pillage (optional)
 

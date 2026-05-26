@@ -8,11 +8,29 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). **`
 
 ---
 
+## [1.4.2] — 2026-05-25
+
+### Removed
+
+- **Levite Fields**, **Create Aeronautics**, **Sable**, and **Biolith** removed from the client manifest (no longer in **`run-server/mods`** after sync).
+
+## [1.4.1] — 2026-05-25
+
+### Changed
+
+- **Pack version** **`1.4.1`**; server zip ships **`overrides/mods/projectisland-1.4.1.jar`** from **`./gradlew jar`**. Bump client **Mods** **`fileID`** when **`projectisland-1.4.1.jar`** is published.
+
+## [1.4.0] — 2026-05-16
+
+### Changed
+
+- **Pack version** **`1.4.0`**; server zip ships **`overrides/mods/projectisland-1.4.0.jar`** from **`./gradlew jar`**. Client manifest still downloads **Project Island** via **`fileID` `8090568`** until maintainers publish **`projectisland-1.4.0.jar`** and bump the pin. **Resource packs** and **`resourcepackoverrides.json`** remain client-only (not in this zip). Upload blurb: **`modpack/curseforge/CURSEFORGE_UPDATE.md`**.
+
 ## [1.3.0] — 2026-05-12
 
 ### Changed
 
-- **Pack version** **`1.3.0`**; server zip still ships **`overrides/mods/projectisland-1.3.0.jar`** from **`./gradlew jar`** plus vendored third-party JARs under **`overrides/mods/`**. Client **`manifest.json`** pins the same mod release as **`fileID` `8090568`** on CurseForge **Mods**. **Realm RPG: Treasure Balloons** manifest pin **`8073660`** (**`realmrpg_balloons-1.0.0-neoforge-1.21.1.jar`**). Upload blurb template: **`modpack/curseforge/CURSEFORGE_UPDATE.md`**.
+- **Pack version** **`1.3.0`**; server zip still ships **`overrides/mods/projectisland-1.3.0.jar`** from **`./gradlew jar`** plus vendored third-party JARs under **`overrides/mods/`**. Client **`manifest.json`** pins the same mod release as **`fileID` `8090568`** on CurseForge **Mods**. **Realm RPG: Treasure Balloons** manifest pin **`8073660`** (**`realmrpg_balloons-1.0.0-neoforge-1.21.1.jar`**).
 - **Xaero’s Minimap / World Map:** same **`overrides/config/xaerominimap-common.txt`** and **`xaeroworldmap-common.txt`** defaults as the client pack (merge **`overrides/`** into the server instance so **`config/`** picks them up on first run).
 
 ## [0.1.2] — 2026-05-11

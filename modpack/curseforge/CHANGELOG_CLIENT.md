@@ -8,11 +8,44 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The
 
 ---
 
+## Unreleased
+
+## [1.4.2] — 2026-05-25
+
+### Removed
+
+- **[Create: Levite Fields](https://www.curseforge.com/minecraft/mc-mods/create-levite-fields)** and test-only deps **Create Aeronautics**, **Sable**, **Biolith** from the modpack manifest (testing complete). **Project Island** worldgen still supports Levite if you add **`levmod`** yourself.
+
+## [1.4.1] — 2026-05-25
+
+### Added
+
+- **Project Island `1.4.1`:** optional Levite void/island placement when **`levmod`** is installed (not required on the pack).
+
+### Removed
+
+- **[Bluedude Dragons](https://www.curseforge.com/minecraft/mc-mods/bluedude-dragons)** and **[BlueLib](https://www.curseforge.com/minecraft/mc-mods/bluelib)** — shelved until the mods are stable for split client/server dev. Island dragon nests from Project Island are no longer placed.
+
+### Changed
+
+- **Pack version** **`1.4.1`**; upload **`projectisland-1.4.1.jar`** to the **Mods** project and bump the manifest **`fileID`** when ready.
+
+## [1.4.0] — 2026-05-16
+
+### Added
+
+- **[BlueLib](https://www.curseforge.com/minecraft/mc-mods/bluelib)** + **[Bluedude Dragons](https://www.curseforge.com/minecraft/mc-mods/bluedude-dragons)** on the manifest (**`1083303`** / **`7417618`**, **`626626`** / **`7419005`**). **Project Island** places **at most one** dragon nest per eligible floating island (tunable in **`projectisland-common.toml`**); explore new chunks or use **`/locate structure bdd:deadly_nadder_nest/deadly_nadder_nest_plains`** (structure ids are **`bdd:<family>/<family>_<biome>`**).
+- **Resource packs (client manifest, default-on):** **[Dramatic Skys](https://www.curseforge.com/minecraft/texture-packs/dramatic-skys)** (**`projectID` `231821`**, **`fileID` `7886728`**) and **[Mandala's GUI - Dark mode](https://www.curseforge.com/minecraft/texture-packs/mandalas-gui-dark-mode)** (**`664719`**, **`7564643`**), plus existing title **`Project_Island_menu_assets.zip`**, enabled via **Resource Pack Overrides** on first install. Not shipped on the dedicated-server additional zip.
+
+### Changed
+
+- **Pack version** **`1.4.0`** (from **`gradle.properties`** **`mod_version`**); built **`manifest.json`** **`version`** matches. **Project Island** mod JAR on the client is still manifest pin **`8090568`** (**`projectisland-1.3.0.jar`**) until you upload **`projectisland-1.4.0.jar`** to the **Mods** project and bump **`fileID`** in **`manifest.json`**. Maintainer copy-paste: **`modpack/curseforge/CURSEFORGE_UPDATE.md`**.
+
 ## [1.3.0] — 2026-05-12
 
 ### Changed
 
-- **Pack version** **`1.3.0`** (from **`gradle.properties`** **`mod_version`**); built **`manifest.json`** **`version`** matches. **CurseForge client manifest:** **Project Island** (**`projectID` `1534225`**) pins **`fileID` `8090568`** (**`projectisland-1.3.0.jar`**). **Realm RPG: Treasure Balloons** pin bumped to **`fileID` `8073660`** (**`realmrpg_balloons-1.0.0-neoforge-1.21.1.jar`**). Maintainer copy-paste summary for uploads: **`modpack/curseforge/CURSEFORGE_UPDATE.md`**.
+- **Pack version** **`1.3.0`** (from **`gradle.properties`** **`mod_version`**); built **`manifest.json`** **`version`** matches. **CurseForge client manifest:** **Project Island** (**`projectID` `1534225`**) pins **`fileID` `8090568`** (**`projectisland-1.3.0.jar`**). **Realm RPG: Treasure Balloons** pin bumped to **`fileID` `8073660`** (**`realmrpg_balloons-1.0.0-neoforge-1.21.1.jar`**).
 - **Inventory HUD+:** **`overrides/config/inventoryhud-client.toml`** now ships full pack defaults (armor / potion HUD layout, positions, scales — inventory hotbar strip still **`byDefault = false`** until players toggle it on).
 - **Xaero’s Minimap / World Map:** **`overrides/config/xaerominimap-common.txt`** and **`overrides/config/xaeroworldmap-common.txt`** — server-side profile defaults (**`Default`** minimap profile, **`ProjectIsland`** world map profile). Fresh installs merge from the pack; existing **`config/`** files are not overwritten.
 

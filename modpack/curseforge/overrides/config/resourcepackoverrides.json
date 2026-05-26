@@ -1,9 +1,19 @@
 {
   "schema_version": 2,
   "failed_reloads_per_session": 5,
-  "default_packs": ["file/Project_Island_menu_assets.zip"],
+  "default_packs": [
+    "file/Dramatic Skys Demo 1.5.3.36.3.zip",
+    "file/Project_Island_menu_assets.zip",
+    "file/MandalasGUI+Dakmode_1.21.8_v2.5.zip"
+  ],
   "pack_overrides": {
+    "file/Dramatic Skys Demo 1.5.3.36.3.zip": {
+      "force_compatible": true
+    },
     "file/Project_Island_menu_assets.zip": {
+      "force_compatible": true
+    },
+    "file/MandalasGUI+Dakmode_1.21.8_v2.5.zip": {
       "force_compatible": true
     }
   }

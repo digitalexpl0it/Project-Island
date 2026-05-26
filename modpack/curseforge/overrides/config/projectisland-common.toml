@@ -1,0 +1,4 @@
+# Project Island — pack defaults (merged on install; existing servers keep saved config)
+floatingIslandsExtraSurfaceTreesPerChunk = 4
+floatingIslandsExtraSurfaceTreesSnowPerChunk = 6
+floatingIslandsSpawnTuningBypassEntityNamespaces = ["mowziesmobs", "cnb"]

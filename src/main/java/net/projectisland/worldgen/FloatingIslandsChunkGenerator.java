@@ -78,6 +78,9 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
     private static final ResourceLocation ISLAND_REGION_BIOME_RANDOM =
             ResourceLocation.fromNamespaceAndPath(ProjectIsland.MOD_ID, "island_region_biome");
 
+    private static final ResourceLocation LEVITE_VOID_COLUMN_BIOME_RANDOM =
+            ResourceLocation.fromNamespaceAndPath(ProjectIsland.MOD_ID, "levite_void_column_biome");
+
     /** F3-friendly biome for void columns (no solid island); not rolled per region. */
     private static final ResourceKey<Biome> VOID_COLUMN_BIOME = Biomes.PLAINS;
 
@@ -93,9 +96,9 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
 
     private boolean biomeRegistryLookupResolved;
 
-    /** Cached {@code biomesoplenty:*} keys from {@link BiomeModIntegration#listRegisteredBiomeKeys} when discovery is on. */
+    /** Cached discover-all mod biome keys from {@link BiomeModIntegration#listDiscoverableBiomeKeys} when discovery is on. */
     @Nullable
-    private List<ResourceKey<Biome>> cachedRegisteredBopBiomeKeys;
+    private List<ResourceKey<Biome>> cachedRegisteredModBiomeKeys;
 
     /** Delegate for vanilla carving context only (masked by {@link FloatingIslandMaskedCarvers}). */
     private NoiseBasedChunkGenerator islandCarvingNoiseDelegate;
@@ -175,40 +178,82 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
     }
 
     /**
-     * All BOP biome ids listed in the dimension biome lookup when {@link Config#ISLAND_BIOME_MOD_DISCOVER_ALL_REGISTERED}
+     * Discoverable mod biome ids in the dimension biome lookup when {@link Config#ISLAND_BIOME_MOD_DISCOVER_ALL_REGISTERED}
      * is {@code true}; otherwise empty (picker uses explicit config list only).
      */
-    private List<ResourceKey<Biome>> registeredBopBiomeKeysForPicker() {
-        if (!BiomeModIntegration.biomesOPlentyLoaded() || !Config.ISLAND_BIOME_MOD_DISCOVER_ALL_REGISTERED.getAsBoolean()) {
+    private List<ResourceKey<Biome>> registeredModBiomeKeysForPicker() {
+        if (!BiomeModIntegration.anyDiscoverableBiomeModLoaded()
+                || !Config.ISLAND_BIOME_MOD_DISCOVER_ALL_REGISTERED.getAsBoolean()) {
             return List.of();
         }
-        if (cachedRegisteredBopBiomeKeys == null) {
-            cachedRegisteredBopBiomeKeys =
-                    biomeRegistryLookup().map(BiomeModIntegration::listRegisteredBiomeKeys).orElse(List.of());
+        if (cachedRegisteredModBiomeKeys == null) {
+            cachedRegisteredModBiomeKeys =
+                    biomeRegistryLookup().map(BiomeModIntegration::listDiscoverableBiomeKeys).orElse(List.of());
         }
-        return cachedRegisteredBopBiomeKeys;
+        return cachedRegisteredModBiomeKeys;
     }
 
     /**
-     * One biome per {@link FloatingIslandKey}: deterministic from {@link RandomState} and region coords.
-     * Void columns use {@link #VOID_COLUMN_BIOME} so F3 does not show river/ocean for open sky.
+     * Island stone columns roll per-region surface biomes; open void near islands can use Levite Fields; deep void uses
+     * {@link #VOID_COLUMN_BIOME}.
      */
     private Holder<Biome> biomeForSurfaceColumn(
             RandomState randomState, int blockX, int blockZ, int minY, int maxY, int columnTopY) {
-        if (columnTopY <= minY) {
-            return holderForBiome(VOID_COLUMN_BIOME);
+        if (columnTopY > minY) {
+            Optional<FloatingIslandKey> owner = FloatingIslandLayout.islandOwningSurface(blockX, blockZ, minY, maxY);
+            if (owner.isPresent()) {
+                FloatingIslandKey key = owner.get();
+                RandomSource rnd = randomState
+                        .getOrCreateRandomFactory(ISLAND_REGION_BIOME_RANDOM)
+                        .at(key.regionX(), key.regionZ(), 0);
+                ResourceKey<Biome> chosen = IslandRegionBiomePicker.roll(
+                        rnd, this::isModIslandBiomeAllowed, this.registeredModBiomeKeysForPicker());
+                return holderForBiome(chosen);
+            }
         }
-        Optional<FloatingIslandKey> owner = FloatingIslandLayout.islandOwningSurface(blockX, blockZ, minY, maxY);
-        if (owner.isEmpty()) {
-            return holderForBiome(VOID_COLUMN_BIOME);
+
+        if (columnEligibleForLeviteVoidBiome(blockX, blockZ, minY, maxY, randomState)) {
+            return holderForBiome(BiomeModIntegration.LEVITITE_FIELDS_BIOME);
         }
-        FloatingIslandKey key = owner.get();
-        RandomSource rnd = randomState
-                .getOrCreateRandomFactory(ISLAND_REGION_BIOME_RANDOM)
-                .at(key.regionX(), key.regionZ(), 0);
-        ResourceKey<Biome> chosen =
-                IslandRegionBiomePicker.roll(rnd, this::isModIslandBiomeAllowed, this.registeredBopBiomeKeysForPicker());
-        return holderForBiome(chosen);
+
+        return holderForBiome(VOID_COLUMN_BIOME);
+    }
+
+    /**
+     * Open void between nearby island masses (not on island stone). Uses horizontal distance to the nearest
+     * procedural island ellipsoid, then {@link Config#ISLAND_LEVITE_FIELDS_VOID_BIOME_CHANCE} per column.
+     */
+    private boolean columnEligibleForLeviteVoidBiome(
+            int blockX, int blockZ, int minY, int maxY, RandomState randomState) {
+        if (!Config.leviteFieldsInVoidBetweenIslands() || !BiomeModIntegration.leviteFieldsLoaded()) {
+            return false;
+        }
+        if (!resolveBiomeHolder(BiomeModIntegration.LEVITITE_FIELDS_BIOME).isPresent()) {
+            return false;
+        }
+        if (FloatingIslandLayout.columnTopY(blockX, blockZ, minY, maxY) > minY) {
+            return false;
+        }
+        Optional<Double> horiz = FloatingIslandLayout.closestProceduralIslandHoriz(blockX, blockZ);
+        if (horiz.isEmpty()) {
+            return false;
+        }
+        double h = horiz.get();
+        if (h < 1.0d) {
+            return false;
+        }
+        if (h > Config.ISLAND_LEVITE_FIELDS_VOID_MAX_HORIZ_BEYOND_EDGE.get()) {
+            return false;
+        }
+        double chance = Config.ISLAND_LEVITE_FIELDS_VOID_BIOME_CHANCE.get();
+        if (chance >= 1.0d) {
+            return true;
+        }
+        if (chance <= 0.0d) {
+            return false;
+        }
+        RandomSource rnd = randomState.getOrCreateRandomFactory(LEVITE_VOID_COLUMN_BIOME_RANDOM).at(blockX, blockZ, 0);
+        return rnd.nextDouble() < chance;
     }
 
     /** Surface biome at ({@code wx},{@code wz}) used for village variant selection (matches column top roll). */
@@ -776,20 +821,16 @@ public final class FloatingIslandsChunkGenerator extends ChunkGenerator {
         }
 
         for (int i = 0; i < nSnow && !snowCols.isEmpty(); i++) {
-            BlockPos col = snowCols.get(rnd.nextInt(snowCols.size()));
-            tryPlaceExtraTree(level, this, chunk, configured, rnd, col);
+            tryPlaceExtraTree(level, this, chunk, configured, rnd, snowCols.get(rnd.nextInt(snowCols.size())));
         }
         for (int i = 0; i < nGrassSandMycelium && !grassCols.isEmpty(); i++) {
-            BlockPos col = grassCols.get(rnd.nextInt(grassCols.size()));
-            tryPlaceExtraTree(level, this, chunk, configured, rnd, col);
+            tryPlaceExtraTree(level, this, chunk, configured, rnd, grassCols.get(rnd.nextInt(grassCols.size())));
         }
         for (int i = 0; i < nGrassSandMycelium && !sandCols.isEmpty(); i++) {
-            BlockPos col = sandCols.get(rnd.nextInt(sandCols.size()));
-            tryPlaceExtraTree(level, this, chunk, configured, rnd, col);
+            tryPlaceExtraTree(level, this, chunk, configured, rnd, sandCols.get(rnd.nextInt(sandCols.size())));
         }
         for (int i = 0; i < nGrassSandMycelium && !myceliumCols.isEmpty(); i++) {
-            BlockPos col = myceliumCols.get(rnd.nextInt(myceliumCols.size()));
-            tryPlaceExtraTree(level, this, chunk, configured, rnd, col);
+            tryPlaceExtraTree(level, this, chunk, configured, rnd, myceliumCols.get(rnd.nextInt(myceliumCols.size())));
         }
     }
 

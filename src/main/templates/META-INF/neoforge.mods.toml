@@ -126,3 +126,11 @@ type="optional"
 versionRange="[1.0,)"
 ordering="NONE"
 side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="levmod"
+type="optional"
+versionRange="[0,)"
+ordering="NONE"
+side="BOTH"
+

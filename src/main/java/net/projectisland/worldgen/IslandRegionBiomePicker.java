@@ -13,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
+import net.neoforged.fml.ModList;
 import net.projectisland.Config;
 import net.projectisland.compat.BiomeModIntegration;
 
@@ -31,13 +32,13 @@ public final class IslandRegionBiomePicker {
      *
      * @param biomePresent mod biome ids only: {@code true} when the id exists in this dimension’s biome registry (not
      *            gated on {@link net.minecraft.world.level.biome.BiomeSource#possibleBiomes()} alone — TerraBlender can omit mod entries there)
-     * @param registeredBopBiomeKeys every {@code biomesoplenty:*} id from {@link BiomeModIntegration#listRegisteredBiomeKeys};
+     * @param registeredModBiomeKeys discover-all ids from {@link BiomeModIntegration#listDiscoverableBiomeKeys};
      *            may be empty when discovery is off or registry lookup failed
      */
     public static ResourceKey<Biome> roll(
             RandomSource random,
             Predicate<ResourceKey<Biome>> biomePresent,
-            List<ResourceKey<Biome>> registeredBopBiomeKeys) {
+            List<ResourceKey<Biome>> registeredModBiomeKeys) {
         List<Weighted> vanillaPool = new ArrayList<>();
         add(vanillaPool, Biomes.RIVER, Config.ISLAND_BIOME_WEIGHT_RIVER.getAsInt());
         add(vanillaPool, Biomes.PLAINS, Config.ISLAND_BIOME_WEIGHT_PLAINS.getAsInt());
@@ -54,15 +55,16 @@ public final class IslandRegionBiomePicker {
         add(vanillaPool, Biomes.SNOWY_TAIGA, Config.ISLAND_BIOME_WEIGHT_SNOWY_TAIGA.getAsInt());
 
         List<Weighted> modPool = new ArrayList<>();
-        if (BiomeModIntegration.biomesOPlentyLoaded() && Config.ISLAND_BIOME_MOD_INTEGRATION_ENABLED.getAsBoolean()) {
-            fillModBiomePool(modPool, biomePresent, registeredBopBiomeKeys);
+        if (BiomeModIntegration.anyDiscoverableBiomeModLoaded()
+                && Config.ISLAND_BIOME_MOD_INTEGRATION_ENABLED.getAsBoolean()) {
+            fillModBiomePool(modPool, biomePresent, registeredModBiomeKeys);
         }
 
-        boolean bopActive =
-                BiomeModIntegration.biomesOPlentyLoaded() && Config.ISLAND_BIOME_MOD_INTEGRATION_ENABLED.getAsBoolean();
+        boolean modBranchActive = BiomeModIntegration.anyDiscoverableBiomeModLoaded()
+                && Config.ISLAND_BIOME_MOD_INTEGRATION_ENABLED.getAsBoolean();
         double preferred = Config.ISLAND_BIOME_MOD_PREFERRED_ROLL_FRACTION.get();
 
-        if (bopActive && !modPool.isEmpty() && preferred > 0.0d) {
+        if (modBranchActive && !modPool.isEmpty() && preferred > 0.0d) {
             if (preferred >= 1.0d || random.nextDouble() < preferred) {
                 return rollWeighted(random, modPool);
             }
@@ -75,36 +77,74 @@ public final class IslandRegionBiomePicker {
     }
 
     private static void fillModBiomePool(
-            List<Weighted> pool, Predicate<ResourceKey<Biome>> biomePresent, List<ResourceKey<Biome>> registeredBopBiomeKeys) {
+            List<Weighted> pool, Predicate<ResourceKey<Biome>> biomePresent, List<ResourceKey<Biome>> registeredModBiomeKeys) {
         Map<ResourceKey<Biome>, Integer> overrides = parseModWeightOverrides();
         boolean discover = Config.ISLAND_BIOME_MOD_DISCOVER_ALL_REGISTERED.getAsBoolean();
 
-        if (discover && !registeredBopBiomeKeys.isEmpty()) {
+        if (discover && !registeredModBiomeKeys.isEmpty()) {
             int defaultW = Config.ISLAND_BIOME_MOD_DISCOVERED_DEFAULT_WEIGHT.getAsInt();
             Map<ResourceKey<Biome>, Integer> weights = new LinkedHashMap<>();
-            for (ResourceKey<Biome> key : registeredBopBiomeKeys) {
+            for (ResourceKey<Biome> key : registeredModBiomeKeys) {
                 if (!biomePresent.test(key)) {
                     continue;
                 }
                 weights.put(key, overrides.getOrDefault(key, defaultW));
             }
-            String ns = BiomeModIntegration.BIOMES_O_PLENTY_MOD_ID;
-            for (Map.Entry<ResourceKey<Biome>, Integer> e : overrides.entrySet()) {
-                ResourceKey<Biome> key = e.getKey();
-                int w = e.getValue();
-                if (w <= 0 || !ns.equals(key.location().getNamespace()) || !biomePresent.test(key)) {
-                    continue;
-                }
-                weights.put(key, w);
-            }
+            mergeExplicitOverrideWeights(weights, overrides, biomePresent);
             for (Map.Entry<ResourceKey<Biome>, Integer> e : weights.entrySet()) {
-                if (e.getValue() > 0) {
+                if (e.getValue() > 0 && !excludeFromIslandSurfacePool(e.getKey())) {
                     pool.add(new Weighted(e.getKey(), e.getValue()));
                 }
             }
         } else {
             addModWeightedEntriesExplicitListOnly(pool, biomePresent);
         }
+        applyExplicitOverrideWeights(pool, biomePresent);
+    }
+
+    /**
+     * Config lines always win over discover-all defaults when the mod is loaded and the biome resolves.
+     */
+    private static void mergeExplicitOverrideWeights(
+            Map<ResourceKey<Biome>, Integer> weights,
+            Map<ResourceKey<Biome>, Integer> overrides,
+            Predicate<ResourceKey<Biome>> biomePresent) {
+        for (Map.Entry<ResourceKey<Biome>, Integer> e : overrides.entrySet()) {
+            ResourceKey<Biome> key = e.getKey();
+            int w = e.getValue();
+            if (w <= 0
+                    || excludeFromIslandSurfacePool(key)
+                    || !modNamespaceLoaded(key)
+                    || !biomePresent.test(key)) {
+                continue;
+            }
+            weights.put(key, w);
+        }
+    }
+
+    /** Replace or append curated weights after discover-all (or explicit-list) build. */
+    private static void applyExplicitOverrideWeights(List<Weighted> pool, Predicate<ResourceKey<Biome>> biomePresent) {
+        for (Map.Entry<ResourceKey<Biome>, Integer> e : parseModWeightOverrides().entrySet()) {
+            if (e.getValue() <= 0
+                    || excludeFromIslandSurfacePool(e.getKey())
+                    || !modNamespaceLoaded(e.getKey())
+                    || !biomePresent.test(e.getKey())) {
+                continue;
+            }
+            pool.removeIf(w -> w.key.equals(e.getKey()));
+            pool.add(new Weighted(e.getKey(), e.getValue()));
+        }
+    }
+
+    /** Levite on island surfaces only when {@link Config#leviteFieldsOnIslandSurfaces()}. */
+    private static boolean excludeFromIslandSurfacePool(ResourceKey<Biome> key) {
+        return !Config.leviteFieldsOnIslandSurfaces()
+                && BiomeModIntegration.leviteFieldsLoaded()
+                && BiomeModIntegration.LEVITE_FIELDS_MOD_ID.equals(key.location().getNamespace());
+    }
+
+    private static boolean modNamespaceLoaded(ResourceKey<Biome> key) {
+        return ModList.get().isLoaded(key.location().getNamespace());
     }
 
     private static Map<ResourceKey<Biome>, Integer> parseModWeightOverrides() {
@@ -150,11 +190,11 @@ public final class IslandRegionBiomePicker {
 
     /**
      * Curated list only ({@link Config#ISLAND_BIOME_MOD_DISCOVER_ALL_REGISTERED} {@code false}), or fallback when
-     * discovery is on but {@code registeredBopBiomeKeys} was empty.
+     * discovery is on but {@code registeredModBiomeKeys} was empty.
      */
     private static void addModWeightedEntriesExplicitListOnly(List<Weighted> pool, Predicate<ResourceKey<Biome>> biomePresent) {
         for (Map.Entry<ResourceKey<Biome>, Integer> e : parseModWeightOverrides().entrySet()) {
-            if (e.getValue() <= 0 || !biomePresent.test(e.getKey())) {
+            if (e.getValue() <= 0 || excludeFromIslandSurfacePool(e.getKey()) || !biomePresent.test(e.getKey())) {
                 continue;
             }
             pool.add(new Weighted(e.getKey(), e.getValue()));
